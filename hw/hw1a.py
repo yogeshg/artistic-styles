@@ -124,7 +124,30 @@ def plot_top_16(D, sz, imname):
     
     raise NotImplementedError
 
-    
+def getImageFileNames(num_images=200):
+    return [ IMG_LOCATION_FORMAT.format(i=i) for i in range(num_images)]
+
+IMAGE_SIZE = 256
+IMAGE_DATA_TYPE = np.dtype('uint8')
+
+def getImageBlockMatrix( image_files, block_size ):
+    num_cols = block_size**2
+    num_blocks = IMAGE_SIZE / block_size
+    num_rows = len(image_files) * (num_blocks**2)
+    mat = np.zeros(( num_rows, num_cols ), dtype=IMAGE_DATA_TYPE)
+    i = 0
+    for fn in image_files:
+        with Image.open(fn) as im:
+            im_mat = np.matrix( im )
+            for b in range(num_blocks):
+                block_i = b%num_blocks
+                block_j = b/num_blocks
+                slice_i = slice(block_i*block_size,(block_i+1)*block_size)
+                slice_j = slice(block_j*block_size,(block_j+1)*block_size)
+                mat[i,:] = im_mat[slice_i, slice_j].flatten()
+                i+=1
+    return mat
+
 def main():
     '''
     Read here all images(grayscale) from Fei_256 folder
@@ -143,7 +166,7 @@ def main():
         (no_images*n_blocks_in_image) x (sz*sz) matrix called X
         ''' 
         
-        #TODO: Write a code snippet that performs as indicated in the above comment
+        X = getImageBlockMatrix( getImageFileNames(2), szs )
         
         X_mean = np.mean(X, 0)
         X = X - np.repeat(X_mean.reshape(1, -1), X.shape[0], 0)
@@ -153,7 +176,9 @@ def main():
         in decreasing order of eigenvalues into a matrix D
         '''
         
-        #TODO: Write a code snippet that performs as indicated in the above comment
+        w,v = np.linalg.eig(np.dot(X.T,X))
+        idx = np.argsort( -w )
+        D = w[idx]
         
         c = np.dot(D.T, X.T)
         
@@ -164,6 +189,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    1+1
+    #main()
     
     
