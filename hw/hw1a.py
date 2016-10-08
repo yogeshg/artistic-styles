@@ -59,13 +59,13 @@ def reconstructed_image(D,c,num_coeffs,X_mean,n_blocks,im_num):
     X_approx = np.dot(c_im.T, D_im.T)
     logging.debug('shape of single approximated image matrix is:' +str(X_approx.shape))
     # logging.debug('the matrix is\n'+str(X_approx))
-    n_pixels_block = int(D.shape[0]**0.5)
-    n_pixels_img = n_pixels_block * n_blocks
+    blockSize = int(D.shape[0]**0.5)
+    n_pixels_img = blockSize * n_blocks
 
     X_recon_img = np.zeros((n_pixels_img, n_pixels_img), dtype=np.dtype('float32'))
     b = 0
-    for (slice_i, slice_j) in getBlockSlices(n_blocks, n_pixels_block):
-        X_recon_img[slice_i, slice_j] = X_approx[b,:].reshape(n_pixels_block, n_pixels_block)
+    for (slice_i, slice_j) in getBlockSlices(n_blocks, blockSize):
+        X_recon_img[slice_i, slice_j] = X_approx[b,:].reshape(blockSize, blockSize)
         b+=1
 
     X_recon_img + np.tile( X_mean, (n_blocks,n_blocks) );
@@ -126,10 +126,10 @@ def plot_reconstructions(D,c,num_coeff_array,X_mean,n_blocks,im_num):
     
     
     
-def plot_top_16(D, sz, imname):
+def plot_top_16(D, blockSize, imname):
     '''
     Plots the top 16 components from the basis matrix D.
-    Each basis vector represents an image block of shape (sz, sz)
+    Each basis vector represents an image block of shape (blockSize, blockSize)
 
     Parameters
     -------------
@@ -138,7 +138,7 @@ def plot_top_16(D, sz, imname):
         N is the dimension of the original space (number of pixels in a block)
         n represents the maximum dimension of the PCA space (assumed to be atleast 16)
 
-    sz: Integer
+    blockSize: Integer
         The height and width of each block
 
     imname: string
@@ -146,10 +146,18 @@ def plot_top_16(D, sz, imname):
     '''
     #TODO: Obtain top 16 components of D and plot them
     
-    raise NotImplementedError
+    logging.info('plotting top 16 components for block size %d', blockSize)
+    f, axarr = plt.subplots(4,4)
+    for i in range(4):
+        for j in range(4):
+            plt.axes(axarr[i,j])
+            plt.imshow(D[i*4+j,:].reshape((blockSize, blockSize)), cmap=cm.Greys_r)
+            
+    f.savefig(imname)
+    plt.close(f)
 
 IMG_LOCATION_FORMAT = './Fei_256/image{i}.jpg'
-NUM_IMAGES = 20
+NUM_IMAGES = 200
 
 def getImageFileNames(num_images=NUM_IMAGES):
     return [ IMG_LOCATION_FORMAT.format(i=i) for i in range(num_images)]
@@ -179,20 +187,6 @@ def convertRawImages2blockMatrix( X, blockSize ):
             i+=1
     return mat 
 
-def getImageBlockMatrix( image_files, block_size ):
-    numCols = block_size**2
-    num_blocks = IMAGE_SIZE / block_size
-    numRows = len(image_files) * (num_blocks**2)
-    mat = np.zeros(( numRows, numCols ), dtype=IMAGE_DATA_TYPE)
-    i = 0
-    for fn in image_files:
-        im = Image.open(fn)
-        im_mat = np.matrix( im )
-        for (slice_i, slice_j) in getBlockSlices(num_blocks, block_size):
-            mat[i,:] = im_mat[slice_i, slice_j].flatten()
-            i+=1
-    return mat
-
 def main():
     '''
     Read here all images(grayscale) from Fei_256 folder
@@ -202,21 +196,18 @@ def main():
     #TODO: Read all images into a numpy array of size (no_images, height, width)
     X_raw = getImagesRaw( getImageFileNames() )
     
-    szs = [8, 32, 64]
-    #TODO
-    sza = [32, 64]
+    blockSizes = [8, 32, 64]
     num_coeffs = [range(1, 10, 1), range(3, 30, 3), range(5, 50, 5)]
 
-    for sz, nc in zip(szs, num_coeffs):
-        print sz, nc
+    for blockSize, nc in zip(blockSizes, num_coeffs):
+        print blockSize, nc
         '''
-        Divide here each image into non-overlapping blocks of shape (sz, sz).
+        Divide here each image into non-overlapping blocks of shape (blockSize, blockSize).
         Flatten each block and arrange all the blocks in a
-        (no_images*n_blocks_in_image) x (sz*sz) matrix called X
+        (no_images*n_blocks_in_image) x (blockSize*blockSize) matrix called X
         ''' 
         
-        X = getImageBlockMatrix( getImageFileNames(), sz )
-        X = convertRawImages2blockMatrix( X_raw, sz )
+        X = convertRawImages2blockMatrix( X_raw, blockSize )
         logging.debug('shape of matrix of all images is:'+str(X.shape))
         # logging.debug('the matrix is\n'+str(X))
         
@@ -235,13 +226,12 @@ def main():
         c = np.dot(D.T, X.T)
         
         for i in range(0, NUM_IMAGES, 10):
-            plot_reconstructions(D=D, c=c, num_coeff_array=nc, X_mean=X_mean.reshape((sz, sz)), n_blocks=int(256/sz), im_num=i)
+            plot_reconstructions(D=D, c=c, num_coeff_array=nc, X_mean=X_mean.reshape((blockSize, blockSize)), n_blocks=int(256/blockSize), im_num=i)
 
-        #plot_top_16(D, sz, imname='output/hw1a_top16_{0}.png'.format(sz))
+        plot_top_16(D, blockSize, imname='output/hw1a_top16_{0}.png'.format(blockSize))
 
 
 if __name__ == '__main__':
-    1+1
     main()
     
     
