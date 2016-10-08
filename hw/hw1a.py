@@ -12,6 +12,8 @@ from PIL import Image
 import theano
 import theano.tensor as T
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 '''
 Implement the functions that were not implemented and complete the
@@ -28,7 +30,7 @@ def reconstructed_image(D,c,num_coeffs,X_mean,n_blocks,im_num):
         Parameters
     ---------------
     c: np.ndarray
-        a n x m matrix  representing the coefficients of all the image blocks.
+        an n x m matrix representing the coefficients of all the image blocks.
         n represents the maximum dimension of the PCA space.
         m is (number of images x n_blocks**2)
 
@@ -51,15 +53,36 @@ def reconstructed_image(D,c,num_coeffs,X_mean,n_blocks,im_num):
         number of blocks comprising the image in each direction.
         For example, for a 256x256 image divided into 64x64 blocks, n_blocks will be 4
     '''
-    
     c_im = c[:num_coeffs,n_blocks*n_blocks*im_num:n_blocks*n_blocks*(im_num+1)]
     D_im = D[:,:num_coeffs]
+
+    X_approx = np.dot(c_im.T, D_im.T)
+    logging.debug('shape of single approximated image matrix is:' +str(X_approx.shape))
+    # logging.debug('the matrix is\n'+str(X_approx))
+    n_pixels_block = int(D.shape[0]**0.5)
+    n_pixels_img = n_pixels_block * n_blocks
+
+    X_recon_img = np.zeros((n_pixels_img, n_pixels_img), dtype=np.dtype('float32'))
+    b = 0
+    for (slice_i, slice_j) in getBlockSlices(n_blocks, n_pixels_block):
+        X_recon_img[slice_i, slice_j] = X_approx[b,:].reshape(n_pixels_block, n_pixels_block)
+        b+=1
+
+    X_recon_img + np.tile( X_mean, (n_blocks,n_blocks) );
     
     #TODO: Enter code below for reconstructing the image X_recon_img
     #......................
     #......................
     #X_recon_img = ........
     return X_recon_img
+
+def getBlockSlices(numBlocks, blockSize):
+    for b in range(numBlocks**2):
+        block_i = b%numBlocks
+        block_j = b/numBlocks
+        slice_i = slice(block_i*blockSize, (block_i+1)*blockSize)
+        slice_j = slice(block_j*blockSize, (block_j+1)*blockSize)
+        yield(slice_i, slice_j)
 
 def plot_reconstructions(D,c,num_coeff_array,X_mean,n_blocks,im_num):
     '''
@@ -91,11 +114,12 @@ def plot_reconstructions(D,c,num_coeff_array,X_mean,n_blocks,im_num):
         im_num: Integer
             index of the image to visualize
     '''
+    logging.info('plotting reconstruction for image %d blocks %d', im_num, n_blocks)
     f, axarr = plt.subplots(3,3)
     for i in range(3):
         for j in range(3):
             plt.axes(axarr[i,j])
-            plt.imshow(reconstructed_image(D,c,num_coeff_array[i*3+j],X_mean,n_blocks,im_num))
+            plt.imshow(reconstructed_image(D,c,num_coeff_array[i*3+j],X_mean,n_blocks,im_num), cmap=cm.Greys_r)
             
     f.savefig('output/hw1a_{0}_im{1}.png'.format(n_blocks, im_num))
     plt.close(f)
@@ -124,28 +148,49 @@ def plot_top_16(D, sz, imname):
     
     raise NotImplementedError
 
-def getImageFileNames(num_images=200):
+IMG_LOCATION_FORMAT = './Fei_256/image{i}.jpg'
+NUM_IMAGES = 20
+
+def getImageFileNames(num_images=NUM_IMAGES):
     return [ IMG_LOCATION_FORMAT.format(i=i) for i in range(num_images)]
 
 IMAGE_SIZE = 256
 IMAGE_DATA_TYPE = np.dtype('uint8')
 
+def getImagesRaw(imageFiles, dtype=IMAGE_DATA_TYPE):
+    numImgs = len(imageFiles)
+    X = np.zeros( (numImgs,IMAGE_SIZE, IMAGE_SIZE), dtype=dtype )
+    for i in range( numImgs ):
+        im = Image.open(imageFiles[i])
+        X[i,:,:] = np.matrix( im )
+    return X
+
+def convertRawImages2blockMatrix( X, blockSize ):
+    numImgs = len(X)
+    numCols = blockSize**2
+    numBlocks = IMAGE_SIZE / blockSize
+    numRows = numImgs * (numBlocks**2)
+    logging.debug('creating a matrix of size (%d,%d) and type %s',numRows, numCols, str(IMAGE_DATA_TYPE))
+    mat = np.zeros(( numRows, numCols ), dtype=IMAGE_DATA_TYPE)
+    i = 0
+    for imgId in range(numImgs):
+        for (slice_i, slice_j) in getBlockSlices(numBlocks, blockSize):
+            mat[i,:] = X[imgId,slice_i,slice_j].flatten()
+            i+=1
+    return mat 
+
 def getImageBlockMatrix( image_files, block_size ):
-    num_cols = block_size**2
+    numCols = block_size**2
     num_blocks = IMAGE_SIZE / block_size
-    num_rows = len(image_files) * (num_blocks**2)
-    mat = np.zeros(( num_rows, num_cols ), dtype=IMAGE_DATA_TYPE)
+    numRows = len(image_files) * (num_blocks**2)
+    mat = np.zeros(( numRows, numCols ), dtype=IMAGE_DATA_TYPE)
     i = 0
     for fn in image_files:
-        with Image.open(fn) as im:
-            im_mat = np.matrix( im )
-            for b in range(num_blocks):
-                block_i = b%num_blocks
-                block_j = b/num_blocks
-                slice_i = slice(block_i*block_size,(block_i+1)*block_size)
-                slice_j = slice(block_j*block_size,(block_j+1)*block_size)
-                mat[i,:] = im_mat[slice_i, slice_j].flatten()
-                i+=1
+        im = Image.open(fn)
+        im_mat = np.matrix( im )
+        for (slice_i, slice_j) in getBlockSlices(num_blocks, block_size):
+            mat[i,:] = im_mat[slice_i, slice_j].flatten()
+            i+=1
     return mat
 
 def main():
@@ -155,18 +200,25 @@ def main():
     Make sure the images are read after sorting the filenames
     '''
     #TODO: Read all images into a numpy array of size (no_images, height, width)
+    X_raw = getImagesRaw( getImageFileNames() )
     
     szs = [8, 32, 64]
+    #TODO
+    sza = [32, 64]
     num_coeffs = [range(1, 10, 1), range(3, 30, 3), range(5, 50, 5)]
 
     for sz, nc in zip(szs, num_coeffs):
+        print sz, nc
         '''
         Divide here each image into non-overlapping blocks of shape (sz, sz).
         Flatten each block and arrange all the blocks in a
         (no_images*n_blocks_in_image) x (sz*sz) matrix called X
         ''' 
         
-        X = getImageBlockMatrix( getImageFileNames(2), szs )
+        X = getImageBlockMatrix( getImageFileNames(), sz )
+        X = convertRawImages2blockMatrix( X_raw, sz )
+        logging.debug('shape of matrix of all images is:'+str(X.shape))
+        # logging.debug('the matrix is\n'+str(X))
         
         X_mean = np.mean(X, 0)
         X = X - np.repeat(X_mean.reshape(1, -1), X.shape[0], 0)
@@ -178,18 +230,18 @@ def main():
         
         w,v = np.linalg.eig(np.dot(X.T,X))
         idx = np.argsort( -w )
-        D = w[idx]
+        D = v[:,idx]
         
         c = np.dot(D.T, X.T)
         
-        for i in range(0, 200, 10):
+        for i in range(0, NUM_IMAGES, 10):
             plot_reconstructions(D=D, c=c, num_coeff_array=nc, X_mean=X_mean.reshape((sz, sz)), n_blocks=int(256/sz), im_num=i)
 
-        plot_top_16(D, sz, imname='output/hw1a_top16_{0}.png'.format(sz))
+        #plot_top_16(D, sz, imname='output/hw1a_top16_{0}.png'.format(sz))
 
 
 if __name__ == '__main__':
     1+1
-    #main()
+    main()
     
     
