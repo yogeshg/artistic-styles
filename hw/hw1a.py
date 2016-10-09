@@ -119,7 +119,9 @@ def plot_reconstructions(D,c,num_coeff_array,X_mean,n_blocks,im_num):
     for i in range(3):
         for j in range(3):
             plt.axes(axarr[i,j])
-            plt.imshow(reconstructed_image(D,c,num_coeff_array[i*3+j],X_mean,n_blocks,im_num), cmap=cm.Greys_r)
+            plt.imshow(reconstructed_image(D,c,num_coeff_array[i*3+j],X_mean,n_blocks,im_num)
+                        , cmap=cm.Greys_r
+                        , interpolation='none')
             
     f.savefig('output/hw1a_{0}_im{1}.png'.format(n_blocks, im_num))
     plt.close(f)
@@ -151,8 +153,10 @@ def plot_top_16(D, blockSize, imname):
     for i in range(4):
         for j in range(4):
             plt.axes(axarr[i,j])
-            plt.imshow(D[i*4+j,:].reshape((blockSize, blockSize)), cmap=cm.Greys_r)
-            
+            plt.imshow(D[i*4+j,:].reshape((blockSize, blockSize))
+                        , cmap=cm.Greys_r
+                        , interpolation='none')
+             
     f.savefig(imname)
     plt.close(f)
 
@@ -163,7 +167,7 @@ def getImageFileNames(num_images=NUM_IMAGES):
     return [ IMG_LOCATION_FORMAT.format(i=i) for i in range(num_images)]
 
 IMAGE_SIZE = 256
-IMAGE_DATA_TYPE = np.dtype('uint8')
+IMAGE_DATA_TYPE = np.dtype('float32')
 
 def getImagesRaw(imageFiles, dtype=IMAGE_DATA_TYPE):
     numImgs = len(imageFiles)
@@ -173,13 +177,13 @@ def getImagesRaw(imageFiles, dtype=IMAGE_DATA_TYPE):
         X[i,:,:] = np.matrix( im )
     return X
 
-def convertRawImages2blockMatrix( X, blockSize ):
+def convertRawImages2blockMatrix( X, blockSize, dtype=IMAGE_DATA_TYPE):
     numImgs = len(X)
     numCols = blockSize**2
     numBlocks = IMAGE_SIZE / blockSize
     numRows = numImgs * (numBlocks**2)
     logging.debug('creating a matrix of size (%d,%d) and type %s',numRows, numCols, str(IMAGE_DATA_TYPE))
-    mat = np.zeros(( numRows, numCols ), dtype=IMAGE_DATA_TYPE)
+    mat = np.zeros(( numRows, numCols ), dtype=dtype)
     i = 0
     for imgId in range(numImgs):
         for (slice_i, slice_j) in getBlockSlices(numBlocks, blockSize):
@@ -219,7 +223,8 @@ def main():
         in decreasing order of eigenvalues into a matrix D
         '''
         
-        w,v = np.linalg.eig(np.dot(X.T,X))
+        w,v = linalg.eigh(np.dot(X.T,X))
+        logging.debug('shape and types of weights and vectors is' + str(w.shape) + str(w.dtype) + str(v.shape) + str(v.dtype) )
         idx = np.argsort( -w )
         D = v[:,idx]
         
