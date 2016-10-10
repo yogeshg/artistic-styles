@@ -12,6 +12,11 @@ from PIL import Image
 import theano
 import theano.tensor as T
 
+from hw1a import IMG_LOCATION_FORMAT, NUM_IMAGES, IMAGE_SIZE, IMAGE_DATA_TYPE
+from hw1a import plot_top_16, getImageFileNames, getImagesRaw, convertRawImages2blockMatrix
+
+from gradient_descent import GradientDescent
+
 
 '''
 Implement the functions that were not implemented and complete the
@@ -49,12 +54,15 @@ def reconstructed_image(D,c,num_coeffs,X_mean,im_num):
     
     c_im = c[:num_coeffs,im_num]
     D_im = D[:,:num_coeffs]
-    
+
+    X_approx = np.dot(c_im.T, D_im.T)
+    logging.debug('shape of single approximated image matrix is:' +str(X_approx.shape))
+
     #TODO: Enter code below for reconstructing the image
     #......................
     #......................
     #X_recon_img = ........
-    return X_recon_img
+    return X_approx
 
 def plot_reconstructions(D,c,num_coeff_array,X_mean,im_num):
     '''
@@ -86,34 +94,12 @@ def plot_reconstructions(D,c,num_coeff_array,X_mean,im_num):
     for i in range(3):
         for j in range(3):
             plt.axes(axarr[i,j])
-            plt.imshow(reconstructed_image(D,c,num_coeff_array[i*3+j],X_mean,im_num))
+            plt.imshow(reconstructed_image(D,c,num_coeff_array[i*3+j],X_mean,im_num)
+                        , cmap=cm.Greys_r
+                        , interpolation='none')
             
     f.savefig('output/hw1b_{0}.png'.format(im_num))
     plt.close(f)
-    
-    
-    
-def plot_top_16(D, sz, imname):
-    '''
-    Plots the top 16 components from the basis matrix D.
-    Each basis vector represents an image block of shape (sz, sz)
-
-    Parameters
-    -------------
-    D: np.ndarray
-        N x n matrix representing the basis vectors of the PCA space
-        N is the dimension of the original space (number of pixels in a block)
-        n represents the maximum dimension of the PCA space (assumed to be atleast 16)
-
-    sz: Integer
-        The height and width of each block
-
-    imname: string
-        name of file where image will be saved.
-    '''
-    #TODO: Obtain top 16 components of D and plot them
-    
-    raise NotImplementedError
 
     
 def main():
@@ -122,8 +108,9 @@ def main():
     each image to get an numpy array Ims with size (no_images, height*width).
     Make sure the images are read after sorting the filenames
     '''
-    #TODO: Write a code snippet that performs as indicated in the above comment
-    
+    X_raw = getImagesRaw( getImageFileNames() )
+    Ims = convertRawImages2blockMatrix( X_raw, 256 )
+
     Ims = Ims.astype(np.float32)
     X_mn = np.mean(Ims, 0)
     X = Ims - np.repeat(X_mn.reshape(1, -1), Ims.shape[0], 0)
@@ -137,7 +124,11 @@ def main():
     Alternatively you can downgrade numpy to 1.9.3, scipy to 0.15.1, matplotlib to 1.4.2
     '''
     
-    #TODO: Write a code snippet that performs as indicated in the above comment
+    gd1 = GradientDescent( n=256*256, eta=0.5, numEig=16)
+    w,v = gd1.getAllEigenValuesAndVectors(X, epsilon=1e-30, max_iteraions=50, validateEpsilon=5)
+
+    D = v
+    c = np.dot(D.T, X.T)
         
     for i in range(0, 200, 10):
         plot_reconstructions(D=D, c=c, num_coeff_array=[1, 2, 4, 6, 8, 10, 12, 14, 16], X_mean=X_mean.reshape((256, 256)), im_num=i)
