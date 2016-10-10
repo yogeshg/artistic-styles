@@ -148,7 +148,7 @@ def plot_top_16(D, blockSize, imname):
     '''
     #TODO: Obtain top 16 components of D and plot them
     
-    logging.info('plotting top 16 components for block size %d', blockSize)
+    logging.info('plotting top 16 components for eigenVectors of shape %s, block size %d', str(D.shape) , blockSize)
     f, axarr = plt.subplots(4,4)
     for i in range(4):
         for j in range(4):

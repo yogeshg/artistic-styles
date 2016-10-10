@@ -12,6 +12,9 @@ from PIL import Image
 import theano
 import theano.tensor as T
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from hw1a import IMG_LOCATION_FORMAT, NUM_IMAGES, IMAGE_SIZE, IMAGE_DATA_TYPE
 from hw1a import plot_top_16, getImageFileNames, getImagesRaw, convertRawImages2blockMatrix
 
@@ -22,6 +25,9 @@ from gradient_descent import GradientDescent
 Implement the functions that were not implemented and complete the
 parts of main according to the instructions in comments.
 '''
+VALIDATE_EPSILON = 10
+EPSILON = 1e-50
+MAX_ITERATIONS = 500
 
 def reconstructed_image(D,c,num_coeffs,X_mean,im_num):
     '''
@@ -55,7 +61,7 @@ def reconstructed_image(D,c,num_coeffs,X_mean,im_num):
     c_im = c[:num_coeffs,im_num]
     D_im = D[:,:num_coeffs]
 
-    X_approx = np.dot(c_im.T, D_im.T)
+    X_approx = np.dot(c_im.T, D_im.T).reshape(X_mean.shape) + X_mean
     logging.debug('shape of single approximated image matrix is:' +str(X_approx.shape))
 
     #TODO: Enter code below for reconstructing the image
@@ -125,15 +131,16 @@ def main():
     '''
     
     gd1 = GradientDescent( n=256*256, eta=0.5, numEig=16)
-    w,v = gd1.getAllEigenValuesAndVectors(X, epsilon=1e-30, max_iteraions=50, validateEpsilon=5)
+    w,v = gd1.getAllEigenValuesAndVectors(X, epsilon=EPSILON, max_iteraions=MAX_ITERATIONS, validateEpsilon=VALIDATE_EPSILON)
 
     D = v
     c = np.dot(D.T, X.T)
+    logging.info('shape of c:%s, D:%s', str(c.shape), str(D.shape))
         
     for i in range(0, 200, 10):
-        plot_reconstructions(D=D, c=c, num_coeff_array=[1, 2, 4, 6, 8, 10, 12, 14, 16], X_mean=X_mean.reshape((256, 256)), im_num=i)
+        plot_reconstructions(D=D, c=c, num_coeff_array=[1, 2, 4, 6, 8, 10, 12, 14, 16], X_mean=X_mn.reshape((256, 256)), im_num=i)
 
-    plot_top_16(D, 256, 'output/hw1b_top16_256.png')
+    plot_top_16(D.T, 256, 'output/hw1b_top16_256.png')
 
 
 if __name__ == '__main__':
