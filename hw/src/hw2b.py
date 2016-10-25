@@ -19,7 +19,7 @@ import scipy.io
 import theano
 import theano.tensor as T
 
-def load_data():
+def load_data( train_data_slice=slice(500), test_data_slice=slice(50)):
     ''' Loads the street view house numbers (SVHN) dataset
 
     This function is modified from load_data in
@@ -59,15 +59,20 @@ def load_data():
     test_set = scipy.io.loadmat(test_dataset)
 
     # Convert data format for usage in Theano
-    def convert_data_format(data):
+    def convert_data_format(data, data_slice=slice(None)):
         X = numpy.reshape(data['X'],
                           (numpy.prod(data['X'].shape[:-1]), data['X'].shape[-1]),
                           order='C').T / 255.
-        y = data['y'].flatten()
+        X = X[data_slice]
+        y = data['y'].flatten()[data_slice]
         y[y == 10] = 0 # '0' has label 10 in the SVHN dataset
+        # print( X       )
+        # print( X.shape )
+        # print( y       )
+        # print( y.shape )
         return (X,y)
-    train_set = convert_data_format(train_set)
-    test_set = convert_data_format(test_set)
+    train_set = convert_data_format(train_set, data_slice = train_data_slice)
+    test_set = convert_data_format(test_set, data_slice = test_data_slice)
 
     # Extract validation dataset from train dataset
     train_set_len = len(train_set[1])
@@ -390,7 +395,7 @@ class myMLP(object):
     pass
 
 # TODO: you might need to modify the interface
-def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
+def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=20,
              batch_size=20, n_hidden=500, verbose=False):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
@@ -603,4 +608,4 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
 
 if __name__ == '__main__':
-    test_mlp()
+    test_mlp(n_hidden = 5, verbose=True)
