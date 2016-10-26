@@ -3,7 +3,6 @@ This code is based on
 [1] http://deeplearning.net/tutorial/logreg.html
 [2] http://deeplearning.net/tutorial/mlp.html
 """
-
 from __future__ import print_function
 
 __docformat__ = 'restructedtext en'
@@ -12,6 +11,7 @@ __docformat__ = 'restructedtext en'
 import os
 import sys
 import timeit
+import argparse
 
 import numpy
 import scipy.io
@@ -19,7 +19,7 @@ import scipy.io
 import theano
 import theano.tensor as T
 
-def load_data( train_data_slice=slice(500), test_data_slice=slice(50)):
+def load_data( train_data_slice=slice(None), test_data_slice=slice(None)):
     ''' Loads the street view house numbers (SVHN) dataset
 
     This function is modified from load_data in
@@ -66,13 +66,11 @@ def load_data( train_data_slice=slice(500), test_data_slice=slice(50)):
         X = X[data_slice]
         y = data['y'].flatten()[data_slice]
         y[y == 10] = 0 # '0' has label 10 in the SVHN dataset
-        # print( X       )
-        # print( X.shape )
-        # print( y       )
-        # print( y.shape )
         return (X,y)
     train_set = convert_data_format(train_set, data_slice = train_data_slice)
     test_set = convert_data_format(test_set, data_slice = test_data_slice)
+    print( 'shape of train_set', [v.shape for v in train_set] )
+    print( 'shape of test_set', [v.shape for v in test_set] )
 
     # Extract validation dataset from train dataset
     train_set_len = len(train_set[1])
@@ -304,8 +302,16 @@ class HiddenLayer(object):
             lin_output if activation is None
             else activation(lin_output)
         )
+
+        self.L1 = abs(W).sum()
+        self.L2_sqr = (W**2).sum()
         # parameters of the model
         self.params = [self.W, self.b]
+
+
+    def __str__ (self) :
+        return 'HiddenLayer: '+str(self.L1.eval())+' '+str(self.L2_sqr.eval())
+        # return 'HiddenLayer:\n'+str(self.W.get_value())+'\n'+str(self.b.get_value())
 
 class MLP(object):
     """Multi-Layer Perceptron Class
@@ -345,6 +351,7 @@ class MLP(object):
         # into a HiddenLayer with a tanh activation function connected to the
         # LogisticRegression layer; the activation function can be replaced by
         # sigmoid or any other nonlinear function
+
         self.hiddenLayer = HiddenLayer(
             rng=rng,
             input=input,
@@ -363,14 +370,16 @@ class MLP(object):
         # L1 norm ; one regularization option is to enforce L1 norm to
         # be small
         self.L1 = (
-            abs(self.hiddenLayer.W).sum()
+            self.hiddenLayer.L1
+            # abs(self.hiddenLayer.W).sum()
             + abs(self.logRegressionLayer.W).sum()
         )
 
         # square of L2 norm ; one regularization option is to enforce
         # square of L2 norm to be small
         self.L2_sqr = (
-            (self.hiddenLayer.W ** 2).sum()
+            self.hiddenLayer.L2_sqr
+            #(self.hiddenLayer.W ** 2).sum()
             + (self.logRegressionLayer.W ** 2).sum()
         )
 
@@ -390,13 +399,146 @@ class MLP(object):
         # keep track of model input
         self.input = input
 
+    def __str__(self):
+        return 'MLP: '+str(self.hiddenLayer)
+
 # TODO: problem b, bullet 1
+class DeepHiddenLayers(object):
+    def __init__(self, rng, input, n_in,
+                # W=None, b=None,
+                n_each, n_layers,
+                activation=T.tanh ):
+        # print('Initialising', self.__name__, rng, input, n_in, n_each, n_layers, activation)
+        self.layers = []
+        node_in = n_in
+        node_out = n_each
+        node_input = input
+
+        for i in range(n_layers):
+            self.layers.append( HiddenLayer( rng, node_input, node_in, node_out, activation=activation) )
+            node_in = node_out
+            node_out = n_each
+            node_input = self.layers[i].output
+
+        self.output = node_input
+
+        self.num_nodes = len( self.layers )
+        self.L1 = numpy.sum( [ abs(h.W).sum() for h in self.layers ] )
+        self.L2_sqr = numpy.sum( [ (h.W**2).sum() for h in self.layers  ] )
+
+        self.params = []
+        for l in self.layers:
+            self.params += l.params
+
+        return
+
+    def __str__(self):
+        s = 'DeepHiddenLayers('+str(self.num_nodes)+'):'
+        for i in range(self.num_nodes):
+            s+='\n'+str(self.layers[i])
+        return s
+
 class myMLP(object):
-    pass
+    """Custom Multi-Layer Perceptron Class
+
+    A multilayer perceptron is a feedforward artificial neural network model
+    that has one layer or more of hidden units and nonlinear activations.
+    Intermediate layers usually have as activation function tanh or the
+    sigmoid function (defined here by a ``DeepHiddenLayers`` class)  while the
+    top layer is a softmax layer (defined here by a ``LogisticRegression``
+    class).
+
+    Note that this different from MLP class because we can now have multiple
+    hidden layers.
+    """
+
+    def __init__(self, rng, input, n_in, n_layers, n_hidden, n_out):
+        """Initialize the parameters for the multilayer perceptron
+
+        :type rng: numpy.random.RandomState
+        :param rng: a random number generator used to initialize weights
+
+        :type input: theano.tensor.TensorType
+        :param input: symbolic variable that describes the input of the
+        architecture (one minibatch)
+
+        :type n_in: int
+        :param n_in: number of input units, the dimension of the space in
+        which the datapoints lie
+
+        :type n_layers: int
+        :param n_layers: number of hidden layers
+
+        :type n_hidden: int
+        :param n_hidden: number of hidden units in each layer
+
+        :type n_out: int
+        :param n_out: number of output units, the dimension of the space in
+        which the labels lie
+
+        """
+        # print('Initialising', self.__name__, rng, input, n_in, n_layers, n_hidden, n_out)
+
+        # Since we are dealing with a one hidden layer MLP, this will translate
+        # into a HiddenLayer with a tanh activation function connected to the
+        # LogisticRegression layer; the activation function can be replaced by
+        # sigmoid or any other nonlinear function
+        self.hiddenLayer = DeepHiddenLayers(
+                                    rng=rng, input=input, n_in=n_in,
+                                    n_each=n_hidden, n_layers=n_layers,activation=T.tanh
+                                )
+        # Test here by using HiddenLayer constructor
+        # self.hiddenLayer = HiddenLayer(
+        #     rng=rng,
+        #     input=input,
+        #     n_in=n_in,
+        #     n_out=n_hidden,
+        #     activation=T.tanh
+        # )
+
+        # The logistic regression layer gets as input the hidden units
+        # of the hidden layer
+        self.logRegressionLayer = LogisticRegression(
+            input=self.hiddenLayer.output,
+            n_in=n_hidden,
+            n_out=n_out
+        )
+        # L1 norm ; one regularization option is to enforce L1 norm to
+        # be small
+        self.L1 = (
+            self.hiddenLayer.L1
+            + abs(self.logRegressionLayer.W).sum()
+        )
+
+        # square of L2 norm ; one regularization option is to enforce
+        # square of L2 norm to be small
+        self.L2_sqr = (
+            self.hiddenLayer.L2_sqr
+            + (self.logRegressionLayer.W ** 2).sum()
+        )
+
+        # negative log likelihood of the MLP is given by the negative
+        # log likelihood of the output of the model, computed in the
+        # logistic regression layer
+        self.negative_log_likelihood = (
+            self.logRegressionLayer.negative_log_likelihood
+        )
+        # same holds for the function computing the number of errors
+        self.errors = self.logRegressionLayer.errors
+
+        # the parameters of the model are the parameters of the multiple layer it is
+        # made out of
+        self.params = self.hiddenLayer.params + self.logRegressionLayer.params
+
+        # keep track of model input
+        self.input = input
+
+    def __str__(self):
+        return 'myMLP: '+str(self.hiddenLayer)
 
 # TODO: you might need to modify the interface
-def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=20,
-             batch_size=20, n_hidden=500, verbose=False):
+def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
+             batch_size=20, n_hidden=500, n_layers=1, verbose=False):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
     perceptron
@@ -447,13 +589,15 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=20,
     rng = numpy.random.RandomState(1234)
 
     # construct the MLP class
-    classifier = MLP(
+    classifier = myMLP(
         rng=rng,
         input=x,
         n_in=32*32*3,
+        n_layers=n_layers,
         n_hidden=n_hidden,
         n_out=10,
     )
+    print( classifier )
 
     # TODO: use your MLP and comment out the classifier object above
     # classifier = myMLP(
@@ -571,6 +715,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=20,
                             this_validation_loss * 100.
                         )
                     )
+                    print( classifier )
 
                 # if we got the best validation score until now
                 if this_validation_loss < best_validation_loss:
@@ -608,4 +753,19 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=20,
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
 
 if __name__ == '__main__':
-    test_mlp(n_hidden = 5, verbose=True)
+    p = argparse.ArgumentParser(__doc__)
+    p.add_argument('-r', '--learning_rate', type=float, default=0.01)
+    p.add_argument('-l1', '--L1_reg', type=float, default=0.00)
+    p.add_argument('-l2', '--L2_reg', type=float, default=0.0001)
+    p.add_argument('-e', '--n_epochs', type=int, default=1000)
+    p.add_argument('-b', '--batch_size', type=int, default=20)
+    p.add_argument('--n_layers', type=int, default=1)
+    p.add_argument('--n_hidden', type=int, default=500)
+    p.add_argument('-v', '--verbose', action='store_true')
+    a = p.parse_args()
+    print('arguments:')
+    for k,v in sorted(vars(a).items()):
+        print('{:>15} : {}'.format(k,v))
+    test_mlp(**vars(a))
+ 
+
