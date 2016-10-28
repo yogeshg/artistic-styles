@@ -778,6 +778,9 @@ if __name__ == '__main__':
     print('arguments:')
     for k,v in sorted(vars(a).items()):
         print('{:>15} : {}'.format(k,v))
-    test_mlp(**vars(a))
+    if( a.n_layers > 8 ):
+        print('ignoring too many layers')
+    else:
+        test_mlp(**vars(a))
  
 
