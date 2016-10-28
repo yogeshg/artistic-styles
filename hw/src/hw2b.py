@@ -7,10 +7,10 @@ from __future__ import print_function
 
 __docformat__ = 'restructedtext en'
 
-
 import os
 import sys
 import timeit
+import datetime as dt
 import argparse
 
 import numpy
@@ -75,7 +75,7 @@ def load_data( train_data_slice=slice(None), test_data_slice=slice(None)):
     # Extract validation dataset from train dataset
     train_set_len = len(train_set[1])
     valid_set = (x[-(train_set_len//10):] for x in train_set)
-    test_set = (x[:-(train_set_len//10)] for x in train_set)
+    train_set = (x[:-(train_set_len//10)] for x in train_set)
 
     # train_set, valid_set, test_set format: tuple(input, target)
     # input is a numpy.ndarray of 2 dimensions (a matrix)
@@ -538,7 +538,7 @@ class myMLP(object):
 
 # TODO: you might need to modify the interface
 def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
-             batch_size=20, n_hidden=500, n_layers=1, verbose=False):
+             batch_size=20, n_hidden=500, n_layers=1, verbose=False, log=False):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
     perceptron
@@ -565,6 +565,17 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
 
     # load the dataset; download the dataset if it is not present
     datasets = load_data()
+
+    # logFile = sys.stdout
+    # if( log ):
+    #     logFileFormat = './logs/run-{n_layers}x{n_hidden}'+         \
+    #         '-{learning_rate:.4f}-{L1_reg:.4f}-{L2_reg:.4f}'+       \
+    #         '-{batch_size}-{n_epochs}-{date:%Y%m%d-%H%M%S}.log'
+    #     logFileName = logFileFormat.format(n_layers=n_layers, n_hidden=n_hidden,    \
+    #         learning_rate=learning_rate, L1_reg=L1_reg, L2_reg=L2_reg,              \
+    #         batch_size=batch_size, n_epochs=n_epochs, date=dt.datetime.now())
+    #     print('logging into ...', logFileName) 
+    #     logFile = open(logFileName, 'w')
 
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
@@ -762,6 +773,7 @@ if __name__ == '__main__':
     p.add_argument('--n_layers', type=int, default=1)
     p.add_argument('--n_hidden', type=int, default=500)
     p.add_argument('-v', '--verbose', action='store_true')
+    p.add_argument('-l', '--log', action='store_true')
     a = p.parse_args()
     print('arguments:')
     for k,v in sorted(vars(a).items()):
