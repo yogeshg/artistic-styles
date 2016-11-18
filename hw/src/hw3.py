@@ -20,27 +20,16 @@ from hw3_nn import LogisticRegression, HiddenLayer, LeNetConvPoolLayer, train_nn
 #Problem 1
 #Implement the convolutional neural network architecture depicted in HW3 problem 1
 #Reference code can be found in http://deeplearning.net/tutorial/code/convolutional_mlp.py
-def test_lenet( batch_size=10       ,
+class MyLeNet():
+  def __init__(self, rng, datasets,
+                batch_size=10       ,
                 nkerns=[32,64]      ,
                 nhidden=[4096, 512] ,
-                n_epochs=200        ,
-                learning_rate=0.1   )
-
-    rng = numpy.random.RandomState(23455)
-
-    datasets = load_data()
+                learning_rate=0.1 ):
 
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
-
-    # compute number of minibatches for training, validation and testing
-    n_train_batches = train_set_x.get_value(borrow=True).shape[0]
-    n_valid_batches = valid_set_x.get_value(borrow=True).shape[0]
-    n_test_batches = test_set_x.get_value(borrow=True).shape[0]
-    n_train_batches //= batch_size
-    n_valid_batches //= batch_size
-    n_test_batches //= batch_size
 
     # allocate symbolic variables for the data
     index = T.lscalar()  # index to a [mini]batch
@@ -68,70 +57,70 @@ def test_lenet( batch_size=10       ,
     # filtering reduces the image size to (32-3+1 , 32-3+1) = (30, 30)
     # maxpooling reduces this further to (30/2, 30/2) = (15, 15)
     # 4D output tensor is thus of shape (batch_size, nkerns[0], 15, 15)
-    layer0 = LeNetConvPoolLayer(
+    self.layer0 = LeNetConvPoolLayer(
         rng,
         input=layer0_input,
         image_shape=(batch_size, IMG_CHANNELS, IMG_DIM, IMG_DIM),
         filter_shape=(nkerns[0], IMG_CHANNELS, FILT_SIZE, FILT_SIZE),
         poolsize=POOL_SIZE
     )
-    print(layer0)
+    print(self.layer0)
 
     LAYER0_OUT_DIM = 15
     # Construct the second convolutional pooling layer
     # filtering reduces the image size to (12-5+1, 12-5+1) = (8, 8)
     # maxpooling reduces this further to (8/2, 8/2) = (4, 4)
     # 4D output tensor is thus of shape (batch_size, nkerns[1], 4, 4)
-    layer1 = LeNetConvPoolLayer(
+    self.layer1 = LeNetConvPoolLayer(
         rng,
-        input=layer0.output,
+        input=self.layer0.output,
         image_shape=(batch_size, nkerns[0], LAYER0_OUT_DIM, LAYER0_OUT_DIM),
         filter_shape=(nkerns[1], nkerns[0], FILT_SIZE, FILT_SIZE),
         poolsize=POOL_SIZE
     )
-    print(layer1)
+    print(self.layer1)
 
     LAYER1_OUT_DIM = 6
     # the HiddenLayer being fully-connected, it operates on 2D matrices of
     # shape (batch_size, num_pixels) (i.e matrix of rasterized images).
     # This will generate a matrix of shape (batch_size, nkerns[1] * 4 * 4),
     # or (500, 50 * 4 * 4) = (500, 800) with the default values.
-    layer2_input = layer1.output.flatten(2)
+    layer2_input = self.layer1.output.flatten(2)
     # construct a fully-connected sigmoidal layer
-    layer2 = HiddenLayer(
+    self.layer2 = HiddenLayer(
         rng,
         input=layer2_input,
         n_in=nkerns[1] * LAYER1_OUT_DIM * LAYER1_OUT_DIM,
         n_out=nhidden[0],
         activation=T.tanh
     )
-    print(layer2)
+    print(self.layer2)
 
     # the HiddenLayer being fully-connected, it operates on 2D matrices of
     # shape (batch_size, num_pixels) (i.e matrix of rasterized images).
     # This will generate a matrix of shape (batch_size, nkerns[1] * 4 * 4),
     # or (500, 50 * 4 * 4) = (500, 800) with the default values.
     # construct a fully-connected sigmoidal layer
-    layer3 = HiddenLayer(
+    self.layer3 = HiddenLayer(
         rng,
-        input=layer2.output,
+        input=self.layer2.output,
         n_in=nhidden[0],
         n_out=nhidden[1],
         activation=T.tanh
     )
-    print(layer3)
+    print(self.layer3)
 
     # classify the values of the fully-connected sigmoidal layer
-    layer4 = LogisticRegression(input=layer3.output, n_in=nhidden[1], n_out=10)
-    print(layer4)
+    self.layer4 = LogisticRegression(input=self.layer3.output, n_in=nhidden[1], n_out=10)
+    print(self.layer4)
 
     # the cost we minimize during training is the NLL of the model
-    cost = layer4.negative_log_likelihood(y)
+    cost = self.layer4.negative_log_likelihood(y)
 
     # create a function to compute the mistakes that are made by the model
-    test_model = theano.function(
+    self.test_model = theano.function(
         [index],
-        layer4.errors(y),
+        self.layer4.errors(y),
         givens={
             x: test_set_x[index * batch_size: (index + 1) * batch_size],
             y: test_set_y[index * batch_size: (index + 1) * batch_size]
@@ -139,9 +128,9 @@ def test_lenet( batch_size=10       ,
     )
     print('Test model compiled...')
 
-    validate_model = theano.function(
+    self.validate_model = theano.function(
         [index],
-        layer4.errors(y),
+        self.layer4.errors(y),
         givens={
             x: valid_set_x[index * batch_size: (index + 1) * batch_size],
             y: valid_set_y[index * batch_size: (index + 1) * batch_size]
@@ -150,7 +139,7 @@ def test_lenet( batch_size=10       ,
     print('Validate model compiled...')
 
     # create a list of all model parameters to be fit by gradient descent
-    params = layer4.params + layer3.params + layer2.params + layer1.params + layer0.params
+    params = self.layer4.params + self.layer3.params + self.layer2.params + self.layer1.params + self.layer0.params
 
     # create a list of gradients for all model parameters
     grads = T.grad(cost, params)
@@ -165,7 +154,7 @@ def test_lenet( batch_size=10       ,
         for param_i, grad_i in zip(params, grads)
     ]
 
-    train_model = theano.function(
+    self.train_model = theano.function(
         [index],
         cost,
         updates=updates,
@@ -175,7 +164,34 @@ def test_lenet( batch_size=10       ,
         }
     )
     print('Train model compiled...')
-    train_nn(train_model, validate_model, test_model,
+
+  def __str__(self):
+    return 'MyMLP\n'+str(self.layer0)+'\n'+str(self.layer1)+'\n'+str(self.layer2)+'\n'+str(self.layer3)+'\n'+str(self.layer4)
+
+def test_lenet( batch_size=10       ,
+                nkerns=[32,64]      ,
+                nhidden=[4096, 512] ,
+                n_epochs=200        ,
+                learning_rate=0.1   ):
+
+    rng = numpy.random.RandomState(23455)
+
+    datasets = load_data()
+
+    train_set_x, train_set_y = datasets[0]
+    valid_set_x, valid_set_y = datasets[1]
+    test_set_x, test_set_y = datasets[2]
+
+    # compute number of minibatches for training, validation and testing
+    n_train_batches = train_set_x.get_value(borrow=True).shape[0]
+    n_valid_batches = valid_set_x.get_value(borrow=True).shape[0]
+    n_test_batches = test_set_x.get_value(borrow=True).shape[0]
+    n_train_batches //= batch_size
+    n_valid_batches //= batch_size
+    n_test_batches //= batch_size
+
+    myLeNet = MyLeNet(rng, batch_size=batch_size, nkerns=nkerns, nhidden=nhidden, learning_rate=learning_rate, datasets=datasets )
+    train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model,
             n_train_batches, n_valid_batches, n_test_batches, n_epochs,
             verbose = True)
  
