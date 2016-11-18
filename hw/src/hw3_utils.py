@@ -83,24 +83,27 @@ def load_data(ds_rate=None, theano_shared=True):
         
         return f_name
     
-    f_name=check_dataset('cifar-10-matlab.tar.gz')
+    f_name=check_dataset('cifar-10-matlab-00500.tar.gz')
     
     train_batches=os.path.join(f_name,'cifar-10-batches-mat/data_batch_1.mat')
-    
+    print train_batches
     
     # Load data and convert data format
     train_batches=['data_batch_1.mat','data_batch_2.mat','data_batch_3.mat','data_batch_4.mat','data_batch_5.mat']
     train_batch=os.path.join(f_name,'cifar-10-batches-mat',train_batches[0])
     train_set=scipy.io.loadmat(train_batch)
+    print 'loaded a matrix of shape', train_set['data'].shape
     train_set['data']=train_set['data']/255.
     for i in range(4):
         train_batch=os.path.join(f_name,'cifar-10-batches-mat',train_batches[i+1])
         temp=scipy.io.loadmat(train_batch)
+        print 'loaded a matrix of shape', temp['data'].shape
         train_set['data']=numpy.concatenate((train_set['data'],temp['data']/255.),axis=0)
         train_set['labels']=numpy.concatenate((train_set['labels'].flatten(),temp['labels'].flatten()),axis=0)
     
     test_batches=os.path.join(f_name,'cifar-10-batches-mat/test_batch.mat')
     test_set=scipy.io.loadmat(test_batches)
+    print 'loaded a matrix of shape', test_set['data'].shape
     test_set['data']=test_set['data']/255.
     test_set['labels']=test_set['labels'].flatten()
     
