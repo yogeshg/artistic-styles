@@ -22,6 +22,7 @@ import theano
 import theano.tensor as T
 from theano.tensor.nnet import conv2d
 from theano.tensor.signal import downsample
+from theano.tensor.signal import pool
 
 class LogisticRegression(object):
     """Multi-class Logistic Regression Class
@@ -86,6 +87,12 @@ class LogisticRegression(object):
 
         # keep track of model input
         self.input = input
+
+        self.L1 = abs(self.W).sum()
+        self.L2_sqr = (self.W**2).sum()
+
+    def __str__(self):
+        return "LogisticRegression L2_sqr:{}".format(self.L2_sqr.eval())
 
     def negative_log_likelihood(self, y):
         """Return the mean of the negative log-likelihood of the prediction
@@ -210,6 +217,12 @@ class HiddenLayer(object):
         )
         # parameters of the model
         self.params = [self.W, self.b]
+        self.L1 = abs(self.W).sum()
+        self.L2_sqr = (self.W**2).sum()
+
+    def __str__(self):
+        return "HiddenLayer L2_sqr:{}".format(self.L2_sqr.eval())
+
 
 class LeNetConvPoolLayer(object):
     """Pool Layer of a convolutional network """
@@ -287,6 +300,12 @@ class LeNetConvPoolLayer(object):
 
         # keep track of model input
         self.input = input
+        self.L1 = abs(self.W).sum()
+        self.L2_sqr = (self.W**2).sum()
+
+    def __str__(self):
+        return "LeNetConvPoolLayer L2_sqr:{}".format(self.L2_sqr.eval())
+
 
 
 def train_nn(train_model, validate_model, test_model,

@@ -83,7 +83,7 @@ def load_data(ds_rate=None, theano_shared=True):
         
         return f_name
     
-    f_name=check_dataset('cifar-10-matlab-00500.tar.gz')
+    f_name=check_dataset('cifar-10-matlab-00010.tar.gz')
     
     train_batches=os.path.join(f_name,'cifar-10-batches-mat/data_batch_1.mat')
     print train_batches
