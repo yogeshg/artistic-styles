@@ -9,6 +9,11 @@ This code is based on
 [3] http://deeplearning.net/tutorial/lenet.html
 """
 import numpy
+import numpy as np
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 import theano
 import theano.tensor as T
@@ -155,95 +160,14 @@ class MyLeNet():
   def __str__(self):
     return 'MyMLP\n'+str(self.layer0)+'\n'+str(self.layer1)+'\n'+str(self.layer2)+'\n'+str(self.layer3)+'\n'+str(self.layer4)
 
-def test_lenet( batch_size=10       ,
-                nkerns=[32,64]      ,
-                nhidden=[4096, 512] ,
-                n_epochs=200        ,
-                learning_rate=0.1   ,
-                rotation=False, translation=False, flipping=False):
-
-    rng = numpy.random.RandomState(23455)
-
-    datasets = load_data(theano_shared=False)
-
-    train_set_x, train_set_y = datasets[0]
-    valid_set_x, valid_set_y = datasets[1]
-    test_set_x, test_set_y = datasets[2]
-    N = train_set_x.shape[0]
-    print N
-
-    if( flipping ):
-        temp = [flip_image(train_set_x[i]) for i in range(train_set_x.shape[0])]
-        train_set_x = np.concatenate([train_set_x, temp])
-        for i in range(1,16+1):
-            print i,
-            plt.subplot(4,4,i)
-            plt.imshow(vector2image( temp[i] ))
-        plt.savefig('./imgs-flip-sample.png')
-        for i in range(1,16+1):
-            print i,
-            plt.subplot(4,4,i)
-            plt.imshow(vector2image( train_set_x[i] ))
-        plt.savefig('./imgs-flip-orig.png')
-
-    if( rotation ):
-        temp = [rotate_image(train_set_x[i], 15-random.random()*30) for i in range(int(train_set_x.shape[0]))]
-        train_set_x = np.concatenate([train_set_x, temp])
-        for i in range(1,16+1):
-            print i,
-            plt.subplot(4,4,i)
-            plt.imshow(vector2image( temp[i] ))
-        plt.savefig('./imgs-rotation-sample.png')
-        for i in range(1,16+1):
-            print i,
-            plt.subplot(4,4,i)
-            plt.imshow(vector2image( train_set_x[i] ))
-        plt.savefig('./imgs-rotation-orig.png')
-
-
-    if( translation ):
-        temp = [translate_image(train_set_x[i], (5-random.random()*10,5-random.random()*10)) for i in range(train_set_x.shape[0])]
-        train_set_x = np.concatenate([train_set_x, temp])
-        for i in range(1,16+1):
-            print i,
-            plt.subplot(4,4,i)
-            plt.imshow(vector2image( temp[i] ))
-        plt.savefig('./imgs-translate-sample.png')
-        for i in range(1,16+1):
-            print i,
-            plt.subplot(4,4,i)
-            plt.imshow(vector2image( train_set_x[i] ))
-        plt.savefig('./imgs-translate-orig.png')
-
-    # compute number of minibatches for training, validation and testing
-    # n_train_batches = train_set_x.get_value(borrow=True).shape[0]
-    # n_valid_batches = valid_set_x.get_value(borrow=True).shape[0]
-    # n_test_batches = test_set_x.get_value(borrow=True).shape[0]
-    n_train_batches = train_set_x.shape[0]
-    n_valid_batches = valid_set_x.shape[0]
-    n_test_batches = test_set_x.shape[0]
-    n_train_batches //= batch_size
-    n_valid_batches //= batch_size
-    n_test_batches //= batch_size
-
-    myLeNet = MyLeNet(rng, batch_size=batch_size, nkerns=nkerns, nhidden=nhidden,
-                        learning_rate=learning_rate, datasets=datasets )
-    print myLeNet
-    train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model,
-            n_train_batches, n_valid_batches, n_test_batches, n_epochs,
-            datasets, batch_size,
-            verbose = True)
-
-if __name__ == '__main__': 
-    test_lenet(batch_size=2, n_epochs=10)
-
 import math
-import PIL
+from PIL import Image
+import random
 
 # def image2vector(im):
 #     return im.transpose(2,0,1).flatten()
-# def vector2image(v):
-#     return np.reshape(v,(3,32,32)).transpose(1,2,0)
+def vector2image(v):
+    return np.reshape(v,(3,32,32)).transpose(1,2,0)
 
 def vector2pil(v):
     return Image.fromarray(np.uint8(255*np.reshape(v,(3,32,32)).transpose(1,2,0)))
@@ -252,7 +176,7 @@ def pil2vector(p):
 
 def rotateTranslate(image, angle, new_center = None, yMirror=1):
     angle = -angle/180.0*math.pi
-    x,y = im1.getbbox()[2:4]
+    x,y = image.getbbox()[2:4]
     x = x/2
     y = y/2
     nx,ny = x,y 
@@ -285,23 +209,92 @@ def rotate_image(inp, r):
 def flip_image(inp):
     return pil2vector(rotateTranslate(vector2pil(inp),0,(-64,0),-1))
 
+## plot16(temp, './imgs-flip-sample.png')
+def plot16(arr, filename):
+        fig = plt.figure()
+        for i in range(1,16+1):
+            print i,
+            ax = fig.add_subplot(4,4,i)
+            ax.imshow(vector2image( arr[i] ))
+        fig.savefig(filename)
+
+def test_lenet( batch_size=10       ,
+                nkerns=[32,64]      ,
+                nhidden=[4096, 512] ,
+                n_epochs=200        ,
+                learning_rate=0.1   ,
+                rotation=False, translation=False, flipping=False):
+
+    rng = numpy.random.RandomState(23455)
+
+    datasets = load_data(theano_shared=False)
+
+    train_set_x, train_set_y = datasets[0]
+    valid_set_x, valid_set_y = datasets[1]
+    test_set_x, test_set_y = datasets[2]
+    N = train_set_x.shape[0]
+    print N
+
+    if( flipping ):
+        temp = [flip_image(train_set_x[i]) for i in range(train_set_x.shape[0])]
+        train_set_x = np.concatenate([train_set_x, temp])
+        train_set_y = np.concatenate([train_set_y, train_set_y])
+        plot16(temp, './imgs-flip-aug.png')
+        plot16(train_set_x, './imgs-flip-orig.png')
+
+    if( rotation ):
+        temp = [rotate_image(train_set_x[i], 15-random.random()*30) for i in range(int(train_set_x.shape[0]))]
+        train_set_x = np.concatenate([train_set_x, temp])
+        train_set_y = np.concatenate([train_set_y, train_set_y])
+        plot16(temp, './imgs-rotate-aug.png')
+        plot16(train_set_x, './imgs-rotate-orig.png')
+
+    if( translation ):
+        temp = [translate_image(train_set_x[i], (5-random.random()*10,5-random.random()*10)) for i in range(train_set_x.shape[0])]
+        train_set_x = np.concatenate([train_set_x, temp])
+        train_set_y = np.concatenate([train_set_y, train_set_y])
+        plot16(temp, './imgs-translate-aug.png')
+        plot16(train_set_x, './imgs-translate-orig.png')
+
+    # compute number of minibatches for training, validation and testing
+    # n_train_batches = train_set_x.get_value(borrow=True).shape[0]
+    # n_valid_batches = valid_set_x.get_value(borrow=True).shape[0]
+    # n_test_batches = test_set_x.get_value(borrow=True).shape[0]
+    n_train_batches = train_set_x.shape[0]
+    n_valid_batches = valid_set_x.shape[0]
+    n_test_batches = test_set_x.shape[0]
+    n_train_batches //= batch_size
+    n_valid_batches //= batch_size
+    n_test_batches //= batch_size
+
+    datasets[0] = (train_set_x, train_set_y)
+    datasets[1] = (valid_set_x, valid_set_y)
+    datasets[2] = (test_set_x, test_set_y  )
+ 
+    myLeNet = MyLeNet(rng, batch_size=batch_size, nkerns=nkerns, nhidden=nhidden,
+                        learning_rate=learning_rate, datasets=datasets )
+    print myLeNet
+    train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model,
+            n_train_batches, n_valid_batches, n_test_batches, n_epochs,
+            datasets, batch_size,
+            verbose = True)
+
+if __name__ == '__main__': 
+    test_lenet(batch_size=20, n_epochs=10, flipping=True)
+    test_lenet(batch_size=20, n_epochs=10, rotation=True)
+    test_lenet(batch_size=20, n_epochs=10, translation=True)
+    test_lenet(batch_size=20, n_epochs=10)
+
 #Implement a convolutional neural network with the translation method for augmentation
 def test_lenet_translation():
     return
 
-
 #Problem 2.2
-#Write a function to add roatations
-def rotate_image():
-    return
 #Implement a convolutional neural network with the rotation method for augmentation
 def test_lenet_rotation():
     return
 
 #Problem 2.3
-#Write a function to flip images
-def flip_image():
-    return
 #Implement a convolutional neural network with the flip method for augmentation
 def test_lenet_flip():
     return
