@@ -224,7 +224,7 @@ def test_lenet( batch_size=10       ,
                 n_epochs=200        ,
                 learning_rate=0.1   ,
                 rotation=False, translation=False, flipping=False):
-
+    print 'test_lenet:', locals()
     rng = numpy.random.RandomState(23455)
 
     datasets = load_data(theano_shared=False)
@@ -279,27 +279,33 @@ def test_lenet( batch_size=10       ,
             datasets, batch_size,
             verbose = True)
 
-if __name__ == '__main__': 
-    test_lenet(batch_size=20, n_epochs=10, flipping=True)
-    test_lenet(batch_size=20, n_epochs=10, rotation=True)
-    test_lenet(batch_size=20, n_epochs=10, translation=True)
-    test_lenet(batch_size=20, n_epochs=10)
-
 #Implement a convolutional neural network with the translation method for augmentation
-def test_lenet_translation():
-    return
+def test_lenet_translation(**kwargs):
+    kwargs['translation']=True
+    return test_lenet(**kwargs)
 
 #Problem 2.2
 #Implement a convolutional neural network with the rotation method for augmentation
-def test_lenet_rotation():
-    return
+def test_lenet_rotation(**kwargs):
+    kwargs['rotation']=True
+    return test_lenet(**kwargs)
 
 #Problem 2.3
 #Implement a convolutional neural network with the flip method for augmentation
-def test_lenet_flip():
-    return
-    
-    
+def test_lenet_flip(**kwargs):
+    kwargs['flipping']=True
+    return test_lenet(**kwargs)
+
+if __name__ == '__main__': 
+    test_lenet(batch_size=20, n_epochs=10)
+    test_lenet_flip(batch_size=20, n_epochs=10)
+    test_lenet_rotation(batch_size=20, n_epochs=10)
+    test_lenet_translation(batch_size=20, n_epochs=10)
+
+    # test_lenet(batch_size=20, n_epochs=10, flipping=True)
+    # test_lenet(batch_size=20, n_epochs=10, rotation=True)
+    # test_lenet(batch_size=20, n_epochs=10, translation=True)
+
 #Problem 2.4
 #Write a function to add noise, it should at least provide Gaussian-distributed and uniform-distributed noise with zero mean
 def noise_injection():
