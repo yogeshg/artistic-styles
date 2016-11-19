@@ -172,20 +172,69 @@ def test_lenet( batch_size=10       ,
                 nkerns=[32,64]      ,
                 nhidden=[4096, 512] ,
                 n_epochs=200        ,
-                learning_rate=0.1   ):
+                learning_rate=0.1   ,
+                rotation=False, translation=False, flipping=False):
 
     rng = numpy.random.RandomState(23455)
 
-    datasets = load_data()
+    datasets = load_data(theano_shared=False)
 
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
+    N = train_set_x.shape[0]
+    print N
+
+    if( flipping ):
+        temp = [flip_image(train_set_x[i]) for i in range(train_set_x.shape[0])]
+        train_set_x = np.concatenate([train_set_x, temp])
+        for i in range(1,16+1):
+            print i,
+            plt.subplot(4,4,i)
+            plt.imshow(vector2image( temp[i] ))
+        plt.savefig('./imgs-flip-sample.png')
+        for i in range(1,16+1):
+            print i,
+            plt.subplot(4,4,i)
+            plt.imshow(vector2image( train_set_x[i] ))
+        plt.savefig('./imgs-flip-orig.png')
+
+    if( rotation ):
+        temp = [rotate_image(train_set_x[i], 15-random.random()*30) for i in range(int(train_set_x.shape[0]))]
+        train_set_x = np.concatenate([train_set_x, temp])
+        for i in range(1,16+1):
+            print i,
+            plt.subplot(4,4,i)
+            plt.imshow(vector2image( temp[i] ))
+        plt.savefig('./imgs-rotation-sample.png')
+        for i in range(1,16+1):
+            print i,
+            plt.subplot(4,4,i)
+            plt.imshow(vector2image( train_set_x[i] ))
+        plt.savefig('./imgs-rotation-orig.png')
+
+
+    if( translation ):
+        temp = [translate_image(train_set_x[i], (5-random.random()*10,5-random.random()*10)) for i in range(train_set_x.shape[0])]
+        train_set_x = np.concatenate([train_set_x, temp])
+        for i in range(1,16+1):
+            print i,
+            plt.subplot(4,4,i)
+            plt.imshow(vector2image( temp[i] ))
+        plt.savefig('./imgs-translate-sample.png')
+        for i in range(1,16+1):
+            print i,
+            plt.subplot(4,4,i)
+            plt.imshow(vector2image( train_set_x[i] ))
+        plt.savefig('./imgs-translate-orig.png')
 
     # compute number of minibatches for training, validation and testing
-    n_train_batches = train_set_x.get_value(borrow=True).shape[0]
-    n_valid_batches = valid_set_x.get_value(borrow=True).shape[0]
-    n_test_batches = test_set_x.get_value(borrow=True).shape[0]
+    # n_train_batches = train_set_x.get_value(borrow=True).shape[0]
+    # n_valid_batches = valid_set_x.get_value(borrow=True).shape[0]
+    # n_test_batches = test_set_x.get_value(borrow=True).shape[0]
+    n_train_batches = train_set_x.shape[0]
+    n_valid_batches = valid_set_x.shape[0]
+    n_test_batches = test_set_x.shape[0]
     n_train_batches //= batch_size
     n_valid_batches //= batch_size
     n_test_batches //= batch_size
@@ -194,12 +243,58 @@ def test_lenet( batch_size=10       ,
     train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model,
             n_train_batches, n_valid_batches, n_test_batches, n_epochs,
             verbose = True)
- 
+
+if __name__ == '__main__': 
+    test_lenet(batch_size=2, n_epochs=10)
+
+import math
+import PIL
+
+# def image2vector(im):
+#     return im.transpose(2,0,1).flatten()
+# def vector2image(v):
+#     return np.reshape(v,(3,32,32)).transpose(1,2,0)
+
+def vector2pil(v):
+    return Image.fromarray(np.uint8(255*np.reshape(v,(3,32,32)).transpose(1,2,0)))
+def pil2vector(p):
+    return (np.array(p.getdata()).T.flatten()/255.)
+
+def rotateTranslate(image, angle, new_center = None, yMirror=1):
+    angle = -angle/180.0*math.pi
+    x,y = im1.getbbox()[2:4]
+    x = x/2
+    y = y/2
+    nx,ny = x,y 
+    if new_center:
+        (dx,dy) = new_center
+        nx+=dx
+        ny+=dy
+    cosine = math.cos(angle)
+    sine = math.sin(angle)
+    a = yMirror * cosine
+    b = yMirror * sine
+    c = (yMirror * (x-nx*a-ny*b))
+    d = -sine
+    e = cosine
+    f = y-nx*d-ny*e
+    return image.transform(image.size, Image.AFFINE, (a,b,c,d,e,f), resample=Image.BICUBIC)
 
 #Problem 2.1
 #Write a function to add translations
-def translate_image():
-    return
+def translate_image(inp, t):
+    return pil2vector(rotateTranslate(vector2pil(inp),0,t))
+
+#Problem 2.2
+#Write a function to add roatations
+def rotate_image(inp, r):
+    return pil2vector(rotateTranslate(vector2pil(inp),r))
+
+#Problem 2.3
+#Write a function to flip images
+def flip_image(inp):
+    return pil2vector(rotateTranslate(vector2pil(inp),0,(-64,0),-1))
+
 #Implement a convolutional neural network with the translation method for augmentation
 def test_lenet_translation():
     return
