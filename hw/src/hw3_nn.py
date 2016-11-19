@@ -306,10 +306,12 @@ class LeNetConvPoolLayer(object):
     def __str__(self):
         return "LeNetConvPoolLayer L2_sqr:{}".format(self.L2_sqr.eval())
 
-
+def getBatch(index, batch_size, dataset):
+    return dataset[index*batch_size : (index+1)*batch_size]
 
 def train_nn(train_model, validate_model, test_model,
             n_train_batches, n_valid_batches, n_test_batches, n_epochs,
+            datasets, batch_size,
             verbose = True):
     """
     Wrapper function for training and test THEANO model
@@ -339,6 +341,9 @@ def train_nn(train_model, validate_model, test_model,
     :param verbose: to print out epoch summary or not to
 
     """
+    train_set_x, train_set_y = datasets[0]
+    valid_set_x, valid_set_y = datasets[1]
+    test_set_x, test_set_y = datasets[2]
 
     # early-stopping parameters
     patience = 10000  # look as this many examples regardless
@@ -368,13 +373,17 @@ def train_nn(train_model, validate_model, test_model,
 
             if (iter % 100 == 0) and verbose:
                 print('training @ iter = ', iter)
-            cost_ij = train_model(minibatch_index)
+            cost_ij = train_model(
+                        getBatch( minibatch_index, batch_size, train_set_x),
+                        getBatch( minibatch_index, batch_size, train_set_y) )
 
             if (iter + 1) % validation_frequency == 0:
 
                 # compute zero-one loss on validation set
-                validation_losses = [validate_model(i) for i
-                                     in range(n_valid_batches)]
+                validation_losses = [validate_model(
+                                        getBatch(i,batch_size,valid_set_x),
+                                        getBatch(i,batch_size,valid_set_y) )
+                                        for i in range(n_valid_batches)]
                 this_validation_loss = numpy.mean(validation_losses)
 
                 if verbose:
@@ -398,7 +407,8 @@ def train_nn(train_model, validate_model, test_model,
 
                     # test it on the test set
                     test_losses = [
-                        test_model(i)
+                        test_model(getBatch(i,batch_size,test_set_x),
+                                   getBatch(i,batch_size,test_set_y) )
                         for i in range(n_test_batches)
                     ]
                     test_score = numpy.mean(test_losses)

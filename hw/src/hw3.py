@@ -31,10 +31,6 @@ class MyLeNet():
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
 
-    # allocate symbolic variables for the data
-    index = T.lscalar()  # index to a [mini]batch
-
-    index = T.lscalar()  # index to a [mini]batch    
     x = T.matrix('x')   # the data is presented as rasterized images
     y = T.ivector('y')  # the labels are presented as 1D vector of
                         # [int] labels
@@ -119,22 +115,16 @@ class MyLeNet():
 
     # create a function to compute the mistakes that are made by the model
     self.test_model = theano.function(
-        [index],
+        [x,y],
         self.layer4.errors(y),
-        givens={
-            x: test_set_x[index * batch_size: (index + 1) * batch_size],
-            y: test_set_y[index * batch_size: (index + 1) * batch_size]
-        }
+        allow_input_downcast=True ## To allow float64 values to be changed to float32
     )
     print('Test model compiled...')
 
     self.validate_model = theano.function(
-        [index],
+        [x,y],
         self.layer4.errors(y),
-        givens={
-            x: valid_set_x[index * batch_size: (index + 1) * batch_size],
-            y: valid_set_y[index * batch_size: (index + 1) * batch_size]
-        }
+        allow_input_downcast=True ## To allow float64 values to be changed to float32
     )
     print('Validate model compiled...')
 
@@ -155,13 +145,10 @@ class MyLeNet():
     ]
 
     self.train_model = theano.function(
-        [index],
+        [x,y],
         cost,
         updates=updates,
-        givens={
-            x: train_set_x[index * batch_size: (index + 1) * batch_size],
-            y: train_set_y[index * batch_size: (index + 1) * batch_size]
-        }
+        allow_input_downcast=True ## To allow float64 values to be changed to float32
     )
     print('Train model compiled...')
 
@@ -239,9 +226,12 @@ def test_lenet( batch_size=10       ,
     n_valid_batches //= batch_size
     n_test_batches //= batch_size
 
-    myLeNet = MyLeNet(rng, batch_size=batch_size, nkerns=nkerns, nhidden=nhidden, learning_rate=learning_rate, datasets=datasets )
+    myLeNet = MyLeNet(rng, batch_size=batch_size, nkerns=nkerns, nhidden=nhidden,
+                        learning_rate=learning_rate, datasets=datasets )
+    print myLeNet
     train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model,
             n_train_batches, n_valid_batches, n_test_batches, n_epochs,
+            datasets, batch_size,
             verbose = True)
 
 if __name__ == '__main__': 
