@@ -227,7 +227,7 @@ class HiddenLayer(object):
 class LeNetConvPoolLayer(object):
     """Pool Layer of a convolutional network """
 
-    def __init__(self, rng, input, filter_shape, image_shape, poolsize=(2, 2)):
+    def __init__(self, rng, input, filter_shape, image_shape):
         """
         Allocate a LeNetConvPoolLayer with shared variable internal parameters.
 
@@ -245,8 +245,6 @@ class LeNetConvPoolLayer(object):
         :param image_shape: (batch size, num input feature maps,
                              image height, image width)
 
-        :type poolsize: tuple or list of length 2
-        :param poolsize: the downsampling (pooling) factor (#rows, #cols)
         """
 
         assert image_shape[1] == filter_shape[1]
@@ -258,8 +256,7 @@ class LeNetConvPoolLayer(object):
         # each unit in the lower layer receives a gradient from:
         # "num output feature maps * filter height * filter width" /
         #   pooling size
-        fan_out = (filter_shape[0] * numpy.prod(filter_shape[2:]) //
-                   numpy.prod(poolsize))
+        fan_out = (filter_shape[0] * numpy.prod(filter_shape[2:]))
         # initialize weights with random weights
         W_bound = numpy.sqrt(6. / (fan_in + fan_out))
         self.W = theano.shared(
@@ -279,21 +276,22 @@ class LeNetConvPoolLayer(object):
             input=input,
             filters=self.W,
             filter_shape=filter_shape,
-            input_shape=image_shape
+            input_shape=image_shape,
+            border_mode=border_mode
         )
 
-        # pool each feature map individually, using maxpooling
-        pooled_out = pool.pool_2d(
-            input=conv_out,
-            ds=poolsize,
-            ignore_border=True
-        )
+        # # pool each feature map individually, using maxpooling
+        # pooled_out = pool.pool_2d(
+        #     input=conv_out,
+        #     ds=poolsize,
+        #     ignore_border=True
+        # )
 
         # add the bias term. Since the bias is a vector (1D array), we first
         # reshape it to a tensor of shape (1, n_filters, 1, 1). Each bias will
         # thus be broadcasted across mini-batches and feature map
         # width & height
-        self.output = T.tanh(pooled_out + self.b.dimshuffle('x', 0, 'x', 'x'))
+        self.output = T.nnet.relu(conv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
 
         # store parameters of this layer
         self.params = [self.W, self.b]
