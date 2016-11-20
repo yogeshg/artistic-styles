@@ -218,6 +218,9 @@ def plot16(arr, filename):
             ax.imshow(vector2image( arr[i] ))
         fig.savefig(filename)
 
+MAX_ROTATE = 2.5 # Degrees
+MAX_TRANSLATE = 2.5 # Pixels
+
 def test_lenet( batch_size=10       ,
                 nkerns=[32,64]      ,
                 nhidden=[4096, 512] ,
@@ -243,14 +246,14 @@ def test_lenet( batch_size=10       ,
         plot16(train_set_x, './imgs-flip-orig.png')
 
     if( rotation ):
-        temp = [rotate_image(train_set_x[i], 15-random.random()*30) for i in range(int(train_set_x.shape[0]))]
+        temp = [rotate_image(train_set_x[i], (MAX_ROTATE)-random.random()*(2*MAX_ROTATE)) for i in range(int(train_set_x.shape[0]))]
         train_set_x = np.concatenate([train_set_x, temp])
         train_set_y = np.concatenate([train_set_y, train_set_y])
         plot16(temp, './imgs-rotate-aug.png')
         plot16(train_set_x, './imgs-rotate-orig.png')
 
     if( translation ):
-        temp = [translate_image(train_set_x[i], (5-random.random()*10,5-random.random()*10)) for i in range(train_set_x.shape[0])]
+        temp = [translate_image(train_set_x[i], (MAX_TRANSLATE-random.random()*(2*MAX_TRANSLATE),MAX_TRANSLATE-random.random()*(2*MAX_TRANSLATE))) for i in range(train_set_x.shape[0])]
         train_set_x = np.concatenate([train_set_x, temp])
         train_set_y = np.concatenate([train_set_y, train_set_y])
         plot16(temp, './imgs-translate-aug.png')
@@ -297,10 +300,11 @@ def test_lenet_flip(**kwargs):
     return test_lenet(**kwargs)
 
 if __name__ == '__main__': 
-    test_lenet(batch_size=20, n_epochs=10)
-    test_lenet_flip(batch_size=20, n_epochs=10)
-    test_lenet_rotation(batch_size=20, n_epochs=10)
-    test_lenet_translation(batch_size=20, n_epochs=10)
+
+    test_lenet_rotation(batch_size=256, n_epochs=500)
+    test_lenet_translation(batch_size=256, n_epochs=500)
+    test_lenet(batch_size=256, n_epochs=500)
+    test_lenet_flip(batch_size=256, n_epochs=500)
 
     # test_lenet(batch_size=20, n_epochs=10, flipping=True)
     # test_lenet(batch_size=20, n_epochs=10, rotation=True)
