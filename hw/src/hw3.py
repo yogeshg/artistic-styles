@@ -220,13 +220,14 @@ def plot16(arr, filename):
 
 MAX_ROTATE = 2.5 # Degrees
 MAX_TRANSLATE = 2.5 # Pixels
+MAX_NOISE = 0.01
 
 def test_lenet( batch_size=10       ,
                 nkerns=[32,64]      ,
                 nhidden=[4096, 512] ,
                 n_epochs=200        ,
                 learning_rate=0.1   ,
-                rotation=False, translation=False, flipping=False):
+                rotation=False, translation=False, flipping=False, noise=None):
     print 'test_lenet:', locals()
     rng = numpy.random.RandomState(23455)
 
@@ -258,6 +259,13 @@ def test_lenet( batch_size=10       ,
         train_set_y = np.concatenate([train_set_y, train_set_y])
         plot16(temp, './imgs-translate-aug.png')
         plot16(train_set_x, './imgs-translate-orig.png')
+
+    if( noise ):
+        temp = [noise_injection(train_set_x[i], magnitude=MAX_NOISE, noise=noise) for i in range(train_set_x.shape[0])]
+        train_set_x = np.concatenate([train_set_x, temp])
+        train_set_y = np.concatenate([train_set_y, train_set_y])
+        plot16(temp, './imgs-'+str(noise)+'Noise-aug.png')
+        plot16(train_set_x, './imgs-'+str(noise)+'Noise-orig.png')
 
     # compute number of minibatches for training, validation and testing
     # n_train_batches = train_set_x.get_value(borrow=True).shape[0]
@@ -299,25 +307,39 @@ def test_lenet_flip(**kwargs):
     kwargs['flipping']=True
     return test_lenet(**kwargs)
 
+#Problem 2.4
+#Write a function to add noise, it should at least provide Gaussian-distributed and uniform-distributed noise with zero mean
+def noise_injection(inp, method='normal', magnitude=MAX_NOISE):
+    print method,
+    if (method=='uniform'):
+        err = numpy.random.uniform(low=0.0, high=magnitude, size=inp.shape)
+        print 1
+    else :
+        err = numpy.random.normal(loc=0.0, scale=magnitude, size=inp.shape)
+        print 2
+    out = inp + err
+    out = (out - out.min())/(out.max() - out.min())
+    return out
+#Implement a convolutional neural network with the augmentation of injecting noise into input
+def test_lenet_inject_noise_input(**kwargs):
+    if(not kwargs.has_key('noise')):
+        kwargs['noise']='normal'
+    return test_lenet(**kwargs)
+    
 if __name__ == '__main__': 
 
-    test_lenet_rotation(batch_size=256, n_epochs=500)
-    test_lenet_translation(batch_size=256, n_epochs=500)
-    test_lenet(batch_size=256, n_epochs=500)
-    test_lenet_flip(batch_size=256, n_epochs=500)
+    test_lenet_inject_noise_input(batch_size=256, n_epochs=500, noise='uniform')
+    test_lenet_inject_noise_input(batch_size=256, n_epochs=500, noise='normal')
+
+    # test_lenet_rotation(batch_size=256, n_epochs=500)
+    # test_lenet_translation(batch_size=256, n_epochs=500)
+    # test_lenet(batch_size=256, n_epochs=500)
+    # test_lenet_flip(batch_size=256, n_epochs=500)
 
     # test_lenet(batch_size=20, n_epochs=10, flipping=True)
     # test_lenet(batch_size=20, n_epochs=10, rotation=True)
     # test_lenet(batch_size=20, n_epochs=10, translation=True)
 
-#Problem 2.4
-#Write a function to add noise, it should at least provide Gaussian-distributed and uniform-distributed noise with zero mean
-def noise_injection():
-    return
-#Implement a convolutional neural network with the augmentation of injecting noise into input
-def test_lenet_inject_noise_input():
-    return
-    
 #Problem 3 
 #Implement a convolutional neural network to achieve at least 80% testing accuracy on CIFAR-dataset
 def MY_lenet():
