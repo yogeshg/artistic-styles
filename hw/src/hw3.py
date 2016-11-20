@@ -8,6 +8,9 @@ This code is based on
 [2] http://deeplearning.net/tutorial/mlp.html
 [3] http://deeplearning.net/tutorial/lenet.html
 """
+import sys, os
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
 import numpy
 import numpy as np
 
@@ -261,7 +264,7 @@ def test_lenet( batch_size=10       ,
         plot16(train_set_x, './imgs-translate-orig.png')
 
     if( noise ):
-        temp = [noise_injection(train_set_x[i], magnitude=MAX_NOISE, noise=noise) for i in range(train_set_x.shape[0])]
+        temp = [noise_injection(train_set_x[i], magnitude=MAX_NOISE, method=noise) for i in range(train_set_x.shape[0])]
         train_set_x = np.concatenate([train_set_x, temp])
         train_set_y = np.concatenate([train_set_y, train_set_y])
         plot16(temp, './imgs-'+str(noise)+'Noise-aug.png')
@@ -310,13 +313,10 @@ def test_lenet_flip(**kwargs):
 #Problem 2.4
 #Write a function to add noise, it should at least provide Gaussian-distributed and uniform-distributed noise with zero mean
 def noise_injection(inp, method='normal', magnitude=MAX_NOISE):
-    print method,
     if (method=='uniform'):
         err = numpy.random.uniform(low=0.0, high=magnitude, size=inp.shape)
-        print 1
     else :
         err = numpy.random.normal(loc=0.0, scale=magnitude, size=inp.shape)
-        print 2
     out = inp + err
     out = (out - out.min())/(out.max() - out.min())
     return out
