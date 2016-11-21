@@ -277,7 +277,7 @@ class LeNetConvPoolLayer(object):
             filters=self.W,
             filter_shape=filter_shape,
             input_shape=image_shape,
-            border_mode=border_mode
+            border_mode='half'
         )
 
         # # pool each feature map individually, using maxpooling

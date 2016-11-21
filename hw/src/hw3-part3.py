@@ -24,7 +24,7 @@ from theano.tensor.signal import downsample
 from theano.tensor.signal import pool
 
 from hw3_utils import shared_dataset, load_data
-from hw3_nn import LogisticRegression, HiddenLayer, train_nn
+from hw3_nn import LogisticRegression, HiddenLayer, train_nn,LeNetConvPoolLayer 
 from hw2c import DropoutHiddenLayer
 
 #Problem 3 
@@ -79,13 +79,36 @@ class MyLeNet():
             ignore_border=True
         )
 
+    self.conv21 = LeNetConvPoolLayer(
+        rng,
+        input=pool1_output,
+        image_shape=(batch_size, 32, 16, 16),
+        filter_shape=(64, 32, 3, 3)
+    )
+    print(self.conv21)
+
+
+    self.conv22 = LeNetConvPoolLayer(
+        rng,
+        input=self.conv21.output,
+        image_shape=(batch_size, 64, 16, 16),
+        filter_shape=(64, 64, 3, 3),
+    )
+    print(self.conv22)
+
+    pool2_output = pool.pool_2d(
+            input=self.conv22.output,
+            ds=(2,2),
+            ignore_border=True
+        )
+
     training_enabled = T.iscalar('training_enabled') # pseudo boolean for switching between training and prediction
 
     self.hidden3 = DropoutHiddenLayer(
         rng,
-        input=self.pool1_output.flatten(2),
-        training_enabled,
-        n_in=32*16*16,
+        input=pool2_output.flatten(2),
+        is_train=training_enabled,
+        n_in=64*8*8,
         n_out=1024,
         p=0.5
     )
@@ -95,7 +118,7 @@ class MyLeNet():
     self.hidden4 = DropoutHiddenLayer(
         rng,
         input=self.hidden3.output,
-        training_enabled,
+        is_train=training_enabled,
         n_in=1024,
         n_out=1024,
         p=0.5
@@ -105,7 +128,7 @@ class MyLeNet():
     self.hidden5 = DropoutHiddenLayer(
         rng,
         input=self.hidden4.output,
-        training_enabled,
+        is_train=training_enabled,
         n_in=1024,
         n_out=200,
         p=0.5
@@ -120,12 +143,12 @@ class MyLeNet():
     print(self.softmax6)
 
     # the cost we minimize during training is the NLL of the model
-    cost = self.layer4.negative_log_likelihood(y)
+    cost = self.softmax6.negative_log_likelihood(y)
 
     # create a function to compute the mistakes that are made by the model
     self.test_model = theano.function(
         [x,y],
-        self.layer4.errors(y),
+        self.softmax6.errors(y),
         allow_input_downcast=True, ## To allow float64 values to be changed to float32
         givens={
             training_enabled: numpy.cast['int32'](0)
@@ -135,7 +158,7 @@ class MyLeNet():
 
     self.validate_model = theano.function(
         [x,y],
-        self.layer4.errors(y),
+        self.softmax6.errors(y),
         allow_input_downcast=True, ## To allow float64 values to be changed to float32
         givens={
             training_enabled: numpy.cast['int32'](0)
@@ -144,7 +167,8 @@ class MyLeNet():
     print('Validate model compiled...')
 
     # create a list of all model parameters to be fit by gradient descent
-    params = self.layer4.params + self.layer3.params + self.layer2.params + self.layer1.params + self.layer0.params
+    params = self.conv11.params + self.conv12.params + self.conv21.params + self.conv22.params + \
+                self.hidden3.params + self.hidden4.params + self.hidden5.params + self.softmax6.params
 
     # create a list of gradients for all model parameters
     grads = T.grad(cost, params)
@@ -172,13 +196,7 @@ class MyLeNet():
     print('Train model compiled...')
 
   def __str__(self):
-    return 'MyLeNet\n'+
-        str(self.conv11)+'\n'+
-        str(self.conv12)+'\n'+
-        str(self.hidden3)+'\n'+
-        str(self.hidden4)+'\n'+
-        str(self.hidden5)+'\n'+
-        str(self.softmax6)+
+    return 'MyLeNet\n'+str(self.conv11)+'\n'+str(self.conv12)+str(self.conv21)+'\n'+str(self.conv22)+'\n'+str(self.hidden3)+'\n'+str(self.hidden4)+'\n'+str(self.hidden5)+'\n'+str(self.softmax6)
 
 import math
 from PIL import Image
@@ -238,7 +256,7 @@ def plot16(arr, filename):
             ax.imshow(vector2image( arr[i] ))
         fig.savefig(filename)
 
-MAX_ROTATE = 2.5 # Degrees
+MAX_ROTATE = 5 # Degrees
 MAX_TRANSLATE = 2.5 # Pixels
 MAX_NOISE = 0.01 # for [0,1]
 
@@ -302,8 +320,7 @@ def test_lenet( batch_size=10       ,
     datasets[1] = (valid_set_x, valid_set_y)
     datasets[2] = (test_set_x, test_set_y  )
  
-    myLeNet = MyLeNet(rng, batch_size=batch_size, nkerns=nkerns, nhidden=nhidden,
-                        learning_rate=learning_rate, datasets=datasets )
+    myLeNet = MyLeNet(rng, datasets, batch_size=batch_size, learning_rate=learning_rate)
     print myLeNet
     train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model,
             n_train_batches, n_valid_batches, n_test_batches, n_epochs,
@@ -351,8 +368,8 @@ def MY_CNN():
 
 if __name__ == '__main__': 
 
-    test_lenet_inject_noise_input(batch_size=256, n_epochs=500, noise='uniform')
-    test_lenet_inject_noise_input(batch_size=256, n_epochs=500, noise='normal')
+    test_lenet(batch_size=512, n_epochs=1000, flipping=True, translation=True)
+    test_lenet(batch_size=512, n_epochs=1000, flipping=True)
 
     # test_lenet_rotation(batch_size=256, n_epochs=500)
     # test_lenet_translation(batch_size=256, n_epochs=500)
