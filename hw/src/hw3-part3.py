@@ -23,7 +23,7 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.signal import pool
 
-from hw3_utils import shared_dataset, load_data
+from hw3_utils import shared_dataset, load_data, RmsProp
 from hw3_nn import LogisticRegression, HiddenLayer, train_nn,LeNetConvPoolLayer 
 from hw2c import DropoutHiddenLayer
 
@@ -64,7 +64,6 @@ class MyLeNet():
     )
     print(self.conv11)
 
-
     self.conv12 = LeNetConvPoolLayer(
         rng,
         input=self.conv11.output,
@@ -102,13 +101,36 @@ class MyLeNet():
             ignore_border=True
         )
 
+    self.conv31 = LeNetConvPoolLayer(
+        rng,
+        input=pool2_output,
+        image_shape=(batch_size, 64,  8,  8),
+        filter_shape=(128,64, 3, 3)
+    )
+    print(self.conv31)
+
+
+    self.conv32 = LeNetConvPoolLayer(
+        rng,
+        input=self.conv31.output,
+        image_shape=(batch_size, 128, 8,  8),
+        filter_shape=(128,128,3, 3),
+    )
+    print(self.conv32)
+
+    pool3_output = pool.pool_2d(
+            input=self.conv32.output,
+            ds=(2,2),
+            ignore_border=True
+        )
+
     training_enabled = T.iscalar('training_enabled') # pseudo boolean for switching between training and prediction
 
     self.hidden3 = DropoutHiddenLayer(
         rng,
-        input=pool2_output.flatten(2),
+        input=pool3_output.flatten(2),
         is_train=training_enabled,
-        n_in=64*8*8,
+        n_in=128*4*4,
         n_out=1024,
         p=0.5
     )
@@ -168,6 +190,7 @@ class MyLeNet():
 
     # create a list of all model parameters to be fit by gradient descent
     params = self.conv11.params + self.conv12.params + self.conv21.params + self.conv22.params + \
+                self.conv31.params + self.conv32.params + \
                 self.hidden3.params + self.hidden4.params + self.hidden5.params + self.softmax6.params
 
     # create a list of gradients for all model parameters
@@ -178,10 +201,13 @@ class MyLeNet():
     # manually create an update rule for each model parameter. We thus
     # create the updates list by automatically looping over all
     # (params[i], grads[i]) pairs.
-    updates = [
-        (param_i, param_i - learning_rate * grad_i)
-        for param_i, grad_i in zip(params, grads)
-    ]
+    # updates = [
+    #     (param_i, param_i - learning_rate * grad_i)
+    #     for param_i, grad_i in zip(params, grads)
+    # ]
+
+    r = RmsProp()
+    updates = r.getUpdates(params, grads)
 
     self.train_model = theano.function(
         [x,y],

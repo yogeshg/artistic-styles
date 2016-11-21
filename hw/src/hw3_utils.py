@@ -14,6 +14,35 @@ import tarfile
 import theano
 import theano.tensor as T
 
+def floatX(X):
+    return numpy.asarray(X, dtype=theano.config.floatX)
+
+def sharedX(X, dtype=theano.config.floatX, name=None):
+    return theano.shared(numpy.asarray(X, dtype=dtype), name=name)
+
+def shared_zeros(shape, dtype=theano.config.floatX, name=None):
+    return sharedX(numpy.zeros(shape), dtype=dtype, name=name)
+
+# RMS prop algo
+class RmsProp():
+    def __init__(self,rho=0.9, lr = 0.001, epsilon = 1e-6):
+        self.rho = rho
+        self.lr = lr
+        self.epsilon = epsilon
+        return
+
+    def getUpdates(self, params, grads):
+        accumulators = [shared_zeros(p.get_value().shape) for p in params]
+        updates = []
+    
+        for p, gr, ac in zip(params, grads, accumulators):
+            ac2 = self.rho * ac + (1 - self.rho) * gr ** 2
+            p2 = p - self.lr * gr / T.sqrt(ac2 + self.epsilon)
+            updates.extend([(ac, ac2), (p, p2)])
+
+        return updates
+
+
 def shared_dataset(data_xy, borrow=True):
     """ Function that loads the dataset into shared variables
 
