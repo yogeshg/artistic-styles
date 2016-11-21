@@ -199,7 +199,21 @@ class MyLeNet():
         updates=updates,
         allow_input_downcast=True ## To allow float64 values to be changed to float32
     )
+    self.x = x
+    self.restore_count = 0
     print('Train model compiled...')
+
+  def restore(self, inp):
+    out = self.conv6.output.eval({self.x: inp})
+    print out.shape
+    plot16(out,'./imgs-reconstructed-'+str(self.restore_count)+'.png')
+    plot16(inp,'./imgs-original-'+str(self.restore_count)+'.png')
+    return
+
+  def test_model_restore(self, inp):
+    self.restore_count+=1
+    self.restore(inp)
+    return self.test_model(inp)
 
   def __str__(self):
     return 'MyLeNet\n'+str(self.conv11)+'\n'+str(self.conv12)+'\n'+str(self.conv21)+'\n'+str(self.conv22)+'\n'+str(self.conv31)+'\n'+str(self.conv41)+'\n'+str(self.conv42)+'\n'+str(self.conv51)+'\n'+str(self.conv52)+'\n'+str(self.conv6)+'\n'
@@ -253,14 +267,22 @@ def rotate_image(inp, r):
 def flip_image(inp):
     return pil2vector(rotateTranslate(vector2pil(inp),0,(-64,0),-1))
 
-## plot16(temp, './imgs-flip-sample.png')
+def plot8(arr, filename):
+        fig = plt.figure()
+        for i in range(1,8+1):
+            print i,
+            ax = fig.add_subplot(4,2,i)
+            ax.imshow(vector2image( arr[i] ))
+        fig.savefig(filename)
+        return
+
 def plot16(arr, filename):
-        # fig = plt.figure()
-        # for i in range(1,16+1):
-        #     print i,
-        #     ax = fig.add_subplot(4,4,i)
-        #     ax.imshow(vector2image( arr[i] ))
-        # fig.savefig(filename)
+        fig = plt.figure()
+        for i in range(1,16+1):
+            print i,
+            ax = fig.add_subplot(4,4,i)
+            ax.imshow(vector2image( arr[i] ))
+        fig.savefig(filename)
         return
 
 MAX_ROTATE = 5 # Degrees
@@ -273,7 +295,7 @@ def test_lenet( batch_size=10       ,
                 n_epochs=200        ,
                 learning_rate=0.1   ,
                 rotation=False, translation=False, flipping=False, noise=None):
-    print 'test_lenet:', locals()
+    # print 'test_lenet:', locals()
     rng = numpy.random.RandomState(23455)
 
     datasets = load_data(theano_shared=False)
