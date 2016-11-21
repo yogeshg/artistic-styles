@@ -450,3 +450,38 @@ epoch 51, minibatch 156/156, validation error 22.687089 %
 training @ iter =  8000
 training @ iter =  8100
 epoch 52, minibatch 156/156, validation error 22.388980 %
+training @ iter =  8200
+epoch 53, minibatch 156/156, validation error 22.070312 %
+training @ iter =  8300
+training @ iter =  8400
+epoch 54, minibatch 156/156, validation error 22.532895 %
+training @ iter =  8500
+epoch 55, minibatch 156/156, validation error 21.823602 %
+     epoch 55, minibatch 156/156, test error of best model 23.458059 %
+training @ iter =  8600
+training @ iter =  8700
+epoch 56, minibatch 156/156, validation error 22.872122 %
+training @ iter =  8800
+epoch 57, minibatch 156/156, validation error 25.616776 %
+training @ iter =  8900
+training @ iter =  9000
+epoch 58, minibatch 156/156, validation error 21.977796 %
+training @ iter =  9100
+training @ iter =  9200
+epoch 59, minibatch 156/156, validation error 22.347862 %
+training @ iter =  9300
+epoch 60, minibatch 156/156, validation error 22.080592 %
+training @ iter =  9400
+training @ iter =  9500
+epoch 61, minibatch 156/156, validation error 22.306743 %
+training @ iter =  9600
+epoch 62, minibatch 156/156, validation error 23.087993 %
+training @ iter =  9700
+training @ iter =  9800
+epoch 63, minibatch 156/156, validation error 21.833882 %
+training @ iter =  9900
+epoch 64, minibatch 156/156, validation error 22.430099 %
+training @ iter =  10000
+Optimization complete.
+Best validation error of 21.823602 % obtained at iteration 8580, with test performance 23.458059 %
+The training process for function test_lenet ran for 184.16m
