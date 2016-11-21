@@ -136,7 +136,6 @@ class MyLeNet():
     )
     print(self.hidden3)
 
-
     self.hidden4 = DropoutHiddenLayer(
         rng,
         input=self.hidden3.output,
@@ -152,14 +151,24 @@ class MyLeNet():
         input=self.hidden4.output,
         is_train=training_enabled,
         n_in=1024,
-        n_out=200,
+        n_out=1024,
         p=0.5
     )
     print(self.hidden5)
 
+    self.hidden6 = DropoutHiddenLayer(
+        rng,
+        input=self.hidden5.output,
+        is_train=training_enabled,
+        n_in=1024,
+        n_out=200,
+        p=0.5
+    )
+    print(self.hidden6)
+
     # classify the values of the fully-connected sigmoidal layer
     self.softmax6 = LogisticRegression(
-        input=self.hidden5.output,
+        input=self.hidden6.output,
         n_in=200,
         n_out=10)
     print(self.softmax6)
@@ -191,7 +200,8 @@ class MyLeNet():
     # create a list of all model parameters to be fit by gradient descent
     params = self.conv11.params + self.conv12.params + self.conv21.params + self.conv22.params + \
                 self.conv31.params + self.conv32.params + \
-                self.hidden3.params + self.hidden4.params + self.hidden5.params + self.softmax6.params
+                self.hidden3.params + self.hidden4.params + self.hidden5.params + self.hidden6.params + \
+                self.softmax6.params
 
     # create a list of gradients for all model parameters
     grads = T.grad(cost, params)
@@ -222,7 +232,7 @@ class MyLeNet():
     print('Train model compiled...')
 
   def __str__(self):
-    return 'MyLeNet\n'+str(self.conv11)+'\n'+str(self.conv12)+str(self.conv21)+'\n'+str(self.conv22)+'\n'+str(self.hidden3)+'\n'+str(self.hidden4)+'\n'+str(self.hidden5)+'\n'+str(self.softmax6)
+    return 'MyLeNet\n'+str(self.conv11)+'\n'+str(self.conv12)+str(self.conv21)+'\n'+str(self.conv22)+'\n'+str(self.hidden3)+'\n'+str(self.hidden4)+'\n'+str(self.hidden5)+'\n'+str(self.hidden6)+'\n'+str(self.softmax6)
 
 import math
 from PIL import Image
@@ -275,12 +285,13 @@ def flip_image(inp):
 
 ## plot16(temp, './imgs-flip-sample.png')
 def plot16(arr, filename):
-        fig = plt.figure()
-        for i in range(1,16+1):
-            print i,
-            ax = fig.add_subplot(4,4,i)
-            ax.imshow(vector2image( arr[i] ))
-        fig.savefig(filename)
+        # fig = plt.figure()
+        # for i in range(1,16+1):
+        #     print i,
+        #     ax = fig.add_subplot(4,4,i)
+        #     ax.imshow(vector2image( arr[i] ))
+        # fig.savefig(filename)
+        return
 
 MAX_ROTATE = 5 # Degrees
 MAX_TRANSLATE = 2.5 # Pixels
