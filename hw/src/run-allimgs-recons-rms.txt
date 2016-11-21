@@ -74,3 +74,159 @@ train_nn: {'datasets': [(array([[ 0.23137255,  0.16862745,  0.19607843, ...,  0.
        [ 0.28627451,  0.38431373,  0.38823529, ...,  0.36862745,
          0.22745098,  0.10196078]]), array([3, 8, 8, ..., 5, 1, 7], dtype=uint8))], 'verbose': True, 'validate_model': <theano.compile.function_module.Function object at 0x7fa089e88390>, 'n_test_batches': 19, 'n_valid_batches': 19, 'n_train_batches': 78, 'batch_size': 512, 'train_model': <theano.compile.function_module.Function object at 0x7fa082c56d10>, 'test_model': <bound method MyLeNet.test_model_restore of <__main__.MyLeNet instance at 0x7fa0ec092e60>>, 'n_epochs': 128}
 training @ iter =  0
+epoch 1, minibatch 78/78, validation error 1.650758 %
+     epoch 1, minibatch 78/78, test error of best model 1.667325 %
+training @ iter =  100
+epoch 2, minibatch 78/78, validation error 1.256221 %
+     epoch 2, minibatch 78/78, test error of best model 1.265784 %
+training @ iter =  200
+epoch 3, minibatch 78/78, validation error 1.082520 %
+     epoch 3, minibatch 78/78, test error of best model 1.090662 %
+training @ iter =  300
+epoch 4, minibatch 78/78, validation error 1.036743 %
+     epoch 4, minibatch 78/78, test error of best model 1.041891 %
+epoch 5, minibatch 78/78, validation error 1.047483 %
+training @ iter =  400
+epoch 6, minibatch 78/78, validation error 0.953564 %
+     epoch 6, minibatch 78/78, test error of best model 0.960887 %
+training @ iter =  500
+epoch 7, minibatch 78/78, validation error 0.927408 %
+     epoch 7, minibatch 78/78, test error of best model 0.934642 %
+training @ iter =  600
+epoch 8, minibatch 78/78, validation error 0.970608 %
+training @ iter =  700
+epoch 9, minibatch 78/78, validation error 0.768806 %
+     epoch 9, minibatch 78/78, test error of best model 0.773572 %
+epoch 10, minibatch 78/78, validation error 0.756848 %
+     epoch 10, minibatch 78/78, test error of best model 0.761473 %
+training @ iter =  800
+epoch 11, minibatch 78/78, validation error 0.825650 %
+training @ iter =  900
+epoch 12, minibatch 78/78, validation error 0.653647 %
+     epoch 12, minibatch 78/78, test error of best model 0.658490 %
+training @ iter =  1000
+epoch 13, minibatch 78/78, validation error 0.658762 %
+epoch 14, minibatch 78/78, validation error 0.575405 %
+(512, 3, 32, 32)
+     epoch 14, minibatch 78/78, test error of best model 0.579022 %
+training @ iter =  1100
+epoch 15, minibatch 78/78, validation error 0.567063 %
+     epoch 15, minibatch 78/78, test error of best model 0.570977 %
+training @ iter =  1200
+epoch 16, minibatch 78/78, validation error 0.684205 %
+training @ iter =  1300
+epoch 17, minibatch 78/78, validation error 0.716074 %
+training @ iter =  1400
+epoch 18, minibatch 78/78, validation error 0.470388 %
+     epoch 18, minibatch 78/78, test error of best model 0.473040 %
+epoch 19, minibatch 78/78, validation error 0.528615 %
+training @ iter =  1500
+epoch 20, minibatch 78/78, validation error 0.623628 %
+training @ iter =  1600
+epoch 21, minibatch 78/78, validation error 0.508613 %
+training @ iter =  1700
+epoch 22, minibatch 78/78, validation error 0.498928 %
+epoch 23, minibatch 78/78, validation error 0.627969 %
+training @ iter =  1800
+epoch 24, minibatch 78/78, validation error 0.639163 %
+training @ iter =  1900
+epoch 25, minibatch 78/78, validation error 0.435314 %
+     epoch 25, minibatch 78/78, test error of best model 0.437321 %
+training @ iter =  2000
+epoch 26, minibatch 78/78, validation error 0.524642 %
+training @ iter =  2100
+epoch 27, minibatch 78/78, validation error 0.489144 %
+epoch 28, minibatch 78/78, validation error 0.479204 %
+training @ iter =  2200
+epoch 29, minibatch 78/78, validation error 0.418777 %
+     epoch 29, minibatch 78/78, test error of best model 0.421770 %
+training @ iter =  2300
+epoch 30, minibatch 78/78, validation error 0.479057 %
+training @ iter =  2400
+epoch 31, minibatch 78/78, validation error 0.416484 %
+     epoch 31, minibatch 78/78, test error of best model 0.418521 %
+epoch 32, minibatch 78/78, validation error 0.316302 %
+     epoch 32, minibatch 78/78, test error of best model 0.318503 %
+training @ iter =  2500
+epoch 33, minibatch 78/78, validation error 0.364528 %
+training @ iter =  2600
+epoch 34, minibatch 78/78, validation error 0.434970 %
+training @ iter =  2700
+epoch 35, minibatch 78/78, validation error 0.392237 %
+training @ iter =  2800
+epoch 36, minibatch 78/78, validation error 0.359421 %
+epoch 37, minibatch 78/78, validation error 0.408013 %
+training @ iter =  2900
+epoch 38, minibatch 78/78, validation error 0.321457 %
+training @ iter =  3000
+epoch 39, minibatch 78/78, validation error 0.330247 %
+training @ iter =  3100
+epoch 40, minibatch 78/78, validation error 0.349742 %
+epoch 41, minibatch 78/78, validation error 0.289349 %
+     epoch 41, minibatch 78/78, test error of best model 0.290608 %
+training @ iter =  3200
+epoch 42, minibatch 78/78, validation error 0.244642 %
+     epoch 42, minibatch 78/78, test error of best model 0.245531 %
+training @ iter =  3300
+epoch 43, minibatch 78/78, validation error 0.351156 %
+training @ iter =  3400
+epoch 44, minibatch 78/78, validation error 0.415894 %
+training @ iter =  3500
+epoch 45, minibatch 78/78, validation error 0.335016 %
+epoch 46, minibatch 78/78, validation error 0.242642 %
+     epoch 46, minibatch 78/78, test error of best model 0.243286 %
+training @ iter =  3600
+epoch 47, minibatch 78/78, validation error 0.290837 %
+training @ iter =  3700
+epoch 48, minibatch 78/78, validation error 0.345882 %
+training @ iter =  3800
+epoch 49, minibatch 78/78, validation error 0.339915 %
+epoch 50, minibatch 78/78, validation error 0.322623 %
+training @ iter =  3900
+epoch 51, minibatch 78/78, validation error 0.268433 %
+training @ iter =  4000
+epoch 52, minibatch 78/78, validation error 0.339028 %
+training @ iter =  4100
+epoch 53, minibatch 78/78, validation error 0.224763 %
+(512, 3, 32, 32)
+     epoch 53, minibatch 78/78, test error of best model 0.225842 %
+training @ iter =  4200
+epoch 54, minibatch 78/78, validation error 0.218828 %
+     epoch 54, minibatch 78/78, test error of best model 0.219716 %
+epoch 55, minibatch 78/78, validation error 0.222660 %
+training @ iter =  4300
+epoch 56, minibatch 78/78, validation error 0.208046 %
+     epoch 56, minibatch 78/78, test error of best model 0.208828 %
+training @ iter =  4400
+epoch 57, minibatch 78/78, validation error 0.200241 %
+     epoch 57, minibatch 78/78, test error of best model 0.201184 %
+training @ iter =  4500
+epoch 58, minibatch 78/78, validation error 0.207837 %
+training @ iter =  4600
+epoch 59, minibatch 78/78, validation error 0.194154 %
+     epoch 59, minibatch 78/78, test error of best model 0.194714 %
+epoch 60, minibatch 78/78, validation error 0.194805 %
+training @ iter =  4700
+epoch 61, minibatch 78/78, validation error 0.189995 %
+     epoch 61, minibatch 78/78, test error of best model 0.190333 %
+training @ iter =  4800
+epoch 62, minibatch 78/78, validation error 0.186135 %
+     epoch 62, minibatch 78/78, test error of best model 0.186404 %
+training @ iter =  4900
+epoch 63, minibatch 78/78, validation error 0.241676 %
+epoch 64, minibatch 78/78, validation error 0.225362 %
+training @ iter =  5000
+epoch 65, minibatch 78/78, validation error 0.241314 %
+training @ iter =  5100
+epoch 66, minibatch 78/78, validation error 0.210297 %
+training @ iter =  5200
+epoch 67, minibatch 78/78, validation error 0.255783 %
+training @ iter =  5300
+epoch 68, minibatch 78/78, validation error 0.276404 %
+epoch 69, minibatch 78/78, validation error 0.187426 %
+training @ iter =  5400
+epoch 70, minibatch 78/78, validation error 0.207584 %
+training @ iter =  5500
+epoch 71, minibatch 78/78, validation error 0.185678 %
+     epoch 71, minibatch 78/78, test error of best model 0.186354 %
+training @ iter =  5600
