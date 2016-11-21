@@ -1,0 +1,309 @@
+nohup: ignoring input
+Using gpu device 0: GRID K520 (CNMeM is disabled, cuDNN Version is too old. Update to v5, was 3007.)
+/home/ubuntu/miniconda2/envs/theano/lib/python2.7/site-packages/theano/tensor/signal/downsample.py:6: UserWarning: downsample module has been moved to the theano.tensor.signal.pool module.
+  "downsample module has been moved to the theano.tensor.signal.pool module.")
+test_lenet: {'nhidden': [4096, 512], 'noise': None, 'learning_rate': 0.1, 'flipping': True, 'batch_size': 512, 'n_epochs': 1000, 'translation': True, 'rotation': False, 'nkerns': [32, 64]}
+/home/ubuntu/code/e4040_hw3_yg2482/src/../data/cifar-10-batches-mat/data_batch_1.mat
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+40000
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 ... building the model
+LeNetConvPoolLayer L2_sqr:5.27040052414
+LeNetConvPoolLayer L2_sqr:32.3934440613
+LeNetConvPoolLayer L2_sqr:42.7145614624
+LeNetConvPoolLayer L2_sqr:64.0919952393
+DropoutHiddenLayer (is_train:undecided,p:undecided)71820.015625 1639.38232422
+DropoutHiddenLayer (is_train:undecided,p:undecided)28380.0878906 1024.15209961
+DropoutHiddenLayer (is_train:undecided,p:undecided)7162.53320312 334.0546875
+LogisticRegression L2_sqr:0.0
+Test model compiled...
+Validate model compiled...
+Train model compiled...
+MyLeNet
+LeNetConvPoolLayer L2_sqr:5.27040052414
+LeNetConvPoolLayer L2_sqr:32.3934440613LeNetConvPoolLayer L2_sqr:42.7145614624
+LeNetConvPoolLayer L2_sqr:64.0919952393
+DropoutHiddenLayer (is_train:undecided,p:undecided)71820.015625 1639.38232422
+DropoutHiddenLayer (is_train:undecided,p:undecided)28380.0878906 1024.15209961
+DropoutHiddenLayer (is_train:undecided,p:undecided)7162.53320312 334.0546875
+LogisticRegression L2_sqr:0.0
+train_nn: {'datasets': [(array([[ 0.23137255,  0.16862745,  0.19607843, ...,  0.54901961,
+         0.32941176,  0.28235294],
+       [ 0.60392157,  0.49411765,  0.41176471, ...,  0.54509804,
+         0.55686275,  0.56470588],
+       [ 1.        ,  0.99215686,  0.99215686, ...,  0.3254902 ,
+         0.3254902 ,  0.32941176],
+       ..., 
+       [ 0.53333333,  0.51764706,  0.27058824, ...,  0.41176471,
+         0.44313725,  0.48235294],
+       [ 0.        ,  0.        ,  0.        , ...,  0.09019608,
+         0.18039216,  0.        ],
+       [ 0.        ,  0.        ,  0.        , ...,  0.62745098,
+         0.63921569,  0.68627451]]), array([6, 9, 9, ..., 6, 2, 8], dtype=uint8)), (array([[ 1.        ,  0.98823529,  0.99215686, ...,  0.67843137,
+         0.90588235,  0.97254902],
+       [ 0.49803922,  0.49411765,  0.49803922, ...,  0.4       ,
+         0.42352941,  0.43921569],
+       [ 0.45490196,  0.25098039,  0.0745098 , ...,  0.02745098,
+         0.02352941,  0.01960784],
+       ..., 
+       [ 0.1372549 ,  0.15686275,  0.16470588, ...,  0.30196078,
+         0.25882353,  0.19607843],
+       [ 0.74117647,  0.72941176,  0.7254902 , ...,  0.6627451 ,
+         0.67058824,  0.67058824],
+       [ 0.89803922,  0.9254902 ,  0.91764706, ...,  0.67843137,
+         0.63529412,  0.63137255]]), array([1, 8, 5, ..., 9, 1, 1], dtype=uint8)), (array([[ 0.61960784,  0.62352941,  0.64705882, ...,  0.48627451,
+         0.50588235,  0.43137255],
+       [ 0.92156863,  0.90588235,  0.90980392, ...,  0.69803922,
+         0.74901961,  0.78039216],
+       [ 0.61960784,  0.61960784,  0.54509804, ...,  0.03137255,
+         0.01176471,  0.02745098],
+       ..., 
+       [ 0.07843137,  0.0745098 ,  0.05882353, ...,  0.19607843,
+         0.20784314,  0.18431373],
+       [ 0.09803922,  0.05882353,  0.09019608, ...,  0.31372549,
+         0.31764706,  0.31372549],
+       [ 0.28627451,  0.38431373,  0.38823529, ...,  0.36862745,
+         0.22745098,  0.10196078]]), array([3, 8, 8, ..., 5, 1, 7], dtype=uint8))], 'verbose': True, 'validate_model': <theano.compile.function_module.Function object at 0x7fe1d1de2990>, 'n_test_batches': 19, 'n_valid_batches': 19, 'n_train_batches': 312, 'batch_size': 512, 'train_model': <theano.compile.function_module.Function object at 0x7fe1cc338bd0>, 'test_model': <theano.compile.function_module.Function object at 0x7fe2382f6150>, 'n_epochs': 1000}
+training @ iter =  0
+training @ iter =  100
+training @ iter =  200
+training @ iter =  300
+epoch 1, minibatch 312/312, validation error 84.888980 %
+     epoch 1, minibatch 312/312, test error of best model 84.611431 %
+training @ iter =  400
+training @ iter =  500
+training @ iter =  600
+epoch 2, minibatch 312/312, validation error 79.584704 %
+     epoch 2, minibatch 312/312, test error of best model 78.762336 %
+training @ iter =  700
+training @ iter =  800
+training @ iter =  900
+epoch 3, minibatch 312/312, validation error 72.748766 %
+     epoch 3, minibatch 312/312, test error of best model 72.234786 %
+training @ iter =  1000
+training @ iter =  1100
+training @ iter =  1200
+epoch 4, minibatch 312/312, validation error 66.282895 %
+     epoch 4, minibatch 312/312, test error of best model 64.740954 %
+training @ iter =  1300
+training @ iter =  1400
+training @ iter =  1500
+epoch 5, minibatch 312/312, validation error 61.276727 %
+     epoch 5, minibatch 312/312, test error of best model 60.187089 %
+training @ iter =  1600
+training @ iter =  1700
+training @ iter =  1800
+epoch 6, minibatch 312/312, validation error 55.458470 %
+     epoch 6, minibatch 312/312, test error of best model 54.985609 %
+training @ iter =  1900
+training @ iter =  2000
+training @ iter =  2100
+epoch 7, minibatch 312/312, validation error 51.994243 %
+     epoch 7, minibatch 312/312, test error of best model 50.699013 %
+training @ iter =  2200
+training @ iter =  2300
+training @ iter =  2400
+epoch 8, minibatch 312/312, validation error 49.496299 %
+     epoch 8, minibatch 312/312, test error of best model 49.198191 %
+training @ iter =  2500
+training @ iter =  2600
+training @ iter =  2700
+training @ iter =  2800
+epoch 9, minibatch 312/312, validation error 47.543174 %
+     epoch 9, minibatch 312/312, test error of best model 46.823602 %
+training @ iter =  2900
+training @ iter =  3000
+training @ iter =  3100
+epoch 10, minibatch 312/312, validation error 45.127467 %
+     epoch 10, minibatch 312/312, test error of best model 44.520970 %
+training @ iter =  3200
+training @ iter =  3300
+training @ iter =  3400
+epoch 11, minibatch 312/312, validation error 43.698602 %
+     epoch 11, minibatch 312/312, test error of best model 43.513569 %
+training @ iter =  3500
+training @ iter =  3600
+training @ iter =  3700
+epoch 12, minibatch 312/312, validation error 44.192023 %
+training @ iter =  3800
+training @ iter =  3900
+training @ iter =  4000
+epoch 13, minibatch 312/312, validation error 40.008224 %
+     epoch 13, minibatch 312/312, test error of best model 39.977385 %
+training @ iter =  4100
+training @ iter =  4200
+training @ iter =  4300
+epoch 14, minibatch 312/312, validation error 39.483964 %
+     epoch 14, minibatch 312/312, test error of best model 39.340049 %
+training @ iter =  4400
+training @ iter =  4500
+training @ iter =  4600
+epoch 15, minibatch 312/312, validation error 35.320724 %
+     epoch 15, minibatch 312/312, test error of best model 35.526316 %
+training @ iter =  4700
+training @ iter =  4800
+training @ iter =  4900
+epoch 16, minibatch 312/312, validation error 41.015625 %
+training @ iter =  5000
+training @ iter =  5100
+training @ iter =  5200
+training @ iter =  5300
+epoch 17, minibatch 312/312, validation error 32.123766 %
+     epoch 17, minibatch 312/312, test error of best model 32.761102 %
+training @ iter =  5400
+training @ iter =  5500
+training @ iter =  5600
+epoch 18, minibatch 312/312, validation error 33.747944 %
+training @ iter =  5700
+training @ iter =  5800
+training @ iter =  5900
+epoch 19, minibatch 312/312, validation error 30.201480 %
+     epoch 19, minibatch 312/312, test error of best model 30.694901 %
+training @ iter =  6000
+training @ iter =  6100
+training @ iter =  6200
+epoch 20, minibatch 312/312, validation error 31.866776 %
+training @ iter =  6300
+training @ iter =  6400
+training @ iter =  6500
+epoch 21, minibatch 312/312, validation error 29.605263 %
+     epoch 21, minibatch 312/312, test error of best model 29.923931 %
+training @ iter =  6600
+training @ iter =  6700
+training @ iter =  6800
+epoch 22, minibatch 312/312, validation error 27.467105 %
+     epoch 22, minibatch 312/312, test error of best model 28.310033 %
+training @ iter =  6900
+training @ iter =  7000
+training @ iter =  7100
+epoch 23, minibatch 312/312, validation error 26.850329 %
+     epoch 23, minibatch 312/312, test error of best model 27.425987 %
+training @ iter =  7200
+training @ iter =  7300
+training @ iter =  7400
+epoch 24, minibatch 312/312, validation error 26.583059 %
+     epoch 24, minibatch 312/312, test error of best model 27.518503 %
+training @ iter =  7500
+training @ iter =  7600
+training @ iter =  7700
+epoch 25, minibatch 312/312, validation error 27.868010 %
+training @ iter =  7800
+training @ iter =  7900
+training @ iter =  8000
+training @ iter =  8100
+epoch 26, minibatch 312/312, validation error 26.315789 %
+     epoch 26, minibatch 312/312, test error of best model 27.621299 %
+training @ iter =  8200
+training @ iter =  8300
+training @ iter =  8400
+epoch 27, minibatch 312/312, validation error 24.712171 %
+     epoch 27, minibatch 312/312, test error of best model 25.277549 %
+training @ iter =  8500
+training @ iter =  8600
+training @ iter =  8700
+epoch 28, minibatch 312/312, validation error 24.352385 %
+     epoch 28, minibatch 312/312, test error of best model 25.020559 %
+training @ iter =  8800
+training @ iter =  8900
+training @ iter =  9000
+epoch 29, minibatch 312/312, validation error 24.465461 %
+training @ iter =  9100
+training @ iter =  9200
+training @ iter =  9300
+epoch 30, minibatch 312/312, validation error 23.817845 %
+     epoch 30, minibatch 312/312, test error of best model 24.917763 %
+training @ iter =  9400
+training @ iter =  9500
+training @ iter =  9600
+epoch 31, minibatch 312/312, validation error 24.167352 %
+training @ iter =  9700
+training @ iter =  9800
+training @ iter =  9900
+epoch 32, minibatch 312/312, validation error 23.468339 %
+     epoch 32, minibatch 312/312, test error of best model 24.547697 %
+training @ iter =  10000
+Optimization complete.
+Best validation error of 23.468339 % obtained at iteration 9984, with test performance 24.547697 %
+The training process for function test_lenet ran for 120.25m
+test_lenet: {'nhidden': [4096, 512], 'noise': None, 'learning_rate': 0.1, 'flipping': True, 'batch_size': 512, 'n_epochs': 1000, 'translation': False, 'rotation': False, 'nkerns': [32, 64]}
+/home/ubuntu/code/e4040_hw3_yg2482/src/../data/cifar-10-batches-mat/data_batch_1.mat
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+40000
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 ... building the model
+LeNetConvPoolLayer L2_sqr:5.27040052414
+LeNetConvPoolLayer L2_sqr:32.3934440613
+LeNetConvPoolLayer L2_sqr:42.7145614624
+LeNetConvPoolLayer L2_sqr:64.0919952393
+DropoutHiddenLayer (is_train:undecided,p:undecided)71820.015625 1639.38232422
+DropoutHiddenLayer (is_train:undecided,p:undecided)28380.0878906 1024.15209961
+DropoutHiddenLayer (is_train:undecided,p:undecided)7162.53320312 334.0546875
+LogisticRegression L2_sqr:0.0
+Test model compiled...
+Validate model compiled...
+Train model compiled...
+MyLeNet
+LeNetConvPoolLayer L2_sqr:5.27040052414
+LeNetConvPoolLayer L2_sqr:32.3934440613LeNetConvPoolLayer L2_sqr:42.7145614624
+LeNetConvPoolLayer L2_sqr:64.0919952393
+DropoutHiddenLayer (is_train:undecided,p:undecided)71820.015625 1639.38232422
+DropoutHiddenLayer (is_train:undecided,p:undecided)28380.0878906 1024.15209961
+DropoutHiddenLayer (is_train:undecided,p:undecided)7162.53320312 334.0546875
+LogisticRegression L2_sqr:0.0
+train_nn: {'datasets': [(array([[ 0.23137255,  0.16862745,  0.19607843, ...,  0.54901961,
+         0.32941176,  0.28235294],
+       [ 0.60392157,  0.49411765,  0.41176471, ...,  0.54509804,
+         0.55686275,  0.56470588],
+       [ 1.        ,  0.99215686,  0.99215686, ...,  0.3254902 ,
+         0.3254902 ,  0.32941176],
+       ..., 
+       [ 0.46666667,  0.59215686,  0.40784314, ...,  0.42745098,
+         0.42352941,  0.4745098 ],
+       [ 0.18431373,  0.18823529,  0.18823529, ...,  0.13333333,
+         0.12156863,  0.09019608],
+       [ 0.89411765,  0.89411765,  0.88235294, ...,  0.55294118,
+         0.5372549 ,  0.55686275]]), array([6, 9, 9, ..., 6, 2, 8], dtype=uint8)), (array([[ 1.        ,  0.98823529,  0.99215686, ...,  0.67843137,
+         0.90588235,  0.97254902],
+       [ 0.49803922,  0.49411765,  0.49803922, ...,  0.4       ,
+         0.42352941,  0.43921569],
+       [ 0.45490196,  0.25098039,  0.0745098 , ...,  0.02745098,
+         0.02352941,  0.01960784],
+       ..., 
+       [ 0.1372549 ,  0.15686275,  0.16470588, ...,  0.30196078,
+         0.25882353,  0.19607843],
+       [ 0.74117647,  0.72941176,  0.7254902 , ...,  0.6627451 ,
+         0.67058824,  0.67058824],
+       [ 0.89803922,  0.9254902 ,  0.91764706, ...,  0.67843137,
+         0.63529412,  0.63137255]]), array([1, 8, 5, ..., 9, 1, 1], dtype=uint8)), (array([[ 0.61960784,  0.62352941,  0.64705882, ...,  0.48627451,
+         0.50588235,  0.43137255],
+       [ 0.92156863,  0.90588235,  0.90980392, ...,  0.69803922,
+         0.74901961,  0.78039216],
+       [ 0.61960784,  0.61960784,  0.54509804, ...,  0.03137255,
+         0.01176471,  0.02745098],
+       ..., 
+       [ 0.07843137,  0.0745098 ,  0.05882353, ...,  0.19607843,
+         0.20784314,  0.18431373],
+       [ 0.09803922,  0.05882353,  0.09019608, ...,  0.31372549,
+         0.31764706,  0.31372549],
+       [ 0.28627451,  0.38431373,  0.38823529, ...,  0.36862745,
+         0.22745098,  0.10196078]]), array([3, 8, 8, ..., 5, 1, 7], dtype=uint8))], 'verbose': True, 'validate_model': <theano.compile.function_module.Function object at 0x7fe2338adbd0>, 'n_test_batches': 19, 'n_valid_batches': 19, 'n_train_batches': 156, 'batch_size': 512, 'train_model': <theano.compile.function_module.Function object at 0x7fe1dbad3f10>, 'test_model': <theano.compile.function_module.Function object at 0x7fe233624990>, 'n_epochs': 1000}
+training @ iter =  0
+training @ iter =  100
+epoch 1, minibatch 156/156, validation error 90.429688 %
+     epoch 1, minibatch 156/156, test error of best model 90.039062 %
+training @ iter =  200
+training @ iter =  300
+epoch 2, minibatch 156/156, validation error 84.508635 %
+     epoch 2, minibatch 156/156, test error of best model 84.292763 %
+training @ iter =  400
+epoch 3, minibatch 156/156, validation error 82.452714 %
+     epoch 3, minibatch 156/156, test error of best model 82.123766 %
+training @ iter =  500
