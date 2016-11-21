@@ -24,7 +24,7 @@ from theano.tensor.signal import downsample
 from theano.tensor.signal import pool
 
 from hw3_utils import shared_dataset, load_data
-from hw3_nn import LogisticRegression, HiddenLayer, train_nn,LeNetConvPoolLayer 
+from hw3_nn_part4 import LogisticRegression, HiddenLayer, train_nn,LeNetConvPoolLayer 
 from hw2c import DropoutHiddenLayer
 
 #Problem 3 
