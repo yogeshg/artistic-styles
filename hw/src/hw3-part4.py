@@ -41,8 +41,6 @@ class MyLeNet():
     test_set_x, test_set_y = datasets[2]
 
     x = T.matrix('x')   # the data is presented as rasterized images
-    y = T.ivector('y')  # the labels are presented as 1D vector of
-                        # [int] labels
 
     ######################
     # BUILD ACTUAL MODEL #
@@ -162,14 +160,14 @@ class MyLeNet():
 
     # create a function to compute the mistakes that are made by the model
     self.test_model = theano.function(
-        [x,y],
+        [x],
         cost,
         allow_input_downcast=True ## To allow float64 values to be changed to float32
     )
     print('Test model compiled...')
 
     self.validate_model = theano.function(
-        [x,y],
+        [x],
         cost,
         allow_input_downcast=True ## To allow float64 values to be changed to float32
     )
@@ -196,7 +194,7 @@ class MyLeNet():
     ]
 
     self.train_model = theano.function(
-        [x,y],
+        [x],
         cost,
         updates=updates,
         allow_input_downcast=True ## To allow float64 values to be changed to float32
@@ -257,12 +255,13 @@ def flip_image(inp):
 
 ## plot16(temp, './imgs-flip-sample.png')
 def plot16(arr, filename):
-        fig = plt.figure()
-        for i in range(1,16+1):
-            print i,
-            ax = fig.add_subplot(4,4,i)
-            ax.imshow(vector2image( arr[i] ))
-        fig.savefig(filename)
+        # fig = plt.figure()
+        # for i in range(1,16+1):
+        #     print i,
+        #     ax = fig.add_subplot(4,4,i)
+        #     ax.imshow(vector2image( arr[i] ))
+        # fig.savefig(filename)
+        return
 
 MAX_ROTATE = 5 # Degrees
 MAX_TRANSLATE = 2.5 # Pixels
@@ -376,8 +375,8 @@ def MY_CNN():
 
 if __name__ == '__main__': 
 
-    test_lenet(batch_size=512, n_epochs=1000, flipping=True, translation=True)
-    test_lenet(batch_size=512, n_epochs=1000, flipping=True)
+    test_lenet(batch_size=512, n_epochs=1000)
+    # test_lenet(batch_size=512, n_epochs=1000, flipping=True)
 
     # test_lenet_rotation(batch_size=256, n_epochs=500)
     # test_lenet_translation(batch_size=256, n_epochs=500)
