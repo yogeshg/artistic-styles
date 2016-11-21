@@ -1,3 +1,4 @@
+nohup: ignoring input
 Using gpu device 0: GRID K520 (CNMeM is disabled, cuDNN Version is too old. Update to v5, was 3007.)
 /home/ubuntu/miniconda2/envs/theano/lib/python2.7/site-packages/theano/tensor/signal/downsample.py:6: UserWarning: downsample module has been moved to the theano.tensor.signal.pool module.
   "downsample module has been moved to the theano.tensor.signal.pool module.")
@@ -71,29 +72,5 @@ train_nn: {'datasets': [(array([[ 0.23137255,  0.16862745,  0.19607843, ...,  0.
        [ 0.09803922,  0.05882353,  0.09019608, ...,  0.31372549,
          0.31764706,  0.31372549],
        [ 0.28627451,  0.38431373,  0.38823529, ...,  0.36862745,
-         0.22745098,  0.10196078]]), array([3, 8, 8, ..., 5, 1, 7], dtype=uint8))], 'verbose': True, 'validate_model': <theano.compile.function_module.Function object at 0x7f4791110290>, 'n_test_batches': 19, 'n_valid_batches': 19, 'n_train_batches': 78, 'batch_size': 512, 'train_model': <theano.compile.function_module.Function object at 0x7f47905d6090>, 'test_model': <theano.compile.function_module.Function object at 0x7f47f893a290>, 'n_epochs': 1000}
+         0.22745098,  0.10196078]]), array([3, 8, 8, ..., 5, 1, 7], dtype=uint8))], 'verbose': True, 'validate_model': <theano.compile.function_module.Function object at 0x7fa089e88390>, 'n_test_batches': 19, 'n_valid_batches': 19, 'n_train_batches': 78, 'batch_size': 512, 'train_model': <theano.compile.function_module.Function object at 0x7fa082c56d10>, 'test_model': <bound method MyLeNet.test_model_restore of <__main__.MyLeNet instance at 0x7fa0ec092e60>>, 'n_epochs': 128}
 training @ iter =  0
-epoch 1, minibatch 78/78, validation error 1.060385 %
-     epoch 1, minibatch 78/78, test error of best model 1.067657 %
-training @ iter =  100
-epoch 2, minibatch 78/78, validation error 0.708425 %
-     epoch 2, minibatch 78/78, test error of best model 0.713458 %
-training @ iter =  200
-epoch 3, minibatch 78/78, validation error 0.327531 %
-     epoch 3, minibatch 78/78, test error of best model 0.328490 %
-training @ iter =  300
-epoch 4, minibatch 78/78, validation error 0.307144 %
-     epoch 4, minibatch 78/78, test error of best model 0.308180 %
-epoch 5, minibatch 78/78, validation error 0.306876 %
-     epoch 5, minibatch 78/78, test error of best model 0.308132 %
-training @ iter =  400
-epoch 6, minibatch 78/78, validation error 0.290354 %
-     epoch 6, minibatch 78/78, test error of best model 0.291467 %
-training @ iter =  500
-epoch 7, minibatch 78/78, validation error 0.202167 %
-     epoch 7, minibatch 78/78, test error of best model 0.202521 %
-training @ iter =  600
-epoch 8, minibatch 78/78, validation error 0.211717 %
-training @ iter =  700
-epoch 9, minibatch 78/78, validation error 0.168644 %
-     epoch 9, minibatch 78/78, test error of best model 0.168903 %

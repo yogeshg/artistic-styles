@@ -25,7 +25,36 @@ from theano.tensor.signal import pool
 
 from hw3_utils import shared_dataset, load_data
 from hw3_nn_part4 import LogisticRegression, HiddenLayer, train_nn,LeNetConvPoolLayer 
-from hw2c import DropoutHiddenLayer
+from hw2c import DropoutHiddenLayer, drop
+
+
+def floatX(X):
+    return numpy.asarray(X, dtype=theano.config.floatX)
+
+def sharedX(X, dtype=theano.config.floatX, name=None):
+    return theano.shared(numpy.asarray(X, dtype=dtype), name=name)
+
+def shared_zeros(shape, dtype=theano.config.floatX, name=None):
+    return sharedX(numpy.zeros(shape), dtype=dtype, name=name)
+
+# RMS prop algo
+class RmsProp():
+    def __init__(self,rho=0.9, lr = 0.001, epsilon = 1e-6):
+        self.rho = rho
+        self.lr = lr
+        self.epsilon = epsilon
+        return
+
+    def getUpdates(self, params, grads):
+        accumulators = [shared_zeros(p.get_value().shape) for p in params]
+        updates = []
+    
+        for p, gr, ac in zip(params, grads, accumulators):
+            ac2 = self.rho * ac + (1 - self.rho) * gr ** 2
+            p2 = p - self.lr * gr / T.sqrt(ac2 + self.epsilon)
+            updates.extend([(ac, ac2), (p, p2)])
+
+        return updates
 
 #Problem 3 
 #Implement a convolutional neural network to achieve at least 80% testing accuracy on CIFAR-dataset
@@ -39,6 +68,13 @@ class MyLeNet():
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
+    n_train_batches = train_set_x.shape[0]
+    n_valid_batches = valid_set_x.shape[0]
+    n_test_batches = test_set_x.shape[0]
+    n_train_batches //= batch_size
+    n_valid_batches //= batch_size
+    n_test_batches //= batch_size
+    self.restore_freq = n_test_batches*10
 
     x = T.matrix('x')   # the data is presented as rasterized images
 
@@ -52,7 +88,8 @@ class MyLeNet():
     # (32, 32) is the size of MNIST images.
 
     POOL_SIZE = (2,2)
-    layer0_input = x.reshape((batch_size, 3, 32, 32))
+    x_corrupted = drop( x, 0.7 )
+    layer0_input = x_corrupted.reshape((batch_size, 3, 32, 32))
 
     self.conv11 = LeNetConvPoolLayer(
         rng,
@@ -188,10 +225,13 @@ class MyLeNet():
     # manually create an update rule for each model parameter. We thus
     # create the updates list by automatically looping over all
     # (params[i], grads[i]) pairs.
-    updates = [
-        (param_i, param_i - learning_rate * grad_i)
-        for param_i, grad_i in zip(params, grads)
-    ]
+    # updates = [
+    #     (param_i, param_i - learning_rate * grad_i)
+    #     for param_i, grad_i in zip(params, grads)
+    # ]
+
+    r = RmsProp()
+    updates = r.getUpdates(params, grads)
 
     self.train_model = theano.function(
         [x],
@@ -200,18 +240,22 @@ class MyLeNet():
         allow_input_downcast=True ## To allow float64 values to be changed to float32
     )
     self.x = x
+    self.x_corrupted = x_corrupted
     self.restore_count = 0
     print('Train model compiled...')
 
   def restore(self, inp):
-    out = self.conv6.output.eval({self.x: inp})
-    print out.shape
-    plot16(out,'./imgs-reconstructed-'+str(self.restore_count)+'.png')
-    plot16(inp,'./imgs-original-'+str(self.restore_count)+'.png')
+    self.restore_count+=1
+    if( not self.restore_count%self.restore_freq ):
+        cor = self.x_corrupted.eval({self.x: inp.astype(np.float32)})
+        out = self.conv6.output.eval({self.x: inp.astype(np.float32)})
+        print out.shape
+        plot16(out,'./imgs-reconstructed-'+str(self.restore_count)+'.png')
+        plot16(cor,'./imgs-corrupted-'+str(self.restore_count)+'.png')
+        plot16(inp,'./imgs-original-'+str(self.restore_count)+'.png')
     return
 
   def test_model_restore(self, inp):
-    self.restore_count+=1
     self.restore(inp)
     return self.test_model(inp)
 
@@ -279,7 +323,7 @@ def plot8(arr, filename):
 def plot16(arr, filename):
         fig = plt.figure()
         for i in range(1,16+1):
-            print i,
+            # print i,
             ax = fig.add_subplot(4,4,i)
             ax.imshow(vector2image( arr[i] ))
         fig.savefig(filename)
@@ -290,8 +334,6 @@ MAX_TRANSLATE = 2.5 # Pixels
 MAX_NOISE = 0.01 # for [0,1]
 
 def test_lenet( batch_size=10       ,
-                nkerns=[32,64]      ,
-                nhidden=[4096, 512] ,
                 n_epochs=200        ,
                 learning_rate=0.1   ,
                 rotation=False, translation=False, flipping=False, noise=None):
@@ -351,7 +393,7 @@ def test_lenet( batch_size=10       ,
  
     myLeNet = MyLeNet(rng, datasets, batch_size=batch_size, learning_rate=learning_rate)
     print myLeNet
-    train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model,
+    train_nn(myLeNet.train_model, myLeNet.validate_model, myLeNet.test_model_restore,
             n_train_batches, n_valid_batches, n_test_batches, n_epochs,
             datasets, batch_size,
             verbose = True)
@@ -397,15 +439,5 @@ def MY_CNN():
 
 if __name__ == '__main__': 
 
-    test_lenet(batch_size=512, n_epochs=1000)
-    # test_lenet(batch_size=512, n_epochs=1000, flipping=True)
-
-    # test_lenet_rotation(batch_size=256, n_epochs=500)
-    # test_lenet_translation(batch_size=256, n_epochs=500)
-    # test_lenet(batch_size=256, n_epochs=500)
-    # test_lenet_flip(batch_size=256, n_epochs=500)
-
-    # test_lenet(batch_size=20, n_epochs=10, flipping=True)
-    # test_lenet(batch_size=20, n_epochs=10, rotation=True)
-    # test_lenet(batch_size=20, n_epochs=10, translation=True)
+    test_lenet(batch_size=512, n_epochs=128 )
 
