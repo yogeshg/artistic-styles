@@ -1,0 +1,76 @@
+
+Using gpu device 0: GRID K520 (CNMeM is disabled, cuDNN Version is too old. Update to v5, was 3007.)
+/home/ubuntu/miniconda2/envs/theano/lib/python2.7/site-packages/theano/tensor/signal/downsample.py:6: UserWarning: downsample module has been moved to the theano.tensor.signal.pool module.
+  "downsample module has been moved to the theano.tensor.signal.pool module.")
+/home/ubuntu/code/e4040_hw3_yg2482/src/../data/cifar-10-batches-mat/data_batch_1.mat
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+loaded a matrix of shape (10000, 3072)
+40000
+... building the model
+LeNetConvPoolLayer L2_sqr:5.61410999298
+LeNetConvPoolLayer L2_sqr:64.4906311035
+LeNetConvPoolLayer L2_sqr:84.8599777222
+LeNetConvPoolLayer L2_sqr:127.94934082
+LeNetConvPoolLayer L2_sqr:171.062194824
+LeNetConvPoolLayer L2_sqr:171.046844482
+LeNetConvPoolLayer L2_sqr:128.058395386
+LeNetConvPoolLayer L2_sqr:85.3890686035
+LeNetConvPoolLayer L2_sqr:64.1285095215
+LeNetConvPoolLayer L2_sqr:5.76074123383
+Test model compiled...
+Validate model compiled...
+Train model compiled...
+MyLeNet
+LeNetConvPoolLayer L2_sqr:5.61410999298
+LeNetConvPoolLayer L2_sqr:64.4906311035
+LeNetConvPoolLayer L2_sqr:84.8599777222
+LeNetConvPoolLayer L2_sqr:127.94934082
+LeNetConvPoolLayer L2_sqr:171.062194824
+LeNetConvPoolLayer L2_sqr:171.046844482
+LeNetConvPoolLayer L2_sqr:128.058395386
+LeNetConvPoolLayer L2_sqr:85.3890686035
+LeNetConvPoolLayer L2_sqr:64.1285095215
+LeNetConvPoolLayer L2_sqr:5.76074123383
+
+train_nn: {'datasets': [(array([[ 0.23137255,  0.16862745,  0.19607843, ...,  0.54901961,
+         0.32941176,  0.28235294],
+       [ 0.60392157,  0.49411765,  0.41176471, ...,  0.54509804,
+         0.55686275,  0.56470588],
+       [ 1.        ,  0.99215686,  0.99215686, ...,  0.3254902 ,
+         0.3254902 ,  0.32941176],
+       ..., 
+       [ 0.65490196,  0.64313725,  0.59215686, ...,  0.51764706,
+         0.55686275,  0.50980392],
+       [ 0.17647059,  0.18039216,  0.18039216, ...,  0.11764706,
+         0.13333333,  0.09411765],
+       [ 0.92156863,  0.9372549 ,  0.9372549 , ...,  0.71372549,
+         0.68627451,  0.68235294]]), array([6, 9, 9, ..., 6, 2, 8], dtype=uint8)), (array([[ 1.        ,  0.98823529,  0.99215686, ...,  0.67843137,
+         0.90588235,  0.97254902],
+       [ 0.49803922,  0.49411765,  0.49803922, ...,  0.4       ,
+         0.42352941,  0.43921569],
+       [ 0.45490196,  0.25098039,  0.0745098 , ...,  0.02745098,
+         0.02352941,  0.01960784],
+       ..., 
+       [ 0.1372549 ,  0.15686275,  0.16470588, ...,  0.30196078,
+         0.25882353,  0.19607843],
+       [ 0.74117647,  0.72941176,  0.7254902 , ...,  0.6627451 ,
+         0.67058824,  0.67058824],
+       [ 0.89803922,  0.9254902 ,  0.91764706, ...,  0.67843137,
+         0.63529412,  0.63137255]]), array([1, 8, 5, ..., 9, 1, 1], dtype=uint8)), (array([[ 0.61960784,  0.62352941,  0.64705882, ...,  0.48627451,
+         0.50588235,  0.43137255],
+       [ 0.92156863,  0.90588235,  0.90980392, ...,  0.69803922,
+         0.74901961,  0.78039216],
+       [ 0.61960784,  0.61960784,  0.54509804, ...,  0.03137255,
+         0.01176471,  0.02745098],
+       ..., 
+       [ 0.07843137,  0.0745098 ,  0.05882353, ...,  0.19607843,
+         0.20784314,  0.18431373],
+       [ 0.09803922,  0.05882353,  0.09019608, ...,  0.31372549,
+         0.31764706,  0.31372549],
+       [ 0.28627451,  0.38431373,  0.38823529, ...,  0.36862745,
+         0.22745098,  0.10196078]]), array([3, 8, 8, ..., 5, 1, 7], dtype=uint8))], 'verbose': True, 'validate_model': <theano.compile.function_module.Function object at 0x7fa799854090>, 'n_test_batches': 19, 'n_valid_batches': 19, 'n_train_batches': 78, 'batch_size': 512, 'train_model': <theano.compile.function_module.Function object at 0x7fa792099e90>, 'test_model': <bound method MyLeNet.test_model_restore of <__main__.MyLeNet instance at 0x7fa7fdd3ed40>>, 'n_epochs': 128}
+training @ iter =  0

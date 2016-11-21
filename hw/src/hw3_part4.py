@@ -23,38 +23,9 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.signal import pool
 
-from hw3_utils import shared_dataset, load_data
+from hw3_utils import shared_dataset, load_data, RmsProp
 from hw3_nn_part4 import LogisticRegression, HiddenLayer, train_nn,LeNetConvPoolLayer 
 from hw2c import DropoutHiddenLayer, drop
-
-
-def floatX(X):
-    return numpy.asarray(X, dtype=theano.config.floatX)
-
-def sharedX(X, dtype=theano.config.floatX, name=None):
-    return theano.shared(numpy.asarray(X, dtype=dtype), name=name)
-
-def shared_zeros(shape, dtype=theano.config.floatX, name=None):
-    return sharedX(numpy.zeros(shape), dtype=dtype, name=name)
-
-# RMS prop algo
-class RmsProp():
-    def __init__(self,rho=0.9, lr = 0.001, epsilon = 1e-6):
-        self.rho = rho
-        self.lr = lr
-        self.epsilon = epsilon
-        return
-
-    def getUpdates(self, params, grads):
-        accumulators = [shared_zeros(p.get_value().shape) for p in params]
-        updates = []
-    
-        for p, gr, ac in zip(params, grads, accumulators):
-            ac2 = self.rho * ac + (1 - self.rho) * gr ** 2
-            p2 = p - self.lr * gr / T.sqrt(ac2 + self.epsilon)
-            updates.extend([(ac, ac2), (p, p2)])
-
-        return updates
 
 #Problem 3 
 #Implement a convolutional neural network to achieve at least 80% testing accuracy on CIFAR-dataset
@@ -74,7 +45,7 @@ class MyLeNet():
     n_train_batches //= batch_size
     n_valid_batches //= batch_size
     n_test_batches //= batch_size
-    self.restore_freq = n_test_batches*10
+    self.restore_freq = n_test_batches
 
     x = T.matrix('x')   # the data is presented as rasterized images
 
@@ -246,14 +217,16 @@ class MyLeNet():
 
   def restore(self, inp):
     self.restore_count+=1
-    if( not self.restore_count%self.restore_freq ):
+    check = not self.restore_count%self.restore_freq
+    if(check):
         cor = self.x_corrupted.eval({self.x: inp.astype(np.float32)})
         out = self.conv6.output.eval({self.x: inp.astype(np.float32)})
         print out.shape
-        plot16(out,'./imgs-reconstructed-'+str(self.restore_count)+'.png')
-        plot16(cor,'./imgs-corrupted-'+str(self.restore_count)+'.png')
-        plot16(inp,'./imgs-original-'+str(self.restore_count)+'.png')
-    return
+        label = str(self.restore_count+self.restore_freq)
+        plot16(out,'./imgs2-reconstructed-'+label+'.png')
+        plot16(cor,'./imgs2-corrupted-'+label+'.png')
+        plot16(inp,'./imgs2-original-'+label+'.png')
+    return check
 
   def test_model_restore(self, inp):
     self.restore(inp)

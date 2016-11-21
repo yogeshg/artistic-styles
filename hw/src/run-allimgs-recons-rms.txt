@@ -230,3 +230,14 @@ training @ iter =  5500
 epoch 71, minibatch 78/78, validation error 0.185678 %
      epoch 71, minibatch 78/78, test error of best model 0.186354 %
 training @ iter =  5600
+epoch 72, minibatch 78/78, validation error 0.248654 %
+epoch 73, minibatch 78/78, validation error 0.183420 %
+     epoch 73, minibatch 78/78, test error of best model 0.183798 %
+training @ iter =  5700
+epoch 74, minibatch 78/78, validation error 0.208282 %
+training @ iter =  5800
+epoch 75, minibatch 78/78, validation error 0.204429 %
+training @ iter =  5900
+epoch 76, minibatch 78/78, validation error 0.178663 %
+     epoch 76, minibatch 78/78, test error of best model 0.179281 %
+training @ iter =  6000
