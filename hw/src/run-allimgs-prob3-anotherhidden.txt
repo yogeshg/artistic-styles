@@ -11,3 +11,97 @@ loaded a matrix of shape (10000, 3072)
 loaded a matrix of shape (10000, 3072)
 loaded a matrix of shape (10000, 3072)
 40000
+... building the model
+LeNetConvPoolLayer L2_sqr:5.27040052414
+LeNetConvPoolLayer L2_sqr:32.3934440613
+LeNetConvPoolLayer L2_sqr:42.7145614624
+LeNetConvPoolLayer L2_sqr:64.0919952393
+LeNetConvPoolLayer L2_sqr:85.1142730713
+LeNetConvPoolLayer L2_sqr:127.888305664
+DropoutHiddenLayer (is_train:undecided,p:undecided)46365.953125 1366.38012695
+DropoutHiddenLayer (is_train:undecided,p:undecided)28394.53125 1025.03491211
+DropoutHiddenLayer (is_train:undecided,p:undecided)28384.015625 1024.11193848
+DropoutHiddenLayer (is_train:undecided,p:undecided)7172.05419922 334.682342529
+LogisticRegression L2_sqr:0.0
+Test model compiled...
+Validate model compiled...
+Train model compiled...
+MyLeNet
+LeNetConvPoolLayer L2_sqr:5.27040052414
+LeNetConvPoolLayer L2_sqr:32.3934440613LeNetConvPoolLayer L2_sqr:42.7145614624
+LeNetConvPoolLayer L2_sqr:64.0919952393
+DropoutHiddenLayer (is_train:undecided,p:undecided)46365.953125 1366.38012695
+DropoutHiddenLayer (is_train:undecided,p:undecided)28394.53125 1025.03491211
+DropoutHiddenLayer (is_train:undecided,p:undecided)28384.015625 1024.11193848
+DropoutHiddenLayer (is_train:undecided,p:undecided)7172.05419922 334.682342529
+LogisticRegression L2_sqr:0.0
+train_nn: {'datasets': [(array([[ 0.23137255,  0.16862745,  0.19607843, ...,  0.54901961,
+         0.32941176,  0.28235294],
+       [ 0.60392157,  0.49411765,  0.41176471, ...,  0.54509804,
+         0.55686275,  0.56470588],
+       [ 1.        ,  0.99215686,  0.99215686, ...,  0.3254902 ,
+         0.3254902 ,  0.32941176],
+       ..., 
+       [ 0.        ,  0.        ,  0.        , ...,  0.47058824,
+         0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        , ...,  0.13333333,
+         0.0627451 ,  0.14509804],
+       [ 0.        ,  0.        ,  0.89019608, ...,  0.57254902,
+         0.59215686,  0.57647059]]), array([6, 9, 9, ..., 6, 2, 8], dtype=uint8)), (array([[ 1.        ,  0.98823529,  0.99215686, ...,  0.67843137,
+         0.90588235,  0.97254902],
+       [ 0.49803922,  0.49411765,  0.49803922, ...,  0.4       ,
+         0.42352941,  0.43921569],
+       [ 0.45490196,  0.25098039,  0.0745098 , ...,  0.02745098,
+         0.02352941,  0.01960784],
+       ..., 
+       [ 0.1372549 ,  0.15686275,  0.16470588, ...,  0.30196078,
+         0.25882353,  0.19607843],
+       [ 0.74117647,  0.72941176,  0.7254902 , ...,  0.6627451 ,
+         0.67058824,  0.67058824],
+       [ 0.89803922,  0.9254902 ,  0.91764706, ...,  0.67843137,
+         0.63529412,  0.63137255]]), array([1, 8, 5, ..., 9, 1, 1], dtype=uint8)), (array([[ 0.61960784,  0.62352941,  0.64705882, ...,  0.48627451,
+         0.50588235,  0.43137255],
+       [ 0.92156863,  0.90588235,  0.90980392, ...,  0.69803922,
+         0.74901961,  0.78039216],
+       [ 0.61960784,  0.61960784,  0.54509804, ...,  0.03137255,
+         0.01176471,  0.02745098],
+       ..., 
+       [ 0.07843137,  0.0745098 ,  0.05882353, ...,  0.19607843,
+         0.20784314,  0.18431373],
+       [ 0.09803922,  0.05882353,  0.09019608, ...,  0.31372549,
+         0.31764706,  0.31372549],
+       [ 0.28627451,  0.38431373,  0.38823529, ...,  0.36862745,
+         0.22745098,  0.10196078]]), array([3, 8, 8, ..., 5, 1, 7], dtype=uint8))], 'verbose': True, 'validate_model': <theano.compile.function_module.Function object at 0x7ff3b6e30b10>, 'n_test_batches': 19, 'n_valid_batches': 19, 'n_train_batches': 312, 'batch_size': 512, 'train_model': <theano.compile.function_module.Function object at 0x7ff3b41013d0>, 'test_model': <theano.compile.function_module.Function object at 0x7ff3ba8e5650>, 'n_epochs': 1000}
+training @ iter =  0
+training @ iter =  100
+training @ iter =  200
+training @ iter =  300
+epoch 1, minibatch 312/312, validation error 75.277549 %
+     epoch 1, minibatch 312/312, test error of best model 74.907484 %
+training @ iter =  400
+training @ iter =  500
+training @ iter =  600
+epoch 2, minibatch 312/312, validation error 71.946957 %
+     epoch 2, minibatch 312/312, test error of best model 70.949836 %
+training @ iter =  700
+training @ iter =  800
+training @ iter =  900
+epoch 3, minibatch 312/312, validation error 51.007401 %
+     epoch 3, minibatch 312/312, test error of best model 49.465461 %
+training @ iter =  1000
+training @ iter =  1100
+training @ iter =  1200
+epoch 4, minibatch 312/312, validation error 42.125822 %
+     epoch 4, minibatch 312/312, test error of best model 42.372533 %
+training @ iter =  1300
+training @ iter =  1400
+training @ iter =  1500
+epoch 5, minibatch 312/312, validation error 33.850740 %
+     epoch 5, minibatch 312/312, test error of best model 34.200247 %
+training @ iter =  1600
+training @ iter =  1700
+training @ iter =  1800
+epoch 6, minibatch 312/312, validation error 27.837171 %
+     epoch 6, minibatch 312/312, test error of best model 29.471628 %
+training @ iter =  1900
+training @ iter =  2000
