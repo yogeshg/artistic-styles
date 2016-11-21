@@ -398,3 +398,10 @@ training @ iter =  4600
 epoch 30, minibatch 156/156, validation error 34.703947 %
      epoch 30, minibatch 156/156, test error of best model 35.022615 %
 training @ iter =  4700
+training @ iter =  4800
+epoch 31, minibatch 156/156, validation error 33.799342 %
+     epoch 31, minibatch 156/156, test error of best model 34.210526 %
+training @ iter =  4900
+epoch 32, minibatch 156/156, validation error 32.802220 %
+     epoch 32, minibatch 156/156, test error of best model 33.388158 %
+training @ iter =  5000
