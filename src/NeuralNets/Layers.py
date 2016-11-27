@@ -11,8 +11,6 @@ This code is based on
 [3] http://deeplearning.net/tutorial/lenet.html
 """
 
-from __future__ import print_function
-
 import timeit
 import inspect
 import sys
@@ -21,8 +19,8 @@ from theano.tensor.nnet import conv
 import theano
 import theano.tensor as T
 from theano.tensor.nnet import conv2d
-from theano.tensor.signal import downsample
 from theano.tensor.signal import pool
+# from theano.tensor.signal.pool import downsample
 
 class LogisticRegression(object):
     """Multi-class Logistic Regression Class
@@ -92,7 +90,7 @@ class LogisticRegression(object):
         self.L2_sqr = (self.W**2).sum()
 
     def __str__(self):
-        return "LogisticRegression L2_sqr:{}".format(self.L2_sqr.eval())
+        return "Layer:{} L2_sqr:{}".format(self.__class__.__name__, self.L2_sqr.eval())
 
     def negative_log_likelihood(self, y):
         """Return the mean of the negative log-likelihood of the prediction
@@ -221,11 +219,11 @@ class HiddenLayer(object):
         self.L2_sqr = (self.W**2).sum()
 
     def __str__(self):
-        return "HiddenLayer L2_sqr:{}".format(self.L2_sqr.eval())
+        return "Layer:{} L2_sqr:{}".format(self.__class__.__name__, self.L2_sqr.eval())
 
 
-class LeNetConvPoolLayer(object):
-    """Pool Layer of a convolutional network """
+class LeNetConvLayer(object):
+    """Convolutional Layer"""
 
     def __init__(self, rng, input, filter_shape, image_shape):
         """
@@ -280,17 +278,6 @@ class LeNetConvPoolLayer(object):
             border_mode='half'
         )
 
-        # # pool each feature map individually, using maxpooling
-        # pooled_out = pool.pool_2d(
-        #     input=conv_out,
-        #     ds=poolsize,
-        #     ignore_border=True
-        # )
-
-        # add the bias term. Since the bias is a vector (1D array), we first
-        # reshape it to a tensor of shape (1, n_filters, 1, 1). Each bias will
-        # thus be broadcasted across mini-batches and feature map
-        # width & height
         self.output = T.nnet.relu(conv_out + self.b.dimshuffle('x', 0, 'x', 'x'))
 
         # store parameters of this layer
@@ -302,139 +289,99 @@ class LeNetConvPoolLayer(object):
         self.L2_sqr = (self.W**2).sum()
 
     def __str__(self):
-        return "LeNetConvPoolLayer L2_sqr:{}".format(self.L2_sqr.eval())
+        return "Layer:{} L2_sqr:{}".format(self.__class__.__name__, self.L2_sqr.eval())
 
-def getBatch(index, batch_size, dataset):
-    return dataset[index*batch_size : (index+1)*batch_size]
-
-def train_nn(train_model, validate_model, test_model,
-            n_train_batches, n_valid_batches, n_test_batches, n_epochs,
-            datasets, batch_size,
-            verbose = True):
+def drop(input, p=0.5): 
     """
-    Wrapper function for training and test THEANO model
+    :type input: numpy.array
+    :param input: layer or weight matrix on which dropout is applied
+    
+    :type p: float or double between 0. and 1. 
+    :param p: p probability of NOT dropping out a unit, therefore (1.-p) is the drop rate.
+    
+    """            
+    rng = numpy.random.RandomState(1234)
+    srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
+    mask = srng.binomial(n=1, p=p, size=input.shape, dtype=theano.config.floatX)
+    return input * mask
 
-    :type train_model: Theano.function
-    :param train_model:
+class DropoutHiddenLayer(object):
+    def __init__(self, rng, is_train, input, n_in, n_out, W=None, b=None,
+                 activation=T.tanh, p=0.5):
+        """
+        Hidden unit activation is given by: activation(dot(input,W) + b)
 
-    :type validate_model: Theano.function
-    :param validate_model:
+        :type rng: numpy.random.RandomState
+        :param rng: a random number generator used to initialize weights
+        
+        :type is_train: theano.iscalar   
+        :param is_train: indicator pseudo-boolean (int) for switching between training and prediction
 
-    :type test_model: Theano.function
-    :param test_model:
+        :type input: theano.tensor.dmatrix
+        :param input: a symbolic tensor of shape (n_examples, n_in)
 
-    :type n_train_batches: int
-    :param n_train_batches: number of training batches
+        :type n_in: int
+        :param n_in: dimensionality of input
 
-    :type n_valid_batches: int
-    :param n_valid_batches: number of validation batches
+        :type n_out: int
+        :param n_out: number of hidden units
 
-    :type n_test_batches: int
-    :param n_test_batches: number of testing batches
+        :type activation: theano.Op or function
+        :param activation: Non linearity to be applied in the hidden
+                           layer
+                           
+        :type p: float or double
+        :param p: probability of NOT dropping out a unit   
+        """
+        self.input = input
 
-    :type n_epochs: int
-    :param n_epochs: maximal number of epochs to run the optimizer
+        if W is None:
+            W_values = numpy.asarray(
+                rng.uniform(
+                    low=-numpy.sqrt(6. / (n_in + n_out)),
+                    high=numpy.sqrt(6. / (n_in + n_out)),
+                    size=(n_in, n_out)
+                ),
+                dtype=theano.config.floatX
+            )
+            if activation == theano.tensor.nnet.sigmoid:
+                W_values *= 4
 
-    :type verbose: boolean
-    :param verbose: to print out epoch summary or not to
+            W = theano.shared(value=W_values, name='W', borrow=True)
 
-    """
-    print( 'train_nn: '+str(locals()))
-    train_set_x, train_set_y = datasets[0]
-    valid_set_x, valid_set_y = datasets[1]
-    test_set_x, test_set_y = datasets[2]
+        if b is None:
+            b_values = numpy.zeros((n_out,), dtype=theano.config.floatX)
+            b = theano.shared(value=b_values, name='b', borrow=True)
 
-    # early-stopping parameters
-    patience = 10000  # look as this many examples regardless
-    patience_increase = 2  # wait this much longer when a new best is
-                           # found
-    improvement_threshold = 0.85  # a relative improvement of this much is
-                                   # considered significant
-    validation_frequency = min(n_train_batches, patience // 2)
-                                  # go through this many
-                                  # minibatche before checking the network
-                                  # on the validation set; in this case we
-                                  # check every epoch
+        
+        self.W = W
+        self.b = b
 
-    best_validation_loss = numpy.inf
-    best_iter = 0
-    test_score = 0.
-    start_time = timeit.default_timer()
+        lin_output = T.dot(input, self.W) + self.b
+        
+        output = activation(lin_output)
+        
+        # multiply output and drop -> in an approximation the scaling effects cancel out 
+        train_output = drop(output,p)
+        
+        #is_train is a pseudo boolean theano variable for switching between training and prediction 
+        self.output = T.switch(T.neq(is_train, 0), train_output, p*output)
 
-    epoch = 0
-    done_looping = False
+        self.L1 = abs(W).sum()
+        self.L2_sqr = (W**2).sum()
 
-    while (epoch < n_epochs) and (not done_looping):
-        epoch = epoch + 1
-        for minibatch_index in range(n_train_batches):
+        # parameters of the model
+        self.params = [self.W, self.b]
 
-            iter = (epoch - 1) * n_train_batches + minibatch_index
+        self._is_train = is_train
+        self._p = p
 
-            if (iter % 100 == 0) and verbose:
-                print('training @ iter = ', iter)
-            cost_ij = train_model(
-                        getBatch( minibatch_index, batch_size, train_set_x),
-                        getBatch( minibatch_index, batch_size, train_set_y) )
-
-            if (iter + 1) % validation_frequency == 0:
-
-                # compute zero-one loss on validation set
-                validation_losses = [validate_model(
-                                        getBatch(i,batch_size,valid_set_x),
-                                        getBatch(i,batch_size,valid_set_y) )
-                                        for i in range(n_valid_batches)]
-                this_validation_loss = numpy.mean(validation_losses)
-
-                if verbose:
-                    print('epoch %i, minibatch %i/%i, validation error %f %%' %
-                        (epoch,
-                         minibatch_index + 1,
-                         n_train_batches,
-                         this_validation_loss * 100.))
-
-                # if we got the best validation score until now
-                if this_validation_loss < best_validation_loss:
-
-                    #improve patience if loss improvement is good enough
-                    if this_validation_loss < best_validation_loss *  \
-                       improvement_threshold:
-                        patience = max(patience, iter * patience_increase)
-
-                    # save best validation score and iteration number
-                    best_validation_loss = this_validation_loss
-                    best_iter = iter
-
-                    # test it on the test set
-                    test_losses = [
-                        test_model(getBatch(i,batch_size,test_set_x),
-                                   getBatch(i,batch_size,test_set_y) )
-                        for i in range(n_test_batches)
-                    ]
-                    test_score = numpy.mean(test_losses)
-
-                    if verbose:
-                        print(('     epoch %i, minibatch %i/%i, test error of '
-                               'best model %f %%') %
-                              (epoch, minibatch_index + 1,
-                               n_train_batches,
-                               test_score * 100.))
-
-            if patience <= iter:
-                done_looping = True
-                break
-
-    end_time = timeit.default_timer()
-
-    # Retrieve the name of function who invokes train_nn() (caller's name)
-    curframe = inspect.currentframe()
-    calframe = inspect.getouterframes(curframe, 2)
-
-    # Print out summary
-    print('Optimization complete.')
-    print('Best validation error of %f %% obtained at iteration %i, '
-          'with test performance %f %%' %
-          (best_validation_loss * 100., best_iter + 1, test_score * 100.))
-    print(('The training process for function ' +
-           calframe[1][3] +
-           ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
-
+    def __str__ (self):
+        it = 'undecided'
+        p = 'undecided'
+        try:
+            it = self._is_train.eval()
+            p = self._p
+        except:
+            pass
+        return 'DropoutHiddenLayer (is_train:{},p:{})'.format(it,p)+str(self.L1.eval())+' '+str(self.L2_sqr.eval())
