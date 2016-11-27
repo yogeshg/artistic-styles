@@ -25,11 +25,48 @@ from theano.tensor.signal import pool
 
 from Utils import shared_dataset, load_data, RmsProp, train_nn
 from Layers import LogisticRegression, HiddenLayer, LeNetConvLayer, DropoutHiddenLayer, drop
+
+class VGG_19():
+    def __init__(self, rng, datasets, batch_size=10, learning_rate=0.1):
+        self.model_name = "VGG_ILSVRC_19_layers"
+        self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
+                                ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
+                                ,"conv5_1","conv5_2","conv5_3","conv5_4","pool5","fc6","drop6","fc7","drop7","fc8","prob"]
+        self.conv1_1 = None
+        self.conv1_2 = None
+        self.pool1   = None
+        self.conv2_1 = None
+        self.conv2_2 = None
+        self.pool2   = None
+        self.conv3_1 = None
+        self.conv3_2 = None
+        self.conv3_3 = None
+        self.conv3_4 = None
+        self.pool3   = None
+        self.conv4_1 = None
+        self.conv4_2 = None
+        self.conv4_3 = None
+        self.conv4_4 = None
+        self.pool4   = None
+        self.conv5_1 = None
+        self.conv5_2 = None
+        self.conv5_3 = None
+        self.conv5_4 = None
+        self.pool5   = None
+        self.fc6     = None
+        self.drop6   = None
+        self.fc7     = None
+        self.drop7   = None
+        self.fc8     = None
+        self.prob    = None
+        return
+
+    def __str__(self):
+        layers_strs = [ l+":\t"+str(getattr(self, l, 'LAYER_NOT_SET')) for l in self.layer_names ]
+        header_str = "{}:{} L2_sqr:{}".format(self.__class__.__name__, self.model_name, 1234 ) # self.L2_sqr.eval()
+        return header_str+"\n\t"+("\n\t".join(layers_strs))
  
-#Problem 3 
 #Implement a convolutional neural network to achieve at least 80% testing accuracy on CIFAR-dataset
-# def MY_lenet():
-#     return
 class MyLeNet():
   def __init__(self, rng, datasets,
                 batch_size=10       ,
