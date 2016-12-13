@@ -77,9 +77,23 @@ def preprocess_image(path):
     imcopy[:,:,1] = im[:, :, 1] - 116.779
     imcopy[:,:,2] = im[:, :, 2] - 123.68
     #RGB -> BGR
-    imcopy = numpy.roll(imcopy,1,axis=-1)
+    imcopy = imcopy[:, :, ::-1]
     #put channels first
     imcopy = numpy.rollaxis(imcopy,2,0)
     #add dimension to make it a 4d image (for theano tensor)
     imcopy = numpy.expand_dims(imcopy,axis=0)
     return imcopy
+
+def deprocess_image(image_array):
+    # put channels last
+    assert image_array.ndim==4
+    image_array = numpy.rollaxis(image_array,1,3)
+    #BGR -> RGB
+    image_array = image_array[:, :, ::-1]
+    #add mean channel
+    image_array_copy[:,:,0] = image_array[:, :, 0] + 103.939
+    image_array_copy[:,:,1] = image_array[:, :, 1] + 116.779
+    image_array_copy[:,:,2] = image_array[:, :, 2] + 123.68
+    #convert to int between 0 and 254
+    image_array_copy = np.clip(image_array_copy, 0, 255).astype('uint8')
+    return image_array_copy
