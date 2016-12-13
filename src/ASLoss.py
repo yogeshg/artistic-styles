@@ -59,16 +59,16 @@ def preprocess_image(paths):
     # if single given not list of strings then convert to list of strings
     if isinstance(paths, basestring):
         paths = [paths]
-        
+
     images = []
     for path in paths:
         image = Image.open(path,'r').convert('RGB')
         w,h = image.size
         # resize so smallest dimenison = 256 (preserve aspect ratio)
         if h<w:
-            image = image.resize((w*256/h,256))
+            image = image.resize((w*256/h,256),resample=Image.BILINEAR)
         else:
-            image = image.resize((256,h*256/w))
+            image = image.resize((256,h*256/w),resample=Image.BILINEAR)
         # crop the images to 224x224
         #get the new shape of the image
         w,h = image.size
