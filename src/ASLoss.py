@@ -52,4 +52,34 @@ def total_loss(F,a,P,style_layers,
         N =...
         M =...
         loss += beta*getStyleLoss(Fl,al,N,M,wl)
-        
+
+def preprocess_image(path):
+    from PIL import Image
+    image = Image.open(path,'r').convert('RGB')
+    w,h = image.size
+    # resize so smallest dimenison = 256 (preserve aspect ratio)
+    if h<w:
+        image = image.resize((w*256/h,256))
+    else:
+        image = image.resize((256,h*256/w))
+    # crop the images to 224x224
+    #get the new shape of the image
+    w,h = image.shape
+    #get the bounds of the box
+    right = w//2 + 112
+    left =w//2 - 112
+    top = h//2 - 112
+    bottom = h//2 + 112
+    image = image.crop((left,top,right,bottom))
+    im = numpy.asarray(image)
+    imcopy = numpy.zeros(im.shape)
+    imcopy[:,:,0] = im[:, :, 0] - 103.939
+    imcopy[:,:,1] = im[:, :, 1] - 116.779
+    imcopy[:,:,2] = im[:, :, 2] - 123.68
+    #RGB -> BGR
+    imcopy = numpy.roll(imcopy,1,axis=-1)
+    #put channels first
+    imcopy = numpy.rollaxis(imcopy,2,0)
+    #add dimension to make it a 4d image (for theano tensor)
+    imcopy = numpy.expand_dims(imcopy,axis=0)
+    return imcopy
