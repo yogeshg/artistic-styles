@@ -31,7 +31,7 @@ class LogisticRegression(object):
     determine a class membership probability.
     """
 
-    def __init__(self, input, n_in, n_out):
+    def __init__(self, input, n_in, n_out,W=None,b=None):
         """ Initialize the parameters of the logistic regression
 
         :type input: theano.tensor.TensorType
@@ -48,23 +48,28 @@ class LogisticRegression(object):
 
         """
         # initialize with 0 the weights W as a matrix of shape (n_in, n_out)
-        self.W = theano.shared(
-            value=numpy.zeros(
-                (n_in, n_out),
-                dtype=theano.config.floatX
-            ),
-            name='W',
-            borrow=True
-        )
-        # initialize the biases b as a vector of n_out 0s
-        self.b = theano.shared(
-            value=numpy.zeros(
-                (n_out,),
-                dtype=theano.config.floatX
-            ),
-            name='b',
-            borrow=True
-        )
+        if W == None:
+            self.W = theano.shared(
+                value=numpy.zeros(
+                    (n_in, n_out),
+                    dtype=theano.config.floatX
+                ),
+                name='W',
+                borrow=True
+            )
+        if b== None:
+            # initialize the biases b as a vector of n_out 0s
+            self.b = theano.shared(
+                value=numpy.zeros(
+                    (n_out,),
+                    dtype=theano.config.floatX
+                ),
+                name='b',
+                borrow=True
+            )
+
+        self.W=W
+        self.b=b
 
         # symbolic expression for computing the matrix of class-membership
         # probabilities
@@ -225,7 +230,7 @@ class HiddenLayer(object):
 class LeNetConvLayer(object):
     """Convolutional Layer"""
 
-    def __init__(self, rng, input, filter_shape, image_shape):
+    def __init__(self, rng, input, filter_shape, image_shape,W=None,b=None):
         """
         Allocate a LeNetConvPoolLayer with shared variable internal parameters.
 
@@ -257,18 +262,22 @@ class LeNetConvLayer(object):
         fan_out = (filter_shape[0] * numpy.prod(filter_shape[2:]))
         # initialize weights with random weights
         W_bound = numpy.sqrt(6. / (fan_in + fan_out))
-        self.W = theano.shared(
-            numpy.asarray(
-                rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
-                dtype=theano.config.floatX
-            ),
-            borrow=True
-        )
+        if W=None:
+            self.W = theano.shared(
+                numpy.asarray(
+                    rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
+                    dtype=theano.config.floatX
+                    ),
+                borrow=True
+                )
+        if b=None:
+            # the bias is a 1D tensor -- one bias per output feature map
+            b_values = numpy.zeros((filter_shape[0],), dtype=theano.config.floatX)
+            self.b = theano.shared(value=b_values, borrow=True)
 
-        # the bias is a 1D tensor -- one bias per output feature map
-        b_values = numpy.zeros((filter_shape[0],), dtype=theano.config.floatX)
-        self.b = theano.shared(value=b_values, borrow=True)
-
+        self.W = W
+        self.b = b
+        
         # convolve input feature maps with filters
         conv_out = conv2d(
             input=input,
@@ -291,15 +300,15 @@ class LeNetConvLayer(object):
     def __str__(self):
         return "Layer:{} L2_sqr:{}".format(self.__class__.__name__, self.L2_sqr.eval())
 
-def drop(input, p=0.5): 
+def drop(input, p=0.5):
     """
     :type input: numpy.array
     :param input: layer or weight matrix on which dropout is applied
-    
-    :type p: float or double between 0. and 1. 
+
+    :type p: float or double between 0. and 1.
     :param p: p probability of NOT dropping out a unit, therefore (1.-p) is the drop rate.
-    
-    """            
+
+    """
     rng = numpy.random.RandomState(1234)
     srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
     mask = srng.binomial(n=1, p=p, size=input.shape, dtype=theano.config.floatX)
@@ -313,8 +322,8 @@ class DropoutHiddenLayer(object):
 
         :type rng: numpy.random.RandomState
         :param rng: a random number generator used to initialize weights
-        
-        :type is_train: theano.iscalar   
+
+        :type is_train: theano.iscalar
         :param is_train: indicator pseudo-boolean (int) for switching between training and prediction
 
         :type input: theano.tensor.dmatrix
@@ -329,9 +338,9 @@ class DropoutHiddenLayer(object):
         :type activation: theano.Op or function
         :param activation: Non linearity to be applied in the hidden
                            layer
-                           
+
         :type p: float or double
-        :param p: probability of NOT dropping out a unit   
+        :param p: probability of NOT dropping out a unit
         """
         self.input = input
 
@@ -353,18 +362,18 @@ class DropoutHiddenLayer(object):
             b_values = numpy.zeros((n_out,), dtype=theano.config.floatX)
             b = theano.shared(value=b_values, name='b', borrow=True)
 
-        
+
         self.W = W
         self.b = b
 
         lin_output = T.dot(input, self.W) + self.b
-        
+
         output = activation(lin_output)
-        
-        # multiply output and drop -> in an approximation the scaling effects cancel out 
+
+        # multiply output and drop -> in an approximation the scaling effects cancel out
         train_output = drop(output,p)
-        
-        #is_train is a pseudo boolean theano variable for switching between training and prediction 
+
+        #is_train is a pseudo boolean theano variable for switching between training and prediction
         self.output = T.switch(T.neq(is_train, 0), train_output, p*output)
 
         self.L1 = abs(W).sum()
