@@ -60,19 +60,19 @@ def load_layer_params(params_file):
         names.append(layer_name)
         types[layer_name]= layer[0][0][1][0].encode('ascii')
         try:
-            weights[layer_name] = layer[0][0][2][0][0]
+            weights[layer_name] = layer[0][0][2][0][0].T
         except:
             weights[layer_name] = None
         try:
-            bias[layer_name] = layer[0][0][2][0][1]
+            bias[layer_name] = layer[0][0][2][0][1].T
         except:
             bias[layer_name] = None
         try:
-            filter_shape[layer_name] = layer[0][0][3]
+            filter_shape[layer_name] = tuple(numpy.fliplr(layer[0][0][3])[0].reshape(1,-1)[0])
         except:
             filter_shape[layer_name] = None
         try:
-            pool_shape[layer_name] = layer[0][0][4]
+            pool_shape[layer_name] = tuple(layer[0][0][4][0].reshape(1,-1)[0])
         except:
             pool_shape[layer_name] = None
 

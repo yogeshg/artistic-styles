@@ -28,32 +28,315 @@ from Layers import LogisticRegression, HiddenLayer, LeNetConvLayer, DropoutHidde
 from ImportParameters.py import load_params
 
 class VGG_19():
-    def __init__(self, rng, datasets, batch_size=10, learning_rate=0.1):
+    def __init__(self, rng, datasets, batch_size=10, learning_rate=0.1,weights=None,bais=None,filter_shape,image_size=(3,224,224)):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
                                 ,"conv5_1","conv5_2","conv5_3","conv5_4","pool5","fc6","drop6","fc7","drop7","fc8","prob"]
-        self.conv1_1 = None
-        self.conv1_2 = None
-        self.pool1   = None
-        self.conv2_1 = None
-        self.conv2_2 = None
-        self.pool2   = None
-        self.conv3_1 = None
-        self.conv3_2 = None
-        self.conv3_3 = None
-        self.conv3_4 = None
-        self.pool3   = None
-        self.conv4_1 = None
-        self.conv4_2 = None
-        self.conv4_3 = None
-        self.conv4_4 = None
-        self.pool4   = None
-        self.conv5_1 = None
-        self.conv5_2 = None
-        self.conv5_3 = None
-        self.conv5_4 = None
-        self.pool5   = None
+        if Weights = None:
+            Weights = {}
+            for name in layer_names:
+                Weights[name]=None
+                bias[name]=None
+
+        d,w,h=image_size
+        i=0
+        name=layer_names[i]
+        self.conv1_1 = LeNetConvLayer(
+            rng,
+            input=layer0_input,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv1_2 = LeNetConvLayer(
+            rng,
+            input=self.conv1_1.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        pool1_output = pool.pool_2d(
+                input=self.conv1_2.output,
+                ds=pool_shape[name],
+                ignore_border=True
+            )
+        i+=1
+        #new image dimensions
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv2_1 = LeNetConvLayer(
+            rng,
+            input=pool1_output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv2_2 = LeNetConvLayer(
+            rng,
+            input=self.conv2_1.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        pool2_output   = pool.pool_2d(
+                input=self.conv2_2.output,
+                ds=pool_shape[name],
+                ignore_border=True
+            )
+        i+=1
+        #new image dimensions
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv3_1 = LeNetConvLayer(
+            rng,
+            input=self.pool2_output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv3_2 = LeNetConvLayer(
+            rng,
+            input=self.conv3_1.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv3_3 = LeNetConvLayer(
+            rng,
+            input=self.conv3_2.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv3_4 = LeNetConvLayer(
+            rng,
+            input=self.conv3_3.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        pool3_output   = pool.pool_2d(
+                input=self.conv3_4.output,
+                ds=pool_shape[name],
+                ignore_border=True
+            )
+        i+=1
+        #new image dimensions
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv4_1 = LeNetConvLayer(
+            rng,
+            input=pool3_output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv4_2 = LeNetConvLayer(
+            rng,
+            input=self.conv4_1.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv4_3 = LeNetConvLayer(
+            rng,
+            input=self.conv4_2.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv4_4 = LeNetConvLayer(
+            rng,
+            input=self.conv4_3.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        pool4_output   = pool.pool_2d(
+                input=self.conv4_4.output,
+                ds=pool_shape[name],
+                ignore_border=True
+            )
+        i+=1
+        #new image dimensions
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv5_1 = LeNetConvLayer(
+            rng,
+            input=pool4_output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv5_2 = LeNetConvLayer(
+            rng,
+            input=self.conv5_1.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv5_3 = LeNetConvLayer(
+            rng,
+            input=self.conv5_2.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        self.conv5_4 = LeNetConvLayer(
+            rng,
+            input=self.conv5_3.output,
+            image_shape=(batch_size, d, w, h),
+            filter_shape=filter_shape[name],
+            W=Weights[name],
+            b=bias[name]
+        )
+        i+=1
+        #new image dimensions
+        d = filter_shape[name][0]
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
+        pool5_output   = pool.pool_2d(
+                input=self.conv5_4.output,
+                ds=pool_shape[name],
+                ignore_border=True
+            )
+        i+=1
+        #new image dimensions
+        w = w/pool_shape[name][0]
+        h = h/pool_shape[name][1]
+
+        name=layer_names[i]
         self.fc6     = None
         self.drop6   = None
         self.fc7     = None
@@ -66,7 +349,7 @@ class VGG_19():
         layers_strs = [ l+":\t"+str(getattr(self, l, 'LAYER_NOT_SET')) for l in self.layer_names ]
         header_str = "{}:{} L2_sqr:{}".format(self.__class__.__name__, self.model_name, 1234 ) # self.L2_sqr.eval()
         return header_str+"\n\t"+("\n\t".join(layers_strs))
- 
+
 #Implement a convolutional neural network to achieve at least 80% testing accuracy on CIFAR-dataset
 class MyLeNet():
   def __init__(self, rng, datasets,
@@ -283,5 +566,3 @@ class MyLeNet():
 
   def __str__(self):
     return 'MyLeNet\n'+str(self.conv11)+'\n'+str(self.conv12)+'\n'+str(self.conv21)+'\n'+str(self.conv22)+'\n'+str(self.conv31)+'\n'+str(self.conv41)+'\n'+str(self.conv42)+'\n'+str(self.conv51)+'\n'+str(self.conv52)+'\n'+str(self.conv6)+'\n'
-
-
