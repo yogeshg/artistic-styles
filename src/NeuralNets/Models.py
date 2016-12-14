@@ -42,6 +42,10 @@ class VGG_19():
         d,w,h=image_size
         i=0
         name=layer_names[i]
+
+        x = T.matrix('x')  # the data is presented as rasterized images
+        layer0_input = x
+
         self.conv1_1 = LeNetConvLayer(
             rng,
             input=layer0_input,
@@ -336,13 +340,43 @@ class VGG_19():
         w = w/pool_shape[name][0]
         h = h/pool_shape[name][1]
 
+        fc6_input = pool5_output.flatten(2)
+
         name=layer_names[i]
-        self.fc6     = None
-        self.drop6   = None
-        self.fc7     = None
-        self.drop7   = None
-        self.fc8     = None
-        self.prob    = None
+        self.fc6     = HiddenLayer(
+        rng,
+        input=fc6_input,
+        n_in=d * w * h,
+        n_out=4096,
+        activation=T.nnet.relu
+    )
+        self.drop6   = drop(self.fc6.output, p=0.5)
+
+        self.fc7     = HiddenLayer(
+        rng,
+        input=self.drop6 ,
+        n_in=4096,
+        n_out=4096,
+        activation=T.nnet.relu
+    )
+
+        self.drop7   = drop(self.fc7.output, p=0.5)
+
+        self.fc8     = HiddenLayer(
+        rng,
+        input=self.drop6 ,
+        n_in=4096,
+        n_out=1000,
+        activation=None
+    )
+
+        self.prob    = LogisticRegression(
+            input=self.fc8.output,
+            n_in=1000,
+            n_out=1000,
+            W=numpy.identity(1000),
+            b=numpy.zeros(1000)
+        )
         return
 
     def __str__(self):
