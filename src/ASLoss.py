@@ -53,36 +53,55 @@ def total_loss(F,a,P,style_layers,
         M =...
         loss += beta*getStyleLoss(Fl,al,N,M,wl)
 
-def preprocess_image(path):
-    from PIL import Image
-    image = Image.open(path,'r').convert('RGB')
-    w,h = image.size
-    # resize so smallest dimenison = 256 (preserve aspect ratio)
-    if h<w:
-        image = image.resize((w*256/h,256))
-    else:
-        image = image.resize((256,h*256/w))
-    # crop the images to 224x224
-    #get the new shape of the image
-    w,h = image.shape
-    #get the bounds of the box
-    right = w//2 + 112
-    left =w//2 - 112
-    top = h//2 - 112
-    bottom = h//2 + 112
-    image = image.crop((left,top,right,bottom))
-    im = numpy.asarray(image)
-    imcopy = numpy.zeros(im.shape)
-    imcopy[:,:,0] = im[:, :, 0] - 103.939
-    imcopy[:,:,1] = im[:, :, 1] - 116.779
-    imcopy[:,:,2] = im[:, :, 2] - 123.68
-    #RGB -> BGR
-    imcopy = imcopy[:, :, ::-1]
-    #put channels first
-    imcopy = numpy.rollaxis(imcopy,2,0)
-    #add dimension to make it a 4d image (for theano tensor)
-    imcopy = numpy.expand_dims(imcopy,axis=0)
-    return imcopy
+from PIL import Image
+
+def preprocess_image(paths,crop=True):
+    # if single given not list of strings then convert to list of strings
+    if isinstance(paths, basestring):
+        paths = [paths]
+
+    images = []
+    original_sizes = []
+    for path in paths:
+        image = Image.open(path,'r').convert('RGB')
+        w,h = image.size
+        # resize so smallest dimenison = 256 (preserve aspect ratio)
+        if crop:
+            if h<w:
+                image = image.resize((w*256/h,256),resample=Image.BILINEAR)
+            else:
+                image = image.resize((256,h*256/w),resample=Image.BILINEAR)
+            # crop the images to 224x224
+            #get the new shape of the image
+            w1,h1 = image.size
+            #get the bounds of the box
+            right = w1//2 + 112
+            left =w1//2 - 112
+            top = h1//2 - 112
+            bottom = h1//2 + 112
+            image = image.crop((left,top,right,bottom))
+        else:
+            image = image.resize((256,256),resample=Image.BILINEAR)
+        im = numpy.asarray(image)
+        imcopy = numpy.zeros(im.shape)
+        imcopy[:,:,0] = im[:, :, 0] - 103.939
+        imcopy[:,:,1] = im[:, :, 1] - 116.779
+        imcopy[:,:,2] = im[:, :, 2] - 123.68
+        #RGB -> BGR
+        imcopy = imcopy[:, :, ::-1]
+        #put channels first
+        imcopy = numpy.rollaxis(imcopy,2,0)
+        #add dimension to make it a 4d image (for theano tensor)
+        imcopy = numpy.expand_dims(imcopy,axis=0)
+        sizes = numpy.expand_dims(numpy.asarray([w,h]),axis=0)
+        #store it in images array
+        if len(images)==0:
+            images = imcopy
+            original_sizes= sizes
+        else:
+            images = numpy.append(images,imcopy,axis=0)
+            original_sizes= numpy.append(original_sizes,sizes,axis=0)
+    return images,original_sizes
 
 def deprocess_image(image_array):
     # put channels last
