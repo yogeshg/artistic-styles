@@ -61,6 +61,7 @@ def preprocess_image(paths,crop=True):
         paths = [paths]
 
     images = []
+    original_sizes = []
     for path in paths:
         image = Image.open(path,'r').convert('RGB')
         w,h = image.size
@@ -72,12 +73,12 @@ def preprocess_image(paths,crop=True):
                 image = image.resize((256,h*256/w),resample=Image.BILINEAR)
             # crop the images to 224x224
             #get the new shape of the image
-            w,h = image.size
+            w1,h1 = image.size
             #get the bounds of the box
-            right = w//2 + 112
-            left =w//2 - 112
-            top = h//2 - 112
-            bottom = h//2 + 112
+            right = w1//2 + 112
+            left =w1//2 - 112
+            top = h1//2 - 112
+            bottom = h1//2 + 112
             image = image.crop((left,top,right,bottom))
         else:
             image = image.resize((256,256),resample=Image.BILINEAR)
@@ -92,12 +93,15 @@ def preprocess_image(paths,crop=True):
         imcopy = numpy.rollaxis(imcopy,2,0)
         #add dimension to make it a 4d image (for theano tensor)
         imcopy = numpy.expand_dims(imcopy,axis=0)
+        sizes = numpy.expand_dims(numpy.asarray([w,h]),axis=0)
         #store it in images array
         if len(images)==0:
             images = imcopy
+            original_sizes= sizes
         else:
             images = numpy.append(images,imcopy,axis=0)
-    return images
+            original_sizes= numpy.append(original_sizes,sizes,axis=0)
+    return images,original_sizes
 
 def deprocess_image(image_array):
     # put channels last
