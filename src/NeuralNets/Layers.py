@@ -59,7 +59,7 @@ class LogisticRegression(object):
             )
         if b == None:
             # initialize the biases b as a vector of n_out 0s
-            self.b = theano.shared(
+            b = theano.shared(
                 value=numpy.zeros(
                     (n_out,),
                     dtype=theano.config.floatX
