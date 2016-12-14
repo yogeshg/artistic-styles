@@ -55,7 +55,7 @@ def total_loss(F,a,P,style_layers,
 
 from PIL import Image
 
-def preprocess_image(paths):
+def preprocess_image(paths,crop=True):
     # if single given not list of strings then convert to list of strings
     if isinstance(paths, basestring):
         paths = [paths]
@@ -65,19 +65,22 @@ def preprocess_image(paths):
         image = Image.open(path,'r').convert('RGB')
         w,h = image.size
         # resize so smallest dimenison = 256 (preserve aspect ratio)
-        if h<w:
-            image = image.resize((w*256/h,256),resample=Image.BILINEAR)
+        if crop:
+            if h<w:
+                image = image.resize((w*256/h,256),resample=Image.BILINEAR)
+            else:
+                image = image.resize((256,h*256/w),resample=Image.BILINEAR)
+            # crop the images to 224x224
+            #get the new shape of the image
+            w,h = image.size
+            #get the bounds of the box
+            right = w//2 + 112
+            left =w//2 - 112
+            top = h//2 - 112
+            bottom = h//2 + 112
+            image = image.crop((left,top,right,bottom))
         else:
-            image = image.resize((256,h*256/w),resample=Image.BILINEAR)
-        # crop the images to 224x224
-        #get the new shape of the image
-        w,h = image.size
-        #get the bounds of the box
-        right = w//2 + 112
-        left =w//2 - 112
-        top = h//2 - 112
-        bottom = h//2 + 112
-        image = image.crop((left,top,right,bottom))
+            image = image.resize((256,256),resample=Image.BILINEAR)
         im = numpy.asarray(image)
         imcopy = numpy.zeros(im.shape)
         imcopy[:,:,0] = im[:, :, 0] - 103.939
