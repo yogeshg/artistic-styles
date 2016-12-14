@@ -25,6 +25,7 @@ from theano.tensor.signal import pool
 
 from Utils import shared_dataset, load_data, RmsProp, train_nn
 from Layers import LogisticRegression, HiddenLayer, LeNetConvLayer, DropoutHiddenLayer, drop
+from ImportParameters.py import load_params
 
 class VGG_19():
     def __init__(self, rng, datasets, batch_size=10, learning_rate=0.1):
@@ -95,14 +96,16 @@ class MyLeNet():
     # (32, 32) is the size of MNIST images.
 
     POOL_SIZE = (2,2)
-    x_corrupted = drop( x, 0.7 )
-    layer0_input = x_corrupted.reshape((batch_size, 3, 32, 32))
+    layer0_input = x.reshape((batch_size, 3, 32, 32))
+
 
     self.conv11 = LeNetConvLayer(
         rng,
         input=layer0_input,
         image_shape=(batch_size, 3, 32, 32),
-        filter_shape=(64, 3, 3, 3)
+        filter_shape=(64, 3, 3, 3),
+        W=load_params(self.layer_names[0])[0],
+        b=load_params(self.layer_names[0])[1]
     )
     print(self.conv11)
 
@@ -112,6 +115,8 @@ class MyLeNet():
         input=self.conv11.output,
         image_shape=(batch_size, 64, 32, 32),
         filter_shape=(64, 64, 3, 3),
+        W=load_params(self.layer_names[1])[0],
+        b=load_params(self.layer_names[1])[1]
     )
     print(self.conv12)
 
@@ -125,7 +130,9 @@ class MyLeNet():
         rng,
         input=pool1_output,
         image_shape=(batch_size, 64, 16, 16),
-        filter_shape=(128, 64, 3, 3)
+        filter_shape=(128, 64, 3, 3),
+        W=load_params(self.layer_names[3])[0],
+        b=load_params(self.layer_names[3])[1]
     )
     print(self.conv21)
 
@@ -135,6 +142,8 @@ class MyLeNet():
         input=self.conv21.output,
         image_shape=(batch_size, 128, 16, 16),
         filter_shape=(128, 128, 3, 3),
+        W=load_params(self.layer_names[4])[0],
+        b=load_params(self.layer_names[4])[1]
     )
     print(self.conv22)
 
@@ -149,6 +158,8 @@ class MyLeNet():
         input=pool2_output,
         image_shape=(batch_size, 128, 8, 8),
         filter_shape=(256, 128, 3, 3),
+        W=load_params(self.layer_names[6])[0],
+        b=load_params(self.layer_names[6])[1]
     )
     print(self.conv31)
 
@@ -158,6 +169,8 @@ class MyLeNet():
         input=upsample4_output,
         image_shape=(batch_size, 256, 16, 16),
         filter_shape=(128, 256, 3, 3),
+        W=load_params(self.layer_names[7])[0],
+        b=load_params(self.layer_names[7])[1]
     )
     print(self.conv41)
     self.conv42 = LeNetConvLayer(
