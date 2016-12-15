@@ -30,7 +30,7 @@ from ImportParameters import load_layer_params
 from collections import defaultdict
 
 class VGG_19():
-    def __init__(self, rng, datasets, filter_shape, pool_shape, batch_size=10, learning_rate=0.1,
+    def __init__(self, rng, datasets, filter_shape, batch_size=10, learning_rate=0.1,
                     Weights=None,bias=None,image_size=(3,224,224)):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
@@ -75,16 +75,15 @@ class VGG_19():
 
         #new image dimensions
         d = filter_shape['conv1_2'][0]
-        name=layer_names[i]
         pool1_output = pool.pool_2d(
                 input=self.conv1_2.output,
-                ds=pool_shape['pool1'],
+                ds=(2,2),
                 ignore_border=True
             )
 
         #new image dimensions
-        w = w/pool_shape['pool1'][0]
-        h = h/pool_shape['pool1'][1]
+        w = w/2
+        h = h/2
 
         self.conv2_1 = LeNetConvLayer(
             rng,
@@ -110,16 +109,16 @@ class VGG_19():
 
         pool2_output   = pool.pool_2d(
                 input=self.conv2_2.output,
-                ds=pool_shape['pool2'],
+                ds=(2,2),
                 ignore_border=True
             )
 
-        w = w/pool_shape['pool2'][0]
-        h = h/pool_shape['pool2'][1]
+        w = w/2
+        h = h/2
 
         self.conv3_1 = LeNetConvLayer(
             rng,
-            input=self.pool2_output,
+            input=pool2_output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv3_1'],
             W=Weights['conv3_1'],
@@ -164,13 +163,13 @@ class VGG_19():
 
         pool3_output   = pool.pool_2d(
                 input=self.conv3_4.output,
-                ds=pool_shape['pool3'],
+                ds=(2,2),
                 ignore_border=True
             )
 
         #new image dimensions
-        w = w/pool_shape['pool3'][0]
-        h = h/pool_shape['pool3'][1]
+        w = w/2
+        h = h/2
 
         self.conv4_1 = LeNetConvLayer(
             rng,
@@ -221,13 +220,13 @@ class VGG_19():
 
         pool4_output   = pool.pool_2d(
                 input=self.conv4_4.output,
-                ds=pool_shape[name],
+                ds=(2,2),
                 ignore_border=True
             )
 
         #new image dimensions
-        w = w/pool_shape['pool4'][0]
-        h = h/pool_shape['pool4'][1]
+        w = w/2
+        h = h/2
 
         self.conv5_1 = LeNetConvLayer(
             rng,
@@ -279,13 +278,13 @@ class VGG_19():
 
         pool5_output   = pool.pool_2d(
                 input=self.conv5_4.output,
-                ds=pool_shape['pool5'],
+                ds=(2,2),
                 ignore_border=True
             )
 
         #new image dimensions
-        w = w/pool_shape['pool5'][0]
-        h = h/pool_shape['pool5'][1]
+        w = w/2
+        h = h/2
 
         fc6_input = pool5_output.flatten(2)
 
