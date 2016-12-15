@@ -15,8 +15,17 @@ print 'creating vgg19...'
 v = VGG_19( rng, None, p['filter_shape'])
 i = np.reshape(preprocess_image('test_images/thais.JPG'),(1,3*224*224)) # (1,3,224,224)
 
-o = v.conv1_1.output.eval( {v.x: i}  )
-print o.shape
+o1 = v.conv1_1.output.eval( {v.x: i}  )
+o2 = v.conv2_1.output.eval({v.x:i})
+o3 = v.conv3_1.output.eval({v.x:i})
+o4 = v.conv4_1.output.eval({v.x:i})
+o4 = v.conv5_1.output.eval({v.x:i})
+
+print o1.shape
+print o2.shape
+print o3.shape
+print o4.shape
+print o5.shape
 
 import cPickle
 

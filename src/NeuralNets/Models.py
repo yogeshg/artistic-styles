@@ -9,7 +9,10 @@ This code is based on
 [3] http://deeplearning.net/tutorial/lenet.html
 """
 import sys, os
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+try:
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+except:
+    pass
 
 import numpy
 import numpy as np
