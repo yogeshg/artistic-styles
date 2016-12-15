@@ -55,13 +55,13 @@ def total_loss(F,a,P,style_layers,
 
 from PIL import Image
 
-def preprocess_image(paths,crop=True):
+def preprocess_image(paths,resize=True):
     # if single given not list of strings then convert to list of strings
     if isinstance(paths, basestring):
         paths = [paths]
-
+    if resize == Fale:
+        assert len(paths)==1
     images = []
-    original_sizes = []
     for path in paths:
         image = Image.open(path,'r').convert('RGB')
         w,h = image.size
@@ -80,8 +80,7 @@ def preprocess_image(paths,crop=True):
             top = h1//2 - 112
             bottom = h1//2 + 112
             image = image.crop((left,top,right,bottom))
-        else:
-            image = image.resize((256,256),resample=Image.BILINEAR)
+
         im = numpy.asarray(image)
         imcopy = numpy.zeros(im.shape)
         imcopy[:,:,0] = im[:, :, 0] - 103.939
@@ -93,15 +92,12 @@ def preprocess_image(paths,crop=True):
         imcopy = numpy.rollaxis(imcopy,2,0)
         #add dimension to make it a 4d image (for theano tensor)
         imcopy = numpy.expand_dims(imcopy,axis=0)
-        sizes = numpy.expand_dims(numpy.asarray([w,h]),axis=0)
         #store it in images array
         if len(images)==0:
             images = imcopy
-            original_sizes= sizes
         else:
             images = numpy.append(images,imcopy,axis=0)
-            original_sizes= numpy.append(original_sizes,sizes,axis=0)
-    return images,original_sizes
+    return images
 
 def deprocess_image(image_array):
     # put channels last
