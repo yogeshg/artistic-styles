@@ -262,18 +262,18 @@ class LeNetConvLayer(object):
         fan_out = (filter_shape[0] * numpy.prod(filter_shape[2:]))
         # initialize weights with random weights
         W_bound = numpy.sqrt(6. / (fan_in + fan_out))
-        if W=None:
-            self.W = theano.shared(
+        if W==None:
+            W = theano.shared(
                 numpy.asarray(
                     rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
                     dtype=theano.config.floatX
                     ),
                 borrow=True
                 )
-        if b=None:
+        if b==None:
             # the bias is a 1D tensor -- one bias per output feature map
             b_values = numpy.zeros((filter_shape[0],), dtype=theano.config.floatX)
-            self.b = theano.shared(value=b_values, borrow=True)
+            b = theano.shared(value=b_values, borrow=True)
 
         self.W = W
         self.b = b

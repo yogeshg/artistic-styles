@@ -25,15 +25,18 @@ from theano.tensor.signal import pool
 
 from Utils import shared_dataset, load_data, RmsProp, train_nn
 from Layers import LogisticRegression, HiddenLayer, LeNetConvLayer, DropoutHiddenLayer, drop
-from ImportParameters.py import load_params
+from ImportParameters import load_layer_params
+
+from collections import defaultdict
 
 class VGG_19():
-    def __init__(self, rng, datasets, batch_size=10, learning_rate=0.1,weights=None,bais=None,filter_shape,image_size=(3,224,224)):
+    def __init__(self, rng, datasets, filter_shape, batch_size=10, learning_rate=0.1,
+                    Weights=None,bias=None,image_size=(3,224,224)):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
                                 ,"conv5_1","conv5_2","conv5_3","conv5_4","pool5","fc6","drop6","fc7","drop7","fc8","prob"]
-        if Weights = None:
+        if Weights == None:
             Weights = {}
             for name in layer_names:
                 Weights[name]=None
@@ -390,15 +393,6 @@ class VGG_19():
             }
         )
 
-        validate_model = theano.function(
-            [index],
-            self.prob.errors(y),
-            givens={
-                x: valid_set_x[index * batch_size: (index + 1) * batch_size],
-                y: valid_set_y[index * batch_size: (index + 1) * batch_size]
-            }
-        )
-
         # create a list of all model parameters to be fit by gradient descent
         params = self.conv1_1.params+self.conv1_2.params+\
                 self.conv2_1.params+self.conv2_2.params+\
@@ -420,7 +414,7 @@ class VGG_19():
             for param_i, grad_i in zip(params, grads)
             ]
 
-        train_model = theano.function(
+        self.train_model = theano.function(
             [index],
             cost,
             updates=updates,
@@ -474,8 +468,8 @@ class MyLeNet():
         input=layer0_input,
         image_shape=(batch_size, 3, 32, 32),
         filter_shape=(64, 3, 3, 3),
-        W=load_params(self.layer_names[0])[0],
-        b=load_params(self.layer_names[0])[1]
+        W=load_layer_params(self.layer_names[0])[0],
+        b=load_layer_params(self.layer_names[0])[1]
     )
     print(self.conv11)
 
@@ -485,8 +479,8 @@ class MyLeNet():
         input=self.conv11.output,
         image_shape=(batch_size, 64, 32, 32),
         filter_shape=(64, 64, 3, 3),
-        W=load_params(self.layer_names[1])[0],
-        b=load_params(self.layer_names[1])[1]
+        W=load_layer_params(self.layer_names[1])[0],
+        b=load_layer_params(self.layer_names[1])[1]
     )
     print(self.conv12)
 
@@ -501,8 +495,8 @@ class MyLeNet():
         input=pool1_output,
         image_shape=(batch_size, 64, 16, 16),
         filter_shape=(128, 64, 3, 3),
-        W=load_params(self.layer_names[3])[0],
-        b=load_params(self.layer_names[3])[1]
+        W=load_layer_params(self.layer_names[3])[0],
+        b=load_layer_params(self.layer_names[3])[1]
     )
     print(self.conv21)
 
@@ -512,8 +506,8 @@ class MyLeNet():
         input=self.conv21.output,
         image_shape=(batch_size, 128, 16, 16),
         filter_shape=(128, 128, 3, 3),
-        W=load_params(self.layer_names[4])[0],
-        b=load_params(self.layer_names[4])[1]
+        W=load_layer_params(self.layer_names[4])[0],
+        b=load_layer_params(self.layer_names[4])[1]
     )
     print(self.conv22)
 
@@ -528,8 +522,8 @@ class MyLeNet():
         input=pool2_output,
         image_shape=(batch_size, 128, 8, 8),
         filter_shape=(256, 128, 3, 3),
-        W=load_params(self.layer_names[6])[0],
-        b=load_params(self.layer_names[6])[1]
+        W=load_layer_params(self.layer_names[6])[0],
+        b=load_layer_params(self.layer_names[6])[1]
     )
     print(self.conv31)
 
@@ -539,8 +533,8 @@ class MyLeNet():
         input=upsample4_output,
         image_shape=(batch_size, 256, 16, 16),
         filter_shape=(128, 256, 3, 3),
-        W=load_params(self.layer_names[7])[0],
-        b=load_params(self.layer_names[7])[1]
+        W=load_layer_params(self.layer_names[7])[0],
+        b=load_layer_params(self.layer_names[7])[1]
     )
     print(self.conv41)
     self.conv42 = LeNetConvLayer(
