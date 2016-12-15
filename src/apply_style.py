@@ -29,7 +29,9 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     loss = total_loss(style, content, blank, v, style_layers, content_layer, alpha, beta, p['filter_shape'])
 
-    grad = T.grad(loss, blank)
+    new_image = T.matrix()
+
+    grad = T.grad(loss, new_image)
 
     updates = [
         (blank, blank - learning_rate * grad)
