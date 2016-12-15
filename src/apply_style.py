@@ -11,6 +11,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layer = 'conv4_2', n_epochs=10,learning_rate=0.1):
 
+    new_image = T.matrix()
 
     rng = np.random.RandomState(23455)
 
@@ -27,17 +28,16 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     content = np.reshape(preprocess_image(content_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
 
     blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
-    new_image = theano.shared(value=blank)
-    loss = total_loss(style, content, new_image.get_value(), v, style_layers, content_layer, alpha, beta, p['filter_shape'])
+    loss = total_loss(style, content, new_image, v, style_layers, content_layer, alpha, beta, p['filter_shape'])
 
     grad = T.grad(loss, new_image)
 
     updates = [
-        (new_image, new_image - learning_rate * grad)
+        (blank, blank - learning_rate * grad)
     ]
 
     train_model = theano.function(
-        [],
+        [new_image],
         loss,
         updates=updates
     )
