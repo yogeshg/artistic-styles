@@ -10,7 +10,9 @@ import theano.tensor as T
 #test_images/starry_night_google.jpg'
 #'test_images/thais.JPG'
 
-def train_style(content_image_path, style_image_path, blank_image_path):
+def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path,
+                style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
+                content_layer = ['conv4_2'], n_epochs=10):
     rng = np.random.RandomState(23455)
 
     print 'loading parameters...'
@@ -23,19 +25,11 @@ def train_style(content_image_path, style_image_path, blank_image_path):
 
     style = np.reshape(preprocess_image(style_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
 
-    s1 = v.conv1_1.output.eval({v.x: style})
-    s2 = v.conv2_1.output.eval({v.x: style})
-    s3 = v.conv3_1.output.eval({v.x: style})
-    s4 = v.conv4_1.output.eval({v.x: style})
-    s5 = v.conv5_1.output.eval({v.x: style})
-
     content = np.reshape(preprocess_image(content_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
-
-    c1 = v.conv4_2.output.eval({v.x: content})
 
     blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
 
-    loss = total_loss()
+    loss = total_loss(style, content, blank, v, style_layers, content_layer, alpha, beta, p['filter_shape'])
 
     grad = T.grad(loss, blank)
 
@@ -45,7 +39,7 @@ def train_style(content_image_path, style_image_path, blank_image_path):
 
     train_model = theano.function(
         [blank],
-        cost,
+        loss,
         updates=updates,
         givens={
             x: blank
@@ -53,5 +47,11 @@ def train_style(content_image_path, style_image_path, blank_image_path):
     )
 
     print('... training')
-    train_nn(train_model, n_epochs)
+
+    for i in range(n_epochs):
+        loss = train_model(blank)
+        print (loss)
+
+    return loss
+
 
