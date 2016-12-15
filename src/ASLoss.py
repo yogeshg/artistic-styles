@@ -39,8 +39,8 @@ def getStyleLoss(Fl,al,N,M,wl):
 def total_loss(style_image,content_image,generated_image,vgg,style_layers,content_layer,alpha,beta,filter_shape):
     loss = T.scalar('loss')
     # add content loss
-    Fl = getattr(vgg,content_layer).output
-    Pl = getattr(vgg,content_layer).output
+    Fl = getattr(vgg,content_layer).output.eval({v.x:generated_image})[0]
+    Pl = getattr(vgg,content_layer).output.eval({v.x:style_image})[0]
     loss+=alpha * getContentLoss(Fl,Pl)
     for layer in style_layers:
         Fl = getattr(vgg,layer).output.eval({v.x:generated_image})[0]
