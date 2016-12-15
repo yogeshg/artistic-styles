@@ -39,12 +39,15 @@ def getStyleLoss(Fl,al,N,M,wl):
 def total_loss(style_image,content_image,generated_image,vgg,style_layers,content_layer,alpha,beta,filter_shape):
     loss = T.scalar('loss')
     # add content loss
-    Fl = getattr(vgg,content_layer).output.eval({vgg.x:generated_image})[0]
-    Pl = getattr(vgg,content_layer).output.eval({vgg.x:content_image})[0]
+    layer=content_layer
+    get_layer = theano.function([vgg.x], getattr(vgg,layer).output, allow_input_downcast=True)
+    Fl = get_layer(generated_image)[0]
+    Pl = get_layer(content_image)[0]
     loss+=alpha * getContentLoss(Fl,Pl)
     for layer in style_layers:
-        Fl = getattr(vgg,layer).output.eval({vgg.x:generated_image})[0]
-        al = getattr(vgg,layer).output.eval({vgg.x:style_image})[0]
+        get_layer = theano.function([vgg.x], getattr(vgg,layer).output, allow_input_downcast=True)
+        Fl = get_layer(generated_image)[0]
+        al = get_layer(style_image)[0]
         wl = 0.2
         N =filter_shape[layer][-3]
         M =filter_shape[layer][-1]*filter_shape[layer][-2]
@@ -71,13 +74,15 @@ def getStyleLoss_numpy(Fl,al,N,M,wl):
 def total_loss_numpy(style_image,content_image,generated_image,vgg,style_layers,content_layer,alpha,beta):
     loss = 0
     # add content loss
-    Fl = getattr(vgg,content_layer).output.eval({vgg.x:generated_image})[0]
-    Pl = getattr(vgg,content_layer).output.eval({vgg.x:content_image})[0]
+    get_layer = theano.function([vgg.x], getattr(vgg,layer).output, allow_input_downcast=True)
+    Fl = get_layer(generated_image)[0]
+    Pl = get_layer(content_image)[0]
     loss+=alpha * getContentLoss_numpy(Fl,Pl)
     print loss
     for layer in style_layers:
-        Fl = getattr(vgg,layer).output.eval({vgg.x:generated_image})[0]
-        al = getattr(vgg,layer).output.eval({vgg.x:style_image})[0]
+        get_layer = theano.function([vgg.x], getattr(vgg,layer).output, allow_input_downcast=True)
+        Fl = get_layer(generated_image)[0]
+        al = get_layer(style_image)[0]
         wl = 0.2
         N =Fl.shape[0]
         M =Fl.shape[-1]*Fl.shape[-2]
