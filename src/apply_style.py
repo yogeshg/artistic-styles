@@ -11,6 +11,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layer = 'conv4_2', n_epochs=10):
 
+    new_image = T.matrix()
+
     rng = np.random.RandomState(23455)
 
     print 'loading parameters...'
@@ -27,9 +29,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
 
-    loss = total_loss(style, content, blank, v, style_layers, content_layer, alpha, beta, p['filter_shape'])
-
-    new_image = T.matrix()
+    loss = total_loss(style, content, new_image, v, style_layers, content_layer, alpha, beta, p['filter_shape'])
 
     grad = T.grad(loss, new_image)
 
