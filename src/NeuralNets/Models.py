@@ -47,6 +47,10 @@ class VGG_19():
         name=layer_names[i]
 
         x = T.matrix('x')  # the data is presented as rasterized images
+        y = T.ivector('y')  # the labels are presented as 1D vector of
+                            # [int] labels
+
+
         layer0_input = x
 
         self.conv1_1 = LeNetConvLayer(
@@ -381,25 +385,31 @@ class VGG_19():
             b=numpy.zeros(1000)
         )
         # the cost we minimize during training is the NLL of the model
-        cost = self.prob.negative_log_likelihood(y)
+        self.cost = self.prob.negative_log_likelihood(y)
 
         # create a function to compute the mistakes that are made by the model
-        test_model = theano.function(
-            [index],
+        self.test_model = theano.function(
+            [x,y],
             self.prob.errors(y),
-            givens={
-                x: test_set_x[index * batch_size: (index + 1) * batch_size],
-                y: test_set_y[index * batch_size: (index + 1) * batch_size]
-            }
+            allow_input_downcast=True
         )
+        print('Test model compiled...')
+
+        self.validate_model = theano.function(
+            [x,y],
+            self.prob.errors(y),
+            allow_input_downcast=True
+        )
+        print('Validate model compiled...')
 
         # create a list of all model parameters to be fit by gradient descent
-        params = self.conv1_1.params+self.conv1_2.params+\
-                self.conv2_1.params+self.conv2_2.params+\
-                self.conv3_1.params+self.conv3_2.params+self.conv3_3.params+self.conv3_4.params+\
-                self.conv4_1.params+self.conv4_2.params+self.conv4_3.params+self.conv4_4.params+\
-                self.conv5_1.params+self.conv5_2.params+self.conv5_3.params+self.conv5_4.params+\
-                self.fc6.params+self.fc7.params+self.fc8.params
+        params = np.sum([ (getattr(self, l, None)).params for l in self.layer_names ]);
+        # params = self.conv1_1.params+self.conv1_2.params+\
+        #         self.conv2_1.params+self.conv2_2.params+\
+        #         self.conv3_1.params+self.conv3_2.params+self.conv3_3.params+self.conv3_4.params+\
+        #         self.conv4_1.params+self.conv4_2.params+self.conv4_3.params+self.conv4_4.params+\
+        #         self.conv5_1.params+self.conv5_2.params+self.conv5_3.params+self.conv5_4.params+\
+        #         self.fc6.params+self.fc7.params+self.fc8.params
 
         # create a list of gradients for all model parameters
         grads = T.grad(cost, params)
@@ -415,16 +425,12 @@ class VGG_19():
             ]
 
         self.train_model = theano.function(
-            [index],
+            [x,y],
             cost,
             updates=updates,
-            givens={
-                x: train_set_x[index * batch_size: (index + 1) * batch_size],
-                y: train_set_y[index * batch_size: (index + 1) * batch_size]
-            }
+            allow_input_downcast=True ## To allow float64 values to be changed to float32
         )
-
-        return train_model, validate_model, test_model
+        print('Train model compiled...')
 
     def __str__(self):
         layers_strs = [ l+":\t"+str(getattr(self, l, 'LAYER_NOT_SET')) for l in self.layer_names ]
