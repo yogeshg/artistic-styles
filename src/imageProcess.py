@@ -12,7 +12,7 @@ def preprocess_image(paths,resize=True):
         image = Image.open(path,'r').convert('RGB')
         w,h = image.size
         # resize so smallest dimenison = 256 (preserve aspect ratio)
-        if crop:
+        if resize:
             if h<w:
                 image = image.resize((w*256/h,256),resample=Image.BILINEAR)
             else:
