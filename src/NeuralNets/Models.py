@@ -30,7 +30,7 @@ from ImportParameters import load_layer_params
 from collections import defaultdict
 
 class VGG_19():
-    def __init__(self, rng, datasets, filter_shape, batch_size=10, learning_rate=0.1,
+    def __init__(self, rng, datasets, filter_shape, batch_size=1, learning_rate=0.1,
                     Weights=None,bias=None,image_size=(3,224,224)):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
@@ -374,6 +374,8 @@ class VGG_19():
             updates=updates,
             allow_input_downcast=True ## To allow float64 values to be changed to float32
         )
+
+        self.x = x
         print('Train model compiled...')
 
     def __str__(self):
