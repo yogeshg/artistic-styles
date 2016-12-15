@@ -10,6 +10,4 @@ p = load_layer_params('imagenet-vgg-verydeep-19.mat')
 
 print 'creating vgg19...'
 
-v = VGG_19( rng, None, p['filter_shape'], p['pool_shape'])
-
-
+v = VGG_19( rng, None, p['filter_shape'])
