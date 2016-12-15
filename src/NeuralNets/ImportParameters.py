@@ -29,7 +29,7 @@ def load_layer_params(params_file):
     def check_dataset(dataset):
         # Check if dataset is in the data directory.
         new_path = os.path.join(
-            os.path.split(__file__)[0],
+            os.getcwd(),
             "data",
             dataset
         )
@@ -76,4 +76,6 @@ def load_layer_params(params_file):
         except:
             pool_shape[layer_name] = None
 
+    # return names,types,weights,bias,filter_shape,pool_shape
     return { 'names': names, 'types': types, 'weights': weights, 'bias': bias, 'filter_shape': filter_shape, 'pool_shape': pool_shape }
+
