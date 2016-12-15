@@ -30,15 +30,16 @@ from ImportParameters import load_layer_params
 from collections import defaultdict
 
 class VGG_19():
-    def __init__(self, rng, datasets, filter_shape, batch_size=10, learning_rate=0.1,
+    def __init__(self, rng, datasets, filter_shape, pool_shape, batch_size=10, learning_rate=0.1,
                     Weights=None,bias=None,image_size=(3,224,224)):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
                                 ,"conv5_1","conv5_2","conv5_3","conv5_4","pool5","fc6","drop6","fc7","drop7","fc8","prob"]
-        if Weights == None:
+        if((Weights == None) or (bias == None)):
             Weights = {}
-            for name in layer_names:
+            bias = {}
+            for name in self.layer_names:
                 Weights[name]=None
                 bias[name]=None
 
@@ -49,7 +50,7 @@ class VGG_19():
                             # [int] labels
 
 
-        layer0_input = x
+        layer0_input = x.reshape((batch_size, d, w, h))
 
         self.conv1_1 = LeNetConvLayer(
             rng,
