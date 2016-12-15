@@ -39,10 +39,12 @@ def train_style(content_image_path, style_image_path, blank_image_path):
 
     grad = T.grad(loss, blank)
 
-    updates =
+    updates = [
+        (blank, blank - learning_rate * grad)
+    ]
 
     train_model = theano.function(
-        [],
+        [blank],
         cost,
         updates=updates,
         givens={
@@ -51,4 +53,5 @@ def train_style(content_image_path, style_image_path, blank_image_path):
     )
 
     print('... training')
+    train_nn(train_model, n_epochs)
 
