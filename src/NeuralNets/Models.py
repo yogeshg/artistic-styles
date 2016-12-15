@@ -43,8 +43,6 @@ class VGG_19():
                 bias[name]=None
 
         d,w,h=image_size
-        i=0
-        name=layer_names[i]
 
         x = T.matrix('x')  # the data is presented as rasterized images
         y = T.ivector('y')  # the labels are presented as 1D vector of
@@ -57,305 +55,247 @@ class VGG_19():
             rng,
             input=layer0_input,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv1_1'],
+            W=Weights['conv1_1'],
+            b=bias['conv1_1']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv1_1'][0]
+
         self.conv1_2 = LeNetConvLayer(
             rng,
             input=self.conv1_1.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv1_2'],
+            W=Weights['conv1_2'],
+            b=bias['conv1_2']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
+        #new image dimensions
+        d = filter_shape['conv1_2'][0]
         name=layer_names[i]
         pool1_output = pool.pool_2d(
                 input=self.conv1_2.output,
-                ds=pool_shape[name],
+                ds=pool_shape['pool1'],
                 ignore_border=True
             )
-        i+=1
-        #new image dimensions
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        w = w/pool_shape['pool1'][0]
+        h = h/pool_shape['pool1'][1]
+
         self.conv2_1 = LeNetConvLayer(
             rng,
             input=pool1_output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv2_1'],
+            W=Weights['conv2_1'],
+            b=bias['conv2_1']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        d = filter_shape['conv2_1'][0]
+
         self.conv2_2 = LeNetConvLayer(
             rng,
             input=self.conv2_1.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv2_2'],
+            W=Weights['conv2_2'],
+            b=bias['conv2_2']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        d = filter_shape['conv2_2'][0]
+
         pool2_output   = pool.pool_2d(
                 input=self.conv2_2.output,
-                ds=pool_shape[name],
+                ds=pool_shape['pool2'],
                 ignore_border=True
             )
-        i+=1
-        #new image dimensions
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        w = w/pool_shape['pool2'][0]
+        h = h/pool_shape['pool2'][1]
+
         self.conv3_1 = LeNetConvLayer(
             rng,
             input=self.pool2_output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv3_1'],
+            W=Weights['conv3_1'],
+            b=bias['conv3_1']
         )
-        i+=1
         #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
-
-        name=layer_names[i]
+        d = filter_shape['conv3_1'][0]
+        
         self.conv3_2 = LeNetConvLayer(
             rng,
             input=self.conv3_1.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv3_2'],
+            W=Weights['conv3_2'],
+            b=bias['conv3_2']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv3_2'][0]
+
         self.conv3_3 = LeNetConvLayer(
             rng,
             input=self.conv3_2.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv3_3'],
+            W=Weights['conv3_3'],
+            b=bias['conv3_3']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        d = filter_shape['conv3_3'][0]
+
         self.conv3_4 = LeNetConvLayer(
             rng,
             input=self.conv3_3.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv3_4'],
+            W=Weights['conv3_4'],
+            b=bias['conv3_4']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        d = filter_shape['conv3_4'][0]
+
         pool3_output   = pool.pool_2d(
                 input=self.conv3_4.output,
-                ds=pool_shape[name],
+                ds=pool_shape['pool3'],
                 ignore_border=True
             )
-        i+=1
-        #new image dimensions
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        w = w/pool_shape['pool3'][0]
+        h = h/pool_shape['pool3'][1]
+
         self.conv4_1 = LeNetConvLayer(
             rng,
             input=pool3_output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv4_1'],
+            W=Weights['conv4_1'],
+            b=bias['conv4_1']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv4_1'][0]
+
         self.conv4_2 = LeNetConvLayer(
             rng,
             input=self.conv4_1.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv4_2'],
+            W=Weights['conv4_2'],
+            b=bias['conv4_2']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv4_2'][0]
+
         self.conv4_3 = LeNetConvLayer(
             rng,
             input=self.conv4_2.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv4_3'],
+            W=Weights['conv4_3'],
+            b=bias['conv4_3']
         )
-        i+=1
         #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
+        d = filter_shape['conv4_3'][0]
 
-        name=layer_names[i]
         self.conv4_4 = LeNetConvLayer(
             rng,
             input=self.conv4_3.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv4_4'],
+            W=Weights['conv4_4'],
+            b=bias['conv4_4']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv4_4'][0]
+
         pool4_output   = pool.pool_2d(
                 input=self.conv4_4.output,
                 ds=pool_shape[name],
                 ignore_border=True
             )
-        i+=1
-        #new image dimensions
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        w = w/pool_shape['pool4'][0]
+        h = h/pool_shape['pool4'][1]
+
         self.conv5_1 = LeNetConvLayer(
             rng,
             input=pool4_output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv5_1'],
+            W=Weights['conv5_1'],
+            b=bias['conv5_1']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv5_1'][0]
+
         self.conv5_2 = LeNetConvLayer(
             rng,
             input=self.conv5_1.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv5_2'],
+            W=Weights['conv5_2'],
+            b=bias['conv5_2']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv5_2'][0]
+
         self.conv5_3 = LeNetConvLayer(
             rng,
             input=self.conv5_2.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv5_3'],
+            W=Weights['conv5_3'],
+            b=bias['conv5_3']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv5_3'][0]
+
         self.conv5_4 = LeNetConvLayer(
             rng,
             input=self.conv5_3.output,
             image_shape=(batch_size, d, w, h),
-            filter_shape=filter_shape[name],
-            W=Weights[name],
-            b=bias[name]
+            filter_shape=filter_shape['conv5_4'],
+            W=Weights['conv5_4'],
+            b=bias['conv5_4']
         )
-        i+=1
-        #new image dimensions
-        d = filter_shape[name][0]
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
 
-        name=layer_names[i]
+        #new image dimensions
+        d = filter_shape['conv5_4'][0]
+
         pool5_output   = pool.pool_2d(
                 input=self.conv5_4.output,
-                ds=pool_shape[name],
+                ds=pool_shape['pool5'],
                 ignore_border=True
             )
-        i+=1
+
         #new image dimensions
-        w = w/pool_shape[name][0]
-        h = h/pool_shape[name][1]
+        w = w/pool_shape['pool5'][0]
+        h = h/pool_shape['pool5'][1]
 
         fc6_input = pool5_output.flatten(2)
 
-        name=layer_names[i]
         self.fc6     = HiddenLayer(
             rng,
             input=fc6_input,
             n_in=d * w * h,
             n_out=4096,
-            activation=T.nnet.relu
+            activation=T.nnet.relu,
+            W=Weights['fc6'],
+            b=bias['fc6']
         )
         self.drop6   = drop(self.fc6.output, p=0.5)
 
@@ -364,18 +304,22 @@ class VGG_19():
             input=self.drop6 ,
             n_in=4096,
             n_out=4096,
-            activation=T.nnet.relu
+            activation=T.nnet.relu,
+            W=Weights['fc7'],
+            b=bias['fc7']
         )
 
         self.drop7   = drop(self.fc7.output, p=0.5)
 
-        self.fc8     = HiddenLayer(
-            rng,
-            input=self.drop6 ,
-            n_in=4096,
-            n_out=1000,
-            activation=None
-        )
+        self.fc8     = HiddenLayer(                         ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            rng,                                            ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            input=self.drop6 ,                              ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            n_in=4096,                                      ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            n_out=1000,                                     ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            activation=None,                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            W=Weights['fc8'],                               ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            b=bias['fc8']                                   ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+        )                                                   ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
 
         self.prob    = LogisticRegression(
             input=self.fc8.output,

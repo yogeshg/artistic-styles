@@ -76,4 +76,4 @@ def load_layer_params(params_file):
         except:
             pool_shape[layer_name] = None
 
-    return names,types,weights,bias,filter_shape,pool_shape
+    return { 'names': names, 'types': types, 'weights': weights, 'bias': bias, 'filter_shape': filter_shape, 'pool_shape': pool_shape }
