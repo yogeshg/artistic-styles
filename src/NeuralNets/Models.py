@@ -344,31 +344,31 @@ class VGG_19():
 
         name=layer_names[i]
         self.fc6     = HiddenLayer(
-        rng,
-        input=fc6_input,
-        n_in=d * w * h,
-        n_out=4096,
-        activation=T.nnet.relu
-    )
+            rng,
+            input=fc6_input,
+            n_in=d * w * h,
+            n_out=4096,
+            activation=T.nnet.relu
+        )
         self.drop6   = drop(self.fc6.output, p=0.5)
 
         self.fc7     = HiddenLayer(
-        rng,
-        input=self.drop6 ,
-        n_in=4096,
-        n_out=4096,
-        activation=T.nnet.relu
-    )
+            rng,
+            input=self.drop6 ,
+            n_in=4096,
+            n_out=4096,
+            activation=T.nnet.relu
+        )
 
         self.drop7   = drop(self.fc7.output, p=0.5)
 
         self.fc8     = HiddenLayer(
-        rng,
-        input=self.drop6 ,
-        n_in=4096,
-        n_out=1000,
-        activation=None
-    )
+            rng,
+            input=self.drop6 ,
+            n_in=4096,
+            n_out=1000,
+            activation=None
+        )
 
         self.prob    = LogisticRegression(
             input=self.fc8.output,
@@ -377,7 +377,60 @@ class VGG_19():
             W=numpy.identity(1000),
             b=numpy.zeros(1000)
         )
-        return
+        # the cost we minimize during training is the NLL of the model
+        cost = self.prob.negative_log_likelihood(y)
+
+        # create a function to compute the mistakes that are made by the model
+        test_model = theano.function(
+            [index],
+            self.prob.errors(y),
+            givens={
+                x: test_set_x[index * batch_size: (index + 1) * batch_size],
+                y: test_set_y[index * batch_size: (index + 1) * batch_size]
+            }
+        )
+
+        validate_model = theano.function(
+            [index],
+            self.prob.errors(y),
+            givens={
+                x: valid_set_x[index * batch_size: (index + 1) * batch_size],
+                y: valid_set_y[index * batch_size: (index + 1) * batch_size]
+            }
+        )
+
+        # create a list of all model parameters to be fit by gradient descent
+        params = self.conv1_1.params+self.conv1_2.params+\
+                self.conv2_1.params+self.conv2_2.params+\
+                self.conv3_1.params+self.conv3_2.params+self.conv3_3.params+self.conv3_4.params+\
+                self.conv4_1.params+self.conv4_2.params+self.conv4_3.params+self.conv4_4.params+\
+                self.conv5_1.params+self.conv5_2.params+self.conv5_3.params+self.conv5_4.params+\
+                self.fc6.params+self.fc7.params+self.fc8.params
+
+        # create a list of gradients for all model parameters
+        grads = T.grad(cost, params)
+
+        # train_model is a function that updates the model parameters by
+        # SGD Since this model has many parameters, it would be tedious to
+        # manually create an update rule for each model parameter. We thus
+        # create the updates list by automatically looping over all
+        # (params[i], grads[i]) pairs.
+        updates = [
+            (param_i, param_i - learning_rate * grad_i)
+            for param_i, grad_i in zip(params, grads)
+            ]
+
+        train_model = theano.function(
+            [index],
+            cost,
+            updates=updates,
+            givens={
+                x: train_set_x[index * batch_size: (index + 1) * batch_size],
+                y: train_set_y[index * batch_size: (index + 1) * batch_size]
+            }
+        )
+
+        return train_model, validate_model, test_model
 
     def __str__(self):
         layers_strs = [ l+":\t"+str(getattr(self, l, 'LAYER_NOT_SET')) for l in self.layer_names ]
