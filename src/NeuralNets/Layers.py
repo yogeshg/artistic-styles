@@ -11,16 +11,18 @@ This code is based on
 [3] http://deeplearning.net/tutorial/lenet.html
 """
 
+import logging
 import timeit
 import inspect
 import sys
-import numpy
-from theano.tensor.nnet import conv
+import numpy as np
+# from theano.tensor.nnet import conv
 import theano
 import theano.tensor as T
 from theano.tensor.nnet import conv2d
-from theano.tensor.signal import pool
-# from theano.tensor.signal.pool import downsample
+# from theano.tensor.signal import pool
+
+from Utils import about
 
 class LogisticRegression(object):
     """Multi-class Logistic Regression Class
@@ -31,42 +33,37 @@ class LogisticRegression(object):
     determine a class membership probability.
     """
 
-    def __init__(self, input, n_in, n_out,W=None,b=None):
-        """ Initialize the parameters of the logistic regression
+    def __init__(self, input, n_in, n_out,W_values=None,b_values=None):
 
-        :type input: theano.tensor.TensorType
-        :param input: symbolic variable that describes the input of the
-                      architecture (one minibatch)
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.debug('Initializing...')
 
-        :type n_in: int
-        :param n_in: number of input units, the dimension of the space in
-                     which the datapoints lie
+        assert (type (input) in (theano.tensor.dtensor4, theano.tensor.TensorVariable)), type (input)
+        assert (type (n_in) == int ), type(n_in)
+        assert (type (n_out) == int ), type(n_out)
+        assert (type (W_values) in (type(None), np.ndarray)), type (W_values)
+        assert (type (b_values) in (type(None), np.ndarray)), type (b_values)
 
-        :type n_out: int
-        :param n_out: number of output units, the dimension of the space in
-                      which the labels lie
+        self.logger.debug( 'input' + about(input) )
+        self.logger.debug( 'W_values' + about(W_values) )
+        self.logger.debug( 'b_values' + about(b_values) )
 
-        """
+        self.input = input
+
         # initialize with 0 the weights W as a matrix of shape (n_in, n_out)
-        if W == None:
-            W = theano.shared(
-                value=numpy.zeros(
+        if W_values is None:
+            W_values = np.zeros(
                     (n_in, n_out),
                     dtype=theano.config.floatX
-                ),
-                name='W',
-                borrow=True
-            )
-        if b == None:
+                )
+        # W = theano.shared(value=W_values, name='W', borrow=True)
+        W = W_values
+
+        if b_values is None:
             # initialize the biases b as a vector of n_out 0s
-            b = theano.shared(
-                value=numpy.zeros(
-                    (n_out,),
-                    dtype=theano.config.floatX
-                ),
-                name='b',
-                borrow=True
-            )
+            b_values = np.zeros((n_out,),dtype=theano.config.floatX)
+        # b = theano.shared( value=b_values, name='b', borrow=True)
+        b = b_values
 
         self.W=W
         self.b=b
@@ -152,32 +149,23 @@ class LogisticRegression(object):
             raise NotImplementedError()
 
 class HiddenLayer(object):
-    def __init__(self, rng, input, n_in, n_out, W=None, b=None,
+    def __init__(self, rng, input, n_in, n_out, W_values=None, b_values=None,
                  activation=T.tanh):
-        """
-        Typical hidden layer of a MLP: units are fully-connected and have
-        sigmoidal activation function. Weight matrix W is of shape (n_in,n_out)
-        and the bias vector b is of shape (n_out,).
-        NOTE : The nonlinearity used here is tanh
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.debug('Initializing...')
 
-        Hidden unit activation is given by: tanh(dot(input,W) + b)
+        assert (type (rng) == np.random.RandomState), type (rng)
+        assert (type (input) in (theano.tensor.dtensor4, theano.tensor.TensorVariable)), type (input)
+        assert (type (n_in) == int ), type(n_in)
+        assert (type (n_out) == int ), type(n_out)
+        try:
+            assert (type (activation) in (theano.Op, type(None))), type (activation)
+        except Exception, e:
+            self.logger.exception(e)
+            
+        assert (type (W_values) in (type(None), np.ndarray)), type (W_values)
+        assert (type (b_values) in (type(None), np.ndarray)), type (b_values)
 
-        :type rng: numpy.random.RandomState
-        :param rng: a random number generator used to initialize weights
-
-        :type input: theano.tensor.dmatrix
-        :param input: a symbolic tensor of shape (n_examples, n_in)
-
-        :type n_in: int
-        :param n_in: dimensionality of input
-
-        :type n_out: int
-        :param n_out: number of hidden units
-
-        :type activation: theano.Op or function
-        :param activation: Non linearity to be applied in the hidden
-                           layer
-        """
         self.input = input
 
         # `W` is initialized with `W_values` which is uniformely sampled
@@ -192,11 +180,11 @@ class HiddenLayer(object):
         #        compared to tanh
         #        We have no info for other function, so we use the same as
         #        tanh.
-        if W is None:
-            W_values = numpy.asarray(
+        if W_values is None:
+            W_values = np.asarray(
                 rng.uniform(
-                    low=-numpy.sqrt(6. / (n_in + n_out)),
-                    high=numpy.sqrt(6. / (n_in + n_out)),
+                    low=-np.sqrt(6. / (n_in + n_out)),
+                    high=np.sqrt(6. / (n_in + n_out)),
                     size=(n_in, n_out)
                 ),
                 dtype=theano.config.floatX
@@ -204,11 +192,11 @@ class HiddenLayer(object):
             if activation == theano.tensor.nnet.sigmoid:
                 W_values *= 4
 
-            W = theano.shared(value=W_values, name='W', borrow=True)
+        W = theano.shared(value=W_values, name='W', borrow=True)
 
-        if b is None:
-            b_values = numpy.zeros((n_out,), dtype=theano.config.floatX)
-            b = theano.shared(value=b_values, name='b', borrow=True)
+        if b_values is None:
+            b_values = np.zeros((n_out,), dtype=theano.config.floatX)
+        b = theano.shared(value=b_values, name='b', borrow=True)
 
         self.W = W
         self.b = b
@@ -230,50 +218,45 @@ class HiddenLayer(object):
 class LeNetConvLayer(object):
     """Convolutional Layer"""
 
-    def __init__(self, rng, input, filter_shape, image_shape,W=None,b=None):
-        """
-        Allocate a LeNetConvPoolLayer with shared variable internal parameters.
+    def __init__(self, rng, input, filter_shape, image_shape,W_values=None,b_values=None):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.debug('Initializing...')
 
-        :type rng: numpy.random.RandomState
-        :param rng: a random number generator used to initialize weights
-
-        :type input: theano.tensor.dtensor4
-        :param input: symbolic image tensor, of shape image_shape
-
-        :type filter_shape: tuple or list of length 4
-        :param filter_shape: (number of filters, num input feature maps,
-                              filter height, filter width)
-
-        :type image_shape: tuple or list of length 4
-        :param image_shape: (batch size, num input feature maps,
-                             image height, image width)
-
-        """
+        assert (type (rng) == np.random.RandomState), type (rng)
+        assert (type (input) in (theano.tensor.dtensor4, theano.tensor.TensorVariable)), type (input)
+        assert (type (filter_shape) in (tuple, list)), type (filter_shape)
+        assert (len (filter_shape) == 4), len (filter_shape)
+        assert (type (image_shape) in (tuple, list)), type (image_shape)
+        assert (len (image_shape) == 4), len (image_shape)
+        assert (type (W_values) in (type(None), np.ndarray)), type (W_values)
+        assert (type (b_values) in (type(None), np.ndarray)), type (b_values)
 
         assert image_shape[1] == filter_shape[1]
         self.input = input
 
         # there are "num input feature maps * filter height * filter width"
         # inputs to each hidden unit
-        fan_in = numpy.prod(filter_shape[1:])
+        fan_in = np.prod(filter_shape[1:])
         # each unit in the lower layer receives a gradient from:
         # "num output feature maps * filter height * filter width" /
         #   pooling size
-        fan_out = (filter_shape[0] * numpy.prod(filter_shape[2:]))
+        fan_out = (filter_shape[0] * np.prod(filter_shape[2:]))
         # initialize weights with random weights
-        W_bound = numpy.sqrt(6. / (fan_in + fan_out))
-        if W==None:
-            W = theano.shared(
-                numpy.asarray(
+        W_bound = np.sqrt(6. / (fan_in + fan_out))
+
+        self.logger.debug('W_values: '+about(W_values))
+        if type(W_values)==type(None):
+            W_values = np.asarray(
                     rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
                     dtype=theano.config.floatX
-                    ),
-                borrow=True
-                )
-        if b==None:
+                    )
+        W = theano.shared( W_values, borrow=True)
+
+        self.logger.debug('b_values: '+about(b_values))
+        if type(b_values)==type(None):
             # the bias is a 1D tensor -- one bias per output feature map
-            b_values = numpy.zeros((filter_shape[0],), dtype=theano.config.floatX)
-            b = theano.shared(value=b_values, borrow=True)
+            b_values = np.zeros((filter_shape[0],), dtype=theano.config.floatX)
+        b = theano.shared(value=b_values, borrow=True)
 
         self.W = W
         self.b = b
@@ -309,7 +292,7 @@ def drop(input, p=0.5):
     :param p: p probability of NOT dropping out a unit, therefore (1.-p) is the drop rate.
 
     """
-    rng = numpy.random.RandomState(1234)
+    rng = np.random.RandomState(1234)
     srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
     mask = srng.binomial(n=1, p=p, size=input.shape, dtype=theano.config.floatX)
     return input * mask
@@ -320,7 +303,7 @@ class DropoutHiddenLayer(object):
         """
         Hidden unit activation is given by: activation(dot(input,W) + b)
 
-        :type rng: numpy.random.RandomState
+        :type rng: np.random.RandomState
         :param rng: a random number generator used to initialize weights
 
         :type is_train: theano.iscalar
@@ -345,10 +328,10 @@ class DropoutHiddenLayer(object):
         self.input = input
 
         if W is None:
-            W_values = numpy.asarray(
+            W_values = np.asarray(
                 rng.uniform(
-                    low=-numpy.sqrt(6. / (n_in + n_out)),
-                    high=numpy.sqrt(6. / (n_in + n_out)),
+                    low=-np.sqrt(6. / (n_in + n_out)),
+                    high=np.sqrt(6. / (n_in + n_out)),
                     size=(n_in, n_out)
                 ),
                 dtype=theano.config.floatX
@@ -359,7 +342,7 @@ class DropoutHiddenLayer(object):
             W = theano.shared(value=W_values, name='W', borrow=True)
 
         if b is None:
-            b_values = numpy.zeros((n_out,), dtype=theano.config.floatX)
+            b_values = np.zeros((n_out,), dtype=theano.config.floatX)
             b = theano.shared(value=b_values, name='b', borrow=True)
 
 

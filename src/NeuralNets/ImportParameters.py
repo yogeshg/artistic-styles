@@ -64,7 +64,7 @@ def load_layer_params(params_file):
         except:
             weights[layer_name] = None
         try:
-            bias[layer_name] = layer[0][0][2][0][1].T
+            bias[layer_name] = (layer[0][0][2][0][1].T)[0]
         except:
             bias[layer_name] = None
         try:

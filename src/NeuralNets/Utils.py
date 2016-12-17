@@ -10,6 +10,8 @@ import os
 import timeit
 import inspect
 import sys
+import re
+
 import numpy
 import scipy.io
 import tarfile
@@ -24,6 +26,17 @@ def sharedX(X, dtype=theano.config.floatX, name=None):
 
 def shared_zeros(shape, dtype=theano.config.floatX, name=None):
     return sharedX(numpy.zeros(shape), dtype=dtype, name=name)
+
+WORDBOUNDS_REGEX = re.compile(r'\s+')
+
+def about(x):
+    strx = str(x)
+    strx = WORDBOUNDS_REGEX.sub(' ', strx)
+    lenx = len(strx)
+    if(lenx > 70):
+        strx=strx[:70]+'...'+str(lenx)
+
+    return str(type(x))+'\n'+strx
 
 # RMS prop algo
 class RmsProp():
