@@ -10,22 +10,23 @@ def preprocess_image(paths,resize=True):
     images = []
     for path in paths:
         image = Image.open(path,'r').convert('RGB')
-        w,h = image.size
-        # resize so smallest dimenison = 256 (preserve aspect ratio)
         if resize:
-            if h<w:
-                image = image.resize((w*256/h,256),resample=Image.BILINEAR)
-            else:
-                image = image.resize((256,h*256/w),resample=Image.BILINEAR)
-            # crop the images to 224x224
-            #get the new shape of the image
-            w1,h1 = image.size
-            #get the bounds of the box
-            right = w1//2 + 112
-            left =w1//2 - 112
-            top = h1//2 - 112
-            bottom = h1//2 + 112
-            image = image.crop((left,top,right,bottom))
+            w,h = image.size
+            # resize so smallest dimenison = 256 (preserve aspect ratio)
+            if resize:
+                if h<w:
+                    image = image.resize((w*256/h,256),resample=Image.BILINEAR)
+                else:
+                    image = image.resize((256,h*256/w),resample=Image.BILINEAR)
+                # crop the images to 224x224
+                #get the new shape of the image
+                w1,h1 = image.size
+                #get the bounds of the box
+                right = w1//2 + 112
+                left =w1//2 - 112
+                top = h1//2 - 112
+                bottom = h1//2 + 112
+                image = image.crop((left,top,right,bottom))
 
         im = numpy.asarray(image)
         imcopy = numpy.zeros(im.shape)
