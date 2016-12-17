@@ -50,10 +50,8 @@ def deprocess_image(image_array):
     # put channels last
     assert image_array.ndim==4
     image_array = numpy.rollaxis(image_array,1,4)
-    print image_array.shape
     #BGR -> RGB
     image_array = image_array[:,:,:,::-1]
-    print image_array.shape
     #add mean channel
     image_array_copy = numpy.zeros(image_array.shape)
     image_array_copy[:,:,:,0] = image_array[:,:,:,0] + 103.939
@@ -62,3 +60,8 @@ def deprocess_image(image_array):
     #convert to int between 0 and 254
     image_array_copy = numpy.clip(image_array_copy, 0, 255).astype('uint8')
     return image_array_copy
+
+def np2pil(image_array):
+    assert image_array.ndim==3
+    image = Image.fromarray(image_array)
+    return image

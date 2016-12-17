@@ -4,7 +4,7 @@ logging.basicConfig(level = logging.INFO)
 import matplotlib.pyplot as plt
 from NeuralNets.Models import VGG_19
 from NeuralNets.ImportParameters import load_layer_params
-from imageProcess import preprocess_image
+from imageProcess import preprocess_image,deprocess_image,np2pil
 from ASLoss import total_loss
 
 import numpy as np
@@ -70,7 +70,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     # grad = T.grad((loss), T.nnet.relu(v.x))
     grad = T.grad((loss), (v.x))
 
-    # blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)   
+    # blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
 
     # updates = [
     #     (v.x, v.x - learning_rate * grad)
@@ -81,7 +81,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     grad_sh = theano.shared(np.zeros_like(blank_values))
 
     updates = [
-        (blank_sh, blank_sh + learning_rate * grad),
+        (blank_sh, blank_sh - learning_rate * grad),
         (grad_sh, grad)
     ]
     givens = { v.x : blank_sh }
@@ -101,7 +101,9 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         print 'max of gradient:', g.max()
         print 'mean of gradient:', g.mean()
         try:
-            p = u.vector2pil( o[0].reshape((3,224,224)) )
+            p = np2pil( deprocess_image(o.reshape((1,3,224,224)))[0])
+            #p = np2pil( o.reshape((1,3,224,224))[0])
+            #p = np2pil(deprocess_image(np.reshape(o,(1,3,224,224)))[0])
             p.save('./data/gen_'+str(i)+'.jpg')
             print('./data/gen_'+str(i)+'.jpg'+'   saved')
         except Exception, e:
@@ -109,8 +111,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
             print e
     return loss
 
-train_style(1, 0, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
+train_style(1, 0, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/starry_night_google.jpg',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10)
-
-
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate =1e-8)
