@@ -36,18 +36,27 @@ def getStyleLoss(Fl,al,N,M,wl):
     El = ((1/(2.*N*M))**2)*(T.sum(T.pow(Gl-Al,2)))
     return wl*El
 
-def total_loss(style_image,content_image,generated_image,vgg,style_layers,content_layer,alpha,beta,filter_shape):
-    loss = T.scalar('loss')
+def total_loss (style_activations, content_activations, v,
+                      style_layers, content_layers,
+                      alpha, beta, filter_shape):
+    # def total_loss(style_image,content_image,vgg,style_layers,content_layer,alpha,beta,filter_shape):
+    # loss = T.scalar('loss')   # should be intialised(?) to 0
+    loss = 0
     # add content loss
-    layer=content_layer
-    get_layer = theano.function([vgg.x], getattr(vgg,layer).output, allow_input_downcast=True)
-    Fl = get_layer(generated_image)[0]
-    Pl = get_layer(content_image)[0]
-    loss+=alpha * getContentLoss(Fl,Pl)
+
+    assert 'conv4_2' == content_layers[0]
+    Fl = v.conv4_2.output                 # depends on v.x
+    Pl = content_activations['conv4_2']
+
+    loss += alpha * getContentLoss(Fl, Pl)   # (symbolic, np) -> symbolic
+    # Fl = v.conv1_1.output
+    # al = style_activations['conv1_1']
     for layer in style_layers:
         get_layer = theano.function([vgg.x], getattr(vgg,layer).output, allow_input_downcast=True)
-        Fl = get_layer(generated_image)[0]
-        al = get_layer(style_image)[0]
+        Fl = getattr(v, layer, None).output
+        al = style_activations[layer]
+        print('Fl: '+str(Fl))
+        print('al: '+str(al.shape))
         wl = 0.2
         N =filter_shape[layer][-3]
         M =filter_shape[layer][-1]*filter_shape[layer][-2]
