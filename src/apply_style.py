@@ -1,6 +1,7 @@
 import logging
 logging.basicConfig(level = logging.INFO)
 
+import matplotlib.pyplot as plt
 from NeuralNets.Models import VGG_19
 from NeuralNets.ImportParameters import load_layer_params
 from imageProcess import preprocess_image
@@ -10,9 +11,12 @@ import numpy as np
 import theano
 import theano.tensor as T
 
+import NeuralNets.Utils as u
+from PIL import Image
+
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate=0.1):
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=0.000001):
 
 
 
@@ -60,7 +64,11 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
                       alpha, beta, p['filter_shape'])
 
     # loss : symbolic
-    grad = T.grad(loss, v.x)
+    # grad = T.grad(loss, v.x)
+    # grad = T.nnet.relu(T.grad(loss, v.x))
+    # grad = T.grad(T.nnet.relu(loss), v.x)
+    # grad = T.grad((loss), T.nnet.relu(v.x))
+    grad = T.grad((loss), (v.x))
 
     # blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)   
 
@@ -70,9 +78,11 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     blank_values = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224)).astype(np.float32)  # (1,3,224,224)
     blank_sh = theano.shared(blank_values)
+    grad_sh = theano.shared(np.zeros_like(blank_values))
 
     updates = [
-        (blank_sh, blank_sh - learning_rate * grad)
+        (blank_sh, blank_sh + learning_rate * grad),
+        (grad_sh, grad)
     ]
     givens = { v.x : blank_sh }
 
@@ -84,9 +94,22 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         # print sum(blank)
         loss = train_model()
         print (loss)
+        o = blank_sh.get_value()
+        g = grad_sh.get_value()
+        print 'magnitude of gradient:', np.sum(g**2)
+        print 'min of gradient:', g.min()
+        print 'max of gradient:', g.max()
+        print 'mean of gradient:', g.mean()
+        try:
+            p = u.vector2pil( o[0].reshape((3,224,224)) )
+            p.save('./data/gen_'+str(i)+'.jpg')
+            print('./data/gen_'+str(i)+'.jpg'+'   saved')
+        except Exception, e:
+            print o.shape
+            print e
     return loss
 
-train_style(0.5, 0.5, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/whitenoise.jpeg',
+train_style(1, 0, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10)
 

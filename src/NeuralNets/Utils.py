@@ -13,6 +13,7 @@ import sys
 import re
 
 import numpy
+import numpy as np
 import scipy.io
 import tarfile
 import theano
@@ -204,7 +205,7 @@ def vector2image(v):
     return np.reshape(v,(3,32,32)).transpose(1,2,0)
 
 def vector2pil(v):
-    return Image.fromarray(np.uint8(255*np.reshape(v,(3,32,32)).transpose(1,2,0)))
+    return Image.fromarray(np.uint8(255*np.reshape(v,(3,224,224)).transpose(1,2,0)))
 def pil2vector(p):
     return (np.array(p.getdata()).T.flatten()/255.)
 
