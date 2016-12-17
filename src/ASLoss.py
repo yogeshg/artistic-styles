@@ -24,7 +24,7 @@ Style representation
 '''
 
 def gram_matrix(Input):
-    assert Input.ndim==3
+    assert Input.ndim==3, Input.ndim
     X = Input
     X_flat = T.reshape(X,(X.shape[0],X.shape[1]*X.shape[2]))
     gram = T.dot(X_flat, X_flat.T)
@@ -52,9 +52,8 @@ def total_loss (style_activations, content_activations, v,
     # Fl = v.conv1_1.output
     # al = style_activations['conv1_1']
     for layer in style_layers:
-        get_layer = theano.function([vgg.x], getattr(vgg,layer).output, allow_input_downcast=True)
-        Fl = getattr(v, layer, None).output
-        al = style_activations[layer]
+        Fl = getattr(v, layer, None).output[0]
+        al = style_activations[layer][0]
         print('Fl: '+str(Fl))
         print('al: '+str(al.shape))
         wl = 0.2

@@ -25,6 +25,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     style_values = np.reshape(preprocess_image(style_image_path), (1, 3 * 224 * 224)) # (1,3,224,224)
     content_values = np.reshape(preprocess_image(content_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
+    style_values = style_values.astype( np.float32 )
+    content_values = content_values.astype( np.float32 )
 
     content_conv_4_2 = v.conv4_2.output.eval({v.x : content_values})
     style_conv1_1 = v.conv1_1.output.eval({v.x: style_values})
@@ -47,39 +49,43 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         'conv5_1': style_conv5_1
     }
     content_activations = {
-        'conv_4_2': content_conv_4_2
+        'conv4_2': content_conv_4_2
     }
-
 
     loss = total_loss(style_activations, content_activations, v,
                       style_layers, content_layers,
                       alpha, beta, p['filter_shape'])
 
-    # loss : theano
+    # loss : symbolic
     grad = T.grad(loss, v.x)
 
-    blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
+    # blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)   
+
+    # updates = [
+    #     (v.x, v.x - learning_rate * grad)
+    # ]
+
+    blank_values = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224)).astype(np.float32)  # (1,3,224,224)
+    blank_sh = theano.shared(blank_values)
 
     updates = [
-        (blank, blank - learning_rate * grad)
+        (blank_sh, blank_sh - learning_rate * grad)
     ]
+    givens = { v.x : blank_sh }
 
-    train_model = theano.function(
-        [v.x],
-        loss,
-        updates=updates
-    )
+    train_model = theano.function([], loss, updates=updates, givens=givens)
 
     print('... training')
 
     for i in range(n_epochs):
-        print sum(blank)
-        loss = train_model(blank)
+        # print sum(blank)
+        loss = train_model()
         print (loss)
-
     return loss
 
 
 train_style(0.5, 0.5, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/whitenoise.jpeg',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layer = 'conv4_2', n_epochs=10)
+                content_layers = ['conv4_2'], n_epochs=10)
+
+
