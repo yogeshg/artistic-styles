@@ -343,8 +343,8 @@ class VGG_19():
             n_in=int(d * w * h),
             n_out=4096,
             activation=T.nnet.relu,
-            W_values=flatten_2(weights['fc6']),
-            b_values=flatten_2(bias['fc6'])
+            W_values=flatten_2(weights['fc6']).T,
+            b_values=flatten_2(bias['fc6'])[:,0]
         )
         self.fc6_sample = self.fc6.output.eval( self.eval_sample )
         self.logger.info('self.fc6_sample:'+about(self.fc6_sample))
@@ -357,9 +357,8 @@ class VGG_19():
             n_in=4096,
             n_out=4096,
             activation=T.nnet.relu,
-            W_values=flatten_2(weights['fc7']),
-            b_values=flatten_2(bias['fc7'])
-
+            W_values=flatten_2(weights['fc7']).T,
+            b_values=flatten_2(bias['fc7'])[:,0]
         )
         self.fc7_sample = self.fc7.output.eval( self.eval_sample )
         self.logger.info('self.fc7_sample:'+about(self.fc7_sample))
@@ -371,9 +370,9 @@ class VGG_19():
             input=self.drop7 ,                              ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             n_in=4096,                                      ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             n_out=1000,                                     ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
-            activation=T.nnet.relu,                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
-            W_values=flatten_2(weights['fc8']),                               ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
-            b_values=flatten_2(bias['fc8'])                                   ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            activation=None,                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            W_values=flatten_2(weights['fc8']).T,
+            b_values=flatten_2(bias['fc8'])[:,0]
         )                                                   ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
         self.fc8_sample = self.fc8.output.eval( self.eval_sample )
         self.logger.info('self.fc8_sample:'+about(self.fc8_sample))

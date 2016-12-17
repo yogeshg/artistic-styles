@@ -76,10 +76,9 @@ class LogisticRegression(object):
         # x is a matrix where row-j  represents input training sample-j
         # b is a vector where element-k represent the free parameter of
         # hyperplane-k
-        # self.logger.info( 'T.dot(input, self.W)' + about(T.dot(input, self.W)) )
-        # self.logger.info( 'T.dot(input, self.W) + self.b' + about(T.dot(input, self.W) + self.b))
-        # self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
-        self.p_y_given_x = T.nnet.softmax(input)
+        self.logger.info( 'T.dot(input, self.W)' + about(T.dot(input, self.W)) )
+        self.logger.info( 'T.dot(input, self.W) + self.b' + about(T.dot(input, self.W) + self.b))
+        self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
 
         # symbolic description of how to compute prediction as class whose
         # probability is maximal
@@ -208,6 +207,7 @@ class HiddenLayer(object):
         self.logger.info('W_values'+about(W_values))
         self.logger.info('b_values'+about(b_values))
 
+        # input : 1*25088 ; W: 25088*4096 ; b: (4096,1)
         lin_output = T.dot(input, self.W) + self.b
         self.output = (
             lin_output if activation is None
