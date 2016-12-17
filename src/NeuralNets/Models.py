@@ -34,16 +34,16 @@ from collections import defaultdict
 
 class VGG_19():
     def __init__(self, rng, datasets, filter_shape, batch_size=1, learning_rate=0.1,
-                    Weights=None,bias=None,image_size=(3,224,224)):
+                    weights=None,bias=None,image_size=(3,224,224)):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
                                 ,"conv5_1","conv5_2","conv5_3","conv5_4","pool5","fc6","drop6","fc7","drop7","fc8","prob"]
-        if((Weights == None) or (bias == None)):
-            Weights = {}
+        if( (weights is None) or (bias is None) ):
+            weights = {}
             bias = {}
             for name in self.layer_names:
-                Weights[name]=None
+                weights[name]=None
                 bias[name]=None
 
         d,w,h=image_size
@@ -51,7 +51,7 @@ class VGG_19():
         x = T.matrix('x')  # the data is presented as rasterized images
         y = T.ivector('y')  # the labels are presented as 1D vector of
                             # [int] labels
-
+        self.eval_sample = {x: np.random.random((batch_size, d*w*h)).astype(np.float32)}
 
         layer0_input = x.reshape((batch_size, d, w, h))
 
@@ -60,9 +60,10 @@ class VGG_19():
             input=layer0_input,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv1_1'],
-            W=Weights['conv1_1'],
-            b=bias['conv1_1']
+            W_values=weights['conv1_1'],
+            b_values=bias['conv1_1']
         )
+        self.conv1_1_sample = self.conv1_1.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv1_1'][0]
@@ -72,9 +73,10 @@ class VGG_19():
             input=self.conv1_1.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv1_2'],
-            W=Weights['conv1_2'],
-            b=bias['conv1_2']
+            W_values=weights['conv1_2'],
+            b_values=bias['conv1_2']
         )
+        self.conv1_2_sample = self.conv1_2.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv1_2'][0]
@@ -93,9 +95,10 @@ class VGG_19():
             input=pool1_output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv2_1'],
-            W=Weights['conv2_1'],
-            b=bias['conv2_1']
+            W_values=weights['conv2_1'],
+            b_values=bias['conv2_1']
         )
+        self.conv2_1_sample = self.conv2_1.output.eval( self.eval_sample )
 
         d = filter_shape['conv2_1'][0]
 
@@ -104,9 +107,10 @@ class VGG_19():
             input=self.conv2_1.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv2_2'],
-            W=Weights['conv2_2'],
-            b=bias['conv2_2']
+            W_values=weights['conv2_2'],
+            b_values=bias['conv2_2']
         )
+        self.conv2_2_sample = self.conv2_2.output.eval( self.eval_sample )
 
         d = filter_shape['conv2_2'][0]
 
@@ -124,10 +128,11 @@ class VGG_19():
             input=pool2_output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv3_1'],
-            W=Weights['conv3_1'],
-            b=bias['conv3_1']
+            W_values=weights['conv3_1'],
+            b_values=bias['conv3_1']
         )
-        #new image dimensions
+        self.conv3_1_sample = self.conv3_1.output.eval( self.eval_sample )        #neweval_sample dimensions
+
         d = filter_shape['conv3_1'][0]
 
         self.conv3_2 = LeNetConvLayer(
@@ -135,9 +140,10 @@ class VGG_19():
             input=self.conv3_1.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv3_2'],
-            W=Weights['conv3_2'],
-            b=bias['conv3_2']
+            W_values=weights['conv3_2'],
+            b_values=bias['conv3_2']
         )
+        self.conv3_2_sample = self.conv3_2.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv3_2'][0]
@@ -147,9 +153,10 @@ class VGG_19():
             input=self.conv3_2.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv3_3'],
-            W=Weights['conv3_3'],
-            b=bias['conv3_3']
+            W_values=weights['conv3_3'],
+            b_values=bias['conv3_3']
         )
+        self.conv3_3_sample = self.conv3_3.output.eval( self.eval_sample )
 
         d = filter_shape['conv3_3'][0]
 
@@ -158,9 +165,10 @@ class VGG_19():
             input=self.conv3_3.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv3_4'],
-            W=Weights['conv3_4'],
-            b=bias['conv3_4']
+            W_values=weights['conv3_4'],
+            b_values=bias['conv3_4']
         )
+        self.conv3_4_sample = self.conv3_4.output.eval( self.eval_sample )
 
         d = filter_shape['conv3_4'][0]
 
@@ -179,9 +187,10 @@ class VGG_19():
             input=pool3_output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv4_1'],
-            W=Weights['conv4_1'],
-            b=bias['conv4_1']
+            W_values=weights['conv4_1'],
+            b_values=bias['conv4_1']
         )
+        self.conv4_1_sample = self.conv4_1.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv4_1'][0]
@@ -191,9 +200,10 @@ class VGG_19():
             input=self.conv4_1.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv4_2'],
-            W=Weights['conv4_2'],
-            b=bias['conv4_2']
+            W_values=weights['conv4_2'],
+            b_values=bias['conv4_2']
         )
+        self.conv4_2_sample = self.conv4_2.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv4_2'][0]
@@ -203,10 +213,11 @@ class VGG_19():
             input=self.conv4_2.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv4_3'],
-            W=Weights['conv4_3'],
-            b=bias['conv4_3']
+            W_values=weights['conv4_3'],
+            b_values=bias['conv4_3']
         )
-        #new image dimensions
+        self.conv4_3_sample = self.conv4_3.output.eval( self.eval_sample )
+
         d = filter_shape['conv4_3'][0]
 
         self.conv4_4 = LeNetConvLayer(
@@ -214,9 +225,10 @@ class VGG_19():
             input=self.conv4_3.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv4_4'],
-            W=Weights['conv4_4'],
-            b=bias['conv4_4']
+            W_values=weights['conv4_4'],
+            b_values=bias['conv4_4']
         )
+        self.conv4_4_sample = self.conv4_4.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv4_4'][0]
@@ -236,9 +248,10 @@ class VGG_19():
             input=pool4_output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv5_1'],
-            W=Weights['conv5_1'],
-            b=bias['conv5_1']
+            W_values=weights['conv5_1'],
+            b_values=bias['conv5_1']
         )
+        self.conv5_1_sample = self.conv5_1.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv5_1'][0]
@@ -248,9 +261,10 @@ class VGG_19():
             input=self.conv5_1.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv5_2'],
-            W=Weights['conv5_2'],
-            b=bias['conv5_2']
+            W_values=weights['conv5_2'],
+            b_values=bias['conv5_2']
         )
+        self.conv5_2_sample = self.conv5_2.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv5_2'][0]
@@ -260,9 +274,10 @@ class VGG_19():
             input=self.conv5_2.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv5_3'],
-            W=Weights['conv5_3'],
-            b=bias['conv5_3']
+            W_values=weights['conv5_3'],
+            b_values=bias['conv5_3']
         )
+        self.conv5_3_sample = self.conv5_3.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv5_3'][0]
@@ -272,9 +287,10 @@ class VGG_19():
             input=self.conv5_3.output,
             image_shape=(batch_size, d, w, h),
             filter_shape=filter_shape['conv5_4'],
-            W=Weights['conv5_4'],
-            b=bias['conv5_4']
+            W_values=weights['conv5_4'],
+            b_values=bias['conv5_4']
         )
+        self.conv5_4_sample = self.conv5_4.output.eval( self.eval_sample )
 
         #new image dimensions
         d = filter_shape['conv5_4'][0]
@@ -294,11 +310,11 @@ class VGG_19():
         self.fc6     = HiddenLayer(
             rng,
             input=fc6_input,
-            n_in=d * w * h,
+            n_in=int(d * w * h),
             n_out=4096,
             activation=T.nnet.relu,
-            W=Weights['fc6'],
-            b=bias['fc6']
+            W_values=weights['fc6'],
+            b_values=bias['fc6']
         )
         self.drop6   = drop(self.fc6.output, p=0.5)
 
@@ -308,8 +324,8 @@ class VGG_19():
             n_in=4096,
             n_out=4096,
             activation=T.nnet.relu,
-            W=Weights['fc7'],
-            b=bias['fc7']
+            W_values=weights['fc7'],
+            b_values=bias['fc7']
         )
 
         self.drop7   = drop(self.fc7.output, p=0.5)
@@ -320,16 +336,16 @@ class VGG_19():
             n_in=4096,                                      ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             n_out=1000,                                     ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             activation=None,                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
-            W=Weights['fc8'],                               ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
-            b=bias['fc8']                                   ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            W_values=weights['fc8'],                               ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+            b_values=bias['fc8']                                   ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
         )                                                   ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
 
         self.prob    = LogisticRegression(
             input=self.fc8.output,
             n_in=1000,
             n_out=1000,
-            W=numpy.identity(1000),
-            b=numpy.zeros(1000)
+            W_values=numpy.identity(1000),
+            b_values=numpy.zeros(1000)
         )
         # the cost we minimize during training is the NLL of the model
         self.cost = self.prob.negative_log_likelihood(y)
