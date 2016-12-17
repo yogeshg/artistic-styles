@@ -81,7 +81,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     grad_sh = theano.shared(np.zeros_like(blank_values))
 
     updates = [
-        (blank_sh, blank_sh + learning_rate * grad),
+        (blank_sh, blank_sh - learning_rate * grad),
         (grad_sh, grad)
     ]
     givens = { v.x : blank_sh }
@@ -111,6 +111,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
 train_style(0, 1, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate=0.0)
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=1e-10)
 
 

@@ -59,10 +59,10 @@ class VGG_19():
         x = T.matrix('x')  # the data is presented as rasterized images
         y = T.ivector('y')  # the labels are presented as 1D vector of
             
-            if(self.DEBUG)                # [int] labels
+        if(self.DEBUG):                # [int] labels
             self.eval_sample = {x: np.random.random((batch_size, d*w*h)).astype(np.float32)}
 
-            layer0_input = x.reshape((batch_size, d, w, h))
+        layer0_input = x.reshape((batch_size, d, w, h))
 
         self.conv1_1 = LeNetConvLayer(
             rng,
@@ -72,7 +72,7 @@ class VGG_19():
             W_values=weights['conv1_1'],
             b_values=bias['conv1_1']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv1_1_sample = self.conv1_1.output.eval( self.eval_sample )
             self.logger.debug('self.conv1_1_sample:'+about(self.conv1_1_sample))
 
@@ -87,7 +87,7 @@ class VGG_19():
             W_values=weights['conv1_2'],
             b_values=bias['conv1_2']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv1_2_sample = self.conv1_2.output.eval( self.eval_sample )
             self.logger.debug('self.conv1_2_sample:'+about(self.conv1_2_sample))
 
@@ -111,7 +111,7 @@ class VGG_19():
             W_values=weights['conv2_1'],
             b_values=bias['conv2_1']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv2_1_sample = self.conv2_1.output.eval( self.eval_sample )
             self.logger.debug('self.conv2_1_sample:'+about(self.conv2_1_sample))
 
@@ -125,7 +125,7 @@ class VGG_19():
             W_values=weights['conv2_2'],
             b_values=bias['conv2_2']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv2_2_sample = self.conv2_2.output.eval( self.eval_sample )
             self.logger.debug('self.conv2_2_sample:'+about(self.conv2_2_sample))
 
@@ -148,7 +148,7 @@ class VGG_19():
             W_values=weights['conv3_1'],
             b_values=bias['conv3_1']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv3_1_sample = self.conv3_1.output.eval( self.eval_sample )        #neweval_sample dimensions
             self.logger.debug('self.conv3_1_sample:'+about(self.conv3_1_sample))
 
@@ -162,7 +162,7 @@ class VGG_19():
             W_values=weights['conv3_2'],
             b_values=bias['conv3_2']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv3_2_sample = self.conv3_2.output.eval( self.eval_sample )
             self.logger.debug('self.conv3_2_sample:'+about(self.conv3_2_sample))
 
@@ -177,7 +177,7 @@ class VGG_19():
             W_values=weights['conv3_3'],
             b_values=bias['conv3_3']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv3_3_sample = self.conv3_3.output.eval( self.eval_sample )
             self.logger.debug('self.conv3_3_sample:'+about(self.conv3_3_sample))
 
@@ -191,7 +191,7 @@ class VGG_19():
             W_values=weights['conv3_4'],
             b_values=bias['conv3_4']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv3_4_sample = self.conv3_4.output.eval( self.eval_sample )
             self.logger.debug('self.conv3_4_sample:'+about(self.conv3_4_sample))
 
@@ -216,7 +216,7 @@ class VGG_19():
             W_values=weights['conv4_1'],
             b_values=bias['conv4_1']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv4_1_sample = self.conv4_1.output.eval( self.eval_sample )
             self.logger.debug('self.conv4_1_sample:'+about(self.conv4_1_sample))
 
@@ -231,7 +231,7 @@ class VGG_19():
             W_values=weights['conv4_2'],
             b_values=bias['conv4_2']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv4_2_sample = self.conv4_2.output.eval( self.eval_sample )
             self.logger.debug('self.conv4_2_sample:'+about(self.conv4_2_sample))
 
@@ -246,7 +246,7 @@ class VGG_19():
             W_values=weights['conv4_3'],
             b_values=bias['conv4_3']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv4_3_sample = self.conv4_3.output.eval( self.eval_sample )
             self.logger.debug('self.conv4_3_sample:'+about(self.conv4_3_sample))
 
@@ -260,7 +260,7 @@ class VGG_19():
             W_values=weights['conv4_4'],
             b_values=bias['conv4_4']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv4_4_sample = self.conv4_4.output.eval( self.eval_sample )
             self.logger.debug('self.conv4_4_sample:'+about(self.conv4_4_sample))
 
@@ -286,7 +286,7 @@ class VGG_19():
             W_values=weights['conv5_1'],
             b_values=bias['conv5_1']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv5_1_sample = self.conv5_1.output.eval( self.eval_sample )
             self.logger.debug('self.conv5_1_sample:'+about(self.conv5_1_sample))
 
@@ -301,7 +301,7 @@ class VGG_19():
             W_values=weights['conv5_2'],
             b_values=bias['conv5_2']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv5_2_sample = self.conv5_2.output.eval( self.eval_sample )
             self.logger.debug('self.conv5_2_sample:'+about(self.conv5_2_sample))
 
@@ -316,7 +316,7 @@ class VGG_19():
             W_values=weights['conv5_3'],
             b_values=bias['conv5_3']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv5_3_sample = self.conv5_3.output.eval( self.eval_sample )
             self.logger.debug('self.conv5_3_sample:'+about(self.conv5_3_sample))
 
@@ -331,7 +331,7 @@ class VGG_19():
             W_values=weights['conv5_4'],
             b_values=bias['conv5_4']
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.conv5_4_sample = self.conv5_4.output.eval( self.eval_sample )
             self.logger.debug('self.conv5_4_sample:'+about(self.conv5_4_sample))
 
@@ -350,7 +350,7 @@ class VGG_19():
 
         fc6_input = pool5_output.flatten(2)
 
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.fc6_input_sample = fc6_input.eval( self.eval_sample )
             self.logger.debug('self.fc6_input_sample:'+about(self.fc6_input_sample))
 
@@ -366,7 +366,7 @@ class VGG_19():
             W_values=flatten_2(weights['fc6']).T,
             b_values=flatten_2(bias['fc6'])[:,0]
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.fc6_sample = self.fc6.output.eval( self.eval_sample )
             self.logger.debug('self.fc6_sample:'+about(self.fc6_sample))
 
@@ -381,7 +381,7 @@ class VGG_19():
             W_values=flatten_2(weights['fc7']).T,
             b_values=flatten_2(bias['fc7'])[:,0]
         )
-        if(self.DEBUG)
+        if(self.DEBUG):
             self.fc7_sample = self.fc7.output.eval( self.eval_sample )
             self.logger.debug('self.fc7_sample:'+about(self.fc7_sample))
 
@@ -396,7 +396,7 @@ class VGG_19():
             W_values=flatten_2(weights['fc8']).T,
             b_values=flatten_2(bias['fc8'])[:,0]
         )   
-        if(self.DEBUG)                                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
+        if(self.DEBUG):                                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             self.fc8_sample = self.fc8.output.eval( self.eval_sample )
             self.logger.debug('self.fc8_sample:'+about(self.fc8_sample))
 
