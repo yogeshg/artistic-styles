@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(level = logging.INFO)
+
 from NeuralNets.Models import VGG_19
 from NeuralNets.ImportParameters import load_layer_params
 from imageProcess import preprocess_image
@@ -21,7 +24,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     print 'creating vgg19...'
 
-    v = VGG_19(rng, None, p['filter_shape'])
+    v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'])
 
     style_values = np.reshape(preprocess_image(style_image_path), (1, 3 * 224 * 224)) # (1,3,224,224)
     content_values = np.reshape(preprocess_image(content_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
@@ -82,7 +85,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         loss = train_model()
         print (loss)
     return loss
-
 
 train_style(0.5, 0.5, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/whitenoise.jpeg',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],

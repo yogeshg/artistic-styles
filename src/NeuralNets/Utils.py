@@ -30,7 +30,16 @@ def shared_zeros(shape, dtype=theano.config.floatX, name=None):
 WORDBOUNDS_REGEX = re.compile(r'\s+')
 
 def about(x):
-    strx = str(x)
+    strx = ''
+    try:
+        strx+=str( x.shape() )
+    except Exception, e:
+        try:
+            strx+=str( x.shape )
+        except Exception, e:
+            pass
+        pass
+    strx += str(x)
     strx = WORDBOUNDS_REGEX.sub(' ', strx)
     lenx = len(strx)
     if(lenx > 70):

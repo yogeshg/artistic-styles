@@ -36,7 +36,7 @@ class LogisticRegression(object):
     def __init__(self, input, n_in, n_out,W_values=None,b_values=None):
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.debug('Initializing...')
+        self.logger.info('Initializing...')
 
         assert (type (input) in (theano.tensor.dtensor4, theano.tensor.TensorVariable)), type (input)
         assert (type (n_in) == int ), type(n_in)
@@ -44,9 +44,9 @@ class LogisticRegression(object):
         assert (type (W_values) in (type(None), np.ndarray)), type (W_values)
         assert (type (b_values) in (type(None), np.ndarray)), type (b_values)
 
-        self.logger.debug( 'input' + about(input) )
-        self.logger.debug( 'W_values' + about(W_values) )
-        self.logger.debug( 'b_values' + about(b_values) )
+        self.logger.info( 'input' + about(input) )
+        self.logger.info( 'W_values' + about(W_values) )
+        self.logger.info( 'b_values' + about(b_values) )
 
         self.input = input
 
@@ -76,7 +76,10 @@ class LogisticRegression(object):
         # x is a matrix where row-j  represents input training sample-j
         # b is a vector where element-k represent the free parameter of
         # hyperplane-k
-        self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
+        # self.logger.info( 'T.dot(input, self.W)' + about(T.dot(input, self.W)) )
+        # self.logger.info( 'T.dot(input, self.W) + self.b' + about(T.dot(input, self.W) + self.b))
+        # self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
+        self.p_y_given_x = T.nnet.softmax(input)
 
         # symbolic description of how to compute prediction as class whose
         # probability is maximal
@@ -152,7 +155,7 @@ class HiddenLayer(object):
     def __init__(self, rng, input, n_in, n_out, W_values=None, b_values=None,
                  activation=T.tanh):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.debug('Initializing...')
+        self.logger.info('Initializing...')
 
         assert (type (rng) == np.random.RandomState), type (rng)
         assert (type (input) in (theano.tensor.dtensor4, theano.tensor.TensorVariable)), type (input)
@@ -161,8 +164,9 @@ class HiddenLayer(object):
         try:
             assert (type (activation) in (theano.Op, type(None))), type (activation)
         except Exception, e:
-            self.logger.exception(e)
-            
+            self.logger.info('activation is of invalid type')
+            # self.logger.exception(e)
+
         assert (type (W_values) in (type(None), np.ndarray)), type (W_values)
         assert (type (b_values) in (type(None), np.ndarray)), type (b_values)
 
@@ -201,6 +205,9 @@ class HiddenLayer(object):
         self.W = W
         self.b = b
 
+        self.logger.info('W_values'+about(W_values))
+        self.logger.info('b_values'+about(b_values))
+
         lin_output = T.dot(input, self.W) + self.b
         self.output = (
             lin_output if activation is None
@@ -220,7 +227,7 @@ class LeNetConvLayer(object):
 
     def __init__(self, rng, input, filter_shape, image_shape,W_values=None,b_values=None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.debug('Initializing...')
+        self.logger.info('Initializing...')
 
         assert (type (rng) == np.random.RandomState), type (rng)
         assert (type (input) in (theano.tensor.dtensor4, theano.tensor.TensorVariable)), type (input)
@@ -244,7 +251,7 @@ class LeNetConvLayer(object):
         # initialize weights with random weights
         W_bound = np.sqrt(6. / (fan_in + fan_out))
 
-        self.logger.debug('W_values: '+about(W_values))
+        self.logger.info('W_values: '+about(W_values))
         if type(W_values)==type(None):
             W_values = np.asarray(
                     rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
@@ -252,7 +259,7 @@ class LeNetConvLayer(object):
                     )
         W = theano.shared( W_values, borrow=True)
 
-        self.logger.debug('b_values: '+about(b_values))
+        self.logger.info('b_values: '+about(b_values))
         if type(b_values)==type(None):
             # the bias is a 1D tensor -- one bias per output feature map
             b_values = np.zeros((filter_shape[0],), dtype=theano.config.floatX)
