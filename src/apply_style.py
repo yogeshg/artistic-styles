@@ -109,8 +109,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
             print e
     return loss
 
-train_style(1, 0, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
+train_style(0, 1, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10)
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=0.0)
 
 
