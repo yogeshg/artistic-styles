@@ -82,7 +82,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     #     (v.x, v.x - learning_rate * grad)
     # ]
 
-    blank_values = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224)).astype(np.float32)  # (1,3,224,224)
+    blank_values = np.reshape(preprocess_image(blank_image_path), (1, 3, 224, 224)).astype(np.float32)  # (1,3,224,224)
     blank_sh = theano.shared(blank_values)
     # grad_sh = theano.shared(np.zeros_like(blank_values))
 
@@ -124,6 +124,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         print new_im.shape
         blank_sh.set_value(new_im)
         x0 = blank_sh.get_value()
+        print x0.flatten().shape
         #print losses
         o = blank_sh.get_value()
         '''
