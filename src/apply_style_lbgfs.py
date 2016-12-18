@@ -4,7 +4,7 @@ logging.basicConfig(level = logging.INFO)
 import matplotlib.pyplot as plt
 from NeuralNets.Models import VGG_19
 from NeuralNets.ImportParameters import load_layer_params
-from imageProcess import preprocess_image,deprocess_image,np2pil
+from imageProcessold import preprocess_image,deprocess_image,np2pil
 from ASLoss import total_loss
 
 import numpy as np
