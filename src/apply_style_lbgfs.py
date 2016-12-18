@@ -114,7 +114,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     for i in range(n_epochs):
         print(i)
-        new_im, losses, _ = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, blank_sh.get_value(), fprime=grad_fct_py, maxfun=40)
+        new_im, losses, _ = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, blank_sh.get_value().flatten(), fprime=grad_fct_py, maxfun=40)
+        print new_im.shape
         blank_sh.set_value(new_im)
         print losses
         o = blank_sh.get_value()
