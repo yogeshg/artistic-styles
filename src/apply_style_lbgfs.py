@@ -116,8 +116,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         print ("hello")
         x1 = (x1.reshape((1, 3, 224, 224))).astype(np.float32)
         blank_sh.set_value(x1)
-        print np.array(grad_fct()).flatten().shape
-        print np.ones(3*224*224)
+        print np.array(grad_fct()).flatten()
+        print np.ones(3*224*224).shape
         print type(np.array(grad_fct()).flatten())
         print type(np.ones(3*224*224))
         return np.array(grad_fct()).flatten()
