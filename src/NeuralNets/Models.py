@@ -38,7 +38,7 @@ from ImportParameters import load_layer_params
 
 class VGG_19():
     def __init__(self, rng, datasets, filter_shape, batch_size=1, learning_rate=0.1,
-                    weights=None,bias=None,image_size=(3,224,224)):
+                    weights=None,bias=None,image_size=(1,3,224,224)):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
@@ -54,11 +54,11 @@ class VGG_19():
                 weights[name]=None
                 bias[name]=None
 
-        d,w,h=image_size
+        n,d,w,h=image_size
 
         x = T.matrix('x')  # the data is presented as rasterized images
         y = T.ivector('y')  # the labels are presented as 1D vector of
-            
+
         if(self.DEBUG):                # [int] labels
             self.eval_sample = {x: np.random.random((batch_size, d*w*h)).astype(np.float32)}
 
@@ -395,7 +395,7 @@ class VGG_19():
             activation=None,                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             W_values=flatten_2(weights['fc8']).T,
             b_values=flatten_2(bias['fc8'])[:,0]
-        )   
+        )
         if(self.DEBUG):                                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             self.fc8_sample = self.fc8.output.eval( self.eval_sample )
             self.logger.debug('self.fc8_sample:'+about(self.fc8_sample))
