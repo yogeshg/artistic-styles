@@ -64,4 +64,4 @@ def deprocess_image(image_array):
 def np2pil(image_array):
     assert image_array.ndim==3
     image = Image.fromarray(image_array)
-return image
+    return image
