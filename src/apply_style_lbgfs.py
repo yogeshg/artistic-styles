@@ -140,7 +140,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         #print x0.flatten().shape
         print losses
         o = blank_sh.get_value()
-        '''
         try:
             p = np2pil(deprocess_image(o.reshape((1, 3, 224, 224)))[0])
             # p = np2pil( o.reshape((1,3,224,224))[0])
@@ -151,7 +150,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         except Exception, e:
             print o.shape
             print e
-'''
 
 
 
