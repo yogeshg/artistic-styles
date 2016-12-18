@@ -50,7 +50,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     content_values = np.reshape(content_image, (content_shape[0], np.prod(content_shape[1:])))
     style_values = style_values.astype(np.float32)
     content_values = content_values.astype(np.float32)
-    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'], image_size=style_shape)
+    #v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'], image_size=style_shape)
     v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'], image_size=content_shape)
 
     content_conv_4_2 = v.conv4_2.output.eval({v.x : content_values})
