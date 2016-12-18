@@ -28,7 +28,7 @@ def white_noise(shape=(1,3,224,224)):
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
-                optimizer='Adam',resize=True):
+                optimizer='Adam',resize=True,lbfgs_maxfun=20):
 
     vgg19_params = 'imagenet-vgg-verydeep-19.mat'
     #image_shape = (3,224,224)
@@ -93,7 +93,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     if blank_image_path==None:
         blank_values = np.reshape(white_noise(content_shape),(content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)
     else:
-        blank_image,blank_image_shape = preprocess_image(blank_image_path,resize=False)
+        blank_image,blank_image_shape = preprocess_image(blank_image_path,resize=resize)
         blank_values = np.reshape(blank_image, (content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)  # (1,3,224,224)
     blank_sh = theano.shared(blank_values)
     # grad_sh = theano.shared(np.zeros_like(blank_values))
@@ -146,6 +146,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         #return np.ones(3*224*224)
         return temp2
 
+    #https://github.com/fchollet/keras/blob/master/examples/neural_style_transfer.py
     class loss_grad_eval():
         def __init__(self):
             self.loss_val = None
@@ -173,7 +174,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
             # print sum(blank)
             if optimizer=='l-bfgs':
                 e = loss_grad_eval()
-                new_im, loss, temp = scipy.optimize.fmin_l_bfgs_b(e.loss, x0.flatten(), fprime=e.grad, maxfun=20)
+                new_im, loss, temp = scipy.optimize.fmin_l_bfgs_b(e.loss, x0.flatten(), fprime=e.grad, maxfun=lbfgs_maxfun)
                 new_im = np.reshape(new_im, content_shape)
                 blank_sh.set_value(new_im.astype(np.float32))
                 x0 = blank_sh.get_value().astype(np.float32)
@@ -206,6 +207,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     return loss
 
-train_style(0.02, 2e-4, 'test_images/tubingen.jpg', 'test_images/starry_night_google.jpg', blank_image_path=None,
+train_style(0.2, 2e-4, 'test_images/tubingen_small.jpg', 'test_images/shipwreck.jpg', blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=20,learning_rate=10,resize=True,optimizer='l-bfgs')
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,optimizer='l-bfgs',lbfgs_maxfun=20)
