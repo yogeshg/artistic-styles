@@ -38,7 +38,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'])
 
-    test = reprocess_image(style_image_path)
+    test = preprocess_image(style_image_path)
     print test.shape
 
     style_values = np.reshape(preprocess_image(style_image_path), (1, np.prod(image_shape))) # (1,3,224,224)
