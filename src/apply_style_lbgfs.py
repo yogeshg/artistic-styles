@@ -103,8 +103,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     #train_model = theano.function([], loss, updates=updates, givens=givens)
 
-    loss_fct = theano.function([], loss, updates=updates, givens=givens)
-    grad_fct = theano.function([], grad, updates=updates, givens=givens)
+    loss_fct = theano.function([], loss,  givens=givens)
+    grad_fct = theano.function([], grad,  givens=givens)
 
     def loss_fct_py(inputs):
         return loss_fct()
@@ -114,7 +114,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     for i in range(n_epochs):
         print(i)
-        _, losses, _ = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, blank_sh, fprime=grad_fct_py, maxfun=40)
+        new_im, losses, _ = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, blank_sh, fprime=grad_fct_py, maxfun=40)
         print losses
         o = blank_sh.get_value()
         try:
