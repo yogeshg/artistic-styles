@@ -92,7 +92,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     if blank_image_path==None:
         blank_values = np.reshape(white_noise(content_shape),(content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)
     else:
-        blank_image,blank_image_shape = preprocess_image(blank_image_path)
+        blank_image,blank_image_shape = preprocess_image(blank_image_path,resize=False)
         blank_values = np.reshape(blank_image, (content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)  # (1,3,224,224)
     blank_sh = theano.shared(blank_values)
     # grad_sh = theano.shared(np.zeros_like(blank_values))
@@ -149,6 +149,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     return loss
 
-train_style(0.2, 2e-5, 'test_images/tubingen.jpg', 'test_images/starry_night_google.jpg', blank_image_path='test_images/tubingen.jpg',
+train_style(0.02, 2e-4, 'test_images/tubingen.jpg', 'test_images/starry_night_google.jpg', blank_image_path='test_images/tubingen.jpg',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=100,learning_rate=100)
+                content_layers = ['conv4_2'], n_epochs=100,learning_rate=10)
