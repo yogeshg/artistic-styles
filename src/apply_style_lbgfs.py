@@ -18,14 +18,6 @@ from PIL import Image
 import archiver
 import json
 
-def white_noise(shape=(1,3,224,224)):
-    image = np.random.randint(0,255,size=shape)
-    image[:,0,:,:] = image[:,0, :, :] - 103.939
-    image[:,1,:,:] = image[:,1, :, :] - 116.779
-    image[:,2,:,:] = image[:,2, :, :] - 123.68
-    image = image[:, ::-1,:, :]
-    return image
-
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
@@ -44,14 +36,12 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     print 'creating vgg19...'
 
-    style_image, style_shape = preprocess_image(style_image_path, resize=False)
-    style_values = np.reshape(style_image, (style_shape[0], np.prod(style_shape[1:])))
-    content_image, content_shape = preprocess_image(content_image_path, resize=False)
-    content_values = np.reshape(content_image, (content_shape[0], np.prod(content_shape[1:])))
-    style_values = style_values.astype(np.float32)
-    content_values = content_values.astype(np.float32)
-    #v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'], image_size=style_shape)
-    v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'], image_size=content_shape)
+    v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'])
+
+    style_values = np.reshape(preprocess_image(style_image_path), (1, np.prod(image_shape))) # (1,3,224,224)
+    content_values = np.reshape(preprocess_image(content_image_path), (1, np.prod(image_shape)))  # (1,3,224,224)
+    style_values = style_values.astype( np.float32 )
+    content_values = content_values.astype( np.float32 )
 
     content_conv_4_2 = v.conv4_2.output.eval({v.x : content_values})
     style_conv1_1 = v.conv1_1.output.eval({v.x: style_values})
@@ -92,13 +82,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     #     (v.x, v.x - learning_rate * grad)
     # ]
 
-    if blank_image_path==None:
-        blank_values = np.reshape(white_noise(content_shape),(content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)
-    else:
-        blank_image,blank_image_shape = preprocess_image(blank_image_path)
-        blank_values = np.reshape(blank_image, (content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)  # (1,3,224,224)
+    blank_values = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224)).astype(np.float32)  # (1,3,224,224)
     blank_sh = theano.shared(blank_values)
-
     # grad_sh = theano.shared(np.zeros_like(blank_values))
 
     # updates = [
