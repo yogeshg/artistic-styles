@@ -116,10 +116,10 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         print ("hello")
         x1 = (x1.reshape((1, 3, 224, 224))).astype(np.float32)
         blank_sh.set_value(x1)
-        print np.array(grad_fct()).flatten().shape
-        print np.ones(3*224*224).shape
-        print type(np.array(grad_fct()).flatten())
-        print type(np.ones(3*224*224))
+        #print np.array(grad_fct()).flatten().shape
+        #print np.ones(3*224*224).shape
+        #print type(np.array(grad_fct()).flatten())
+        #print type(np.ones(3*224*224))
         temp2 = np.ones(3*224*224)-1+(np.array(grad_fct()).flatten())
         #return np.array(grad_fct()).flatten()
         #return np.ones(3*224*224)
@@ -135,8 +135,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         #                                 'maxiter': 15000, 'ftol': 2.220446049250313e-09, 'maxcor': 10,
         #                                 'maxfun': 15000})
         print new_im.shape
-        blank_sh.set_value(new_im)
-        x0 = blank_sh.get_value()
+        blank_sh.set_value(new_im.astype(np.float32))
+        x0 = blank_sh.get_value().astype(np.float32)
         print x0.flatten().shape
         #print losses
         o = blank_sh.get_value()
