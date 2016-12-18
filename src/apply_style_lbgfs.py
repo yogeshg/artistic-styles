@@ -126,6 +126,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         x0 = blank_sh.get_value()
         #print losses
         o = blank_sh.get_value()
+        '''
         try:
             p = np2pil(deprocess_image(o.reshape((1, 3, 224, 224)))[0])
             # p = np2pil( o.reshape((1,3,224,224))[0])
@@ -136,14 +137,14 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         except Exception, e:
             print o.shape
             print e
-
+'''
 
 
 
 
     print('... training')
 
-    return loss
+    return None
 
 train_style(0, 1, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
