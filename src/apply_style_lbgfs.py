@@ -116,13 +116,14 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         print ("hello")
         x1 = (x1.reshape((1, 3, 224, 224))).astype(np.float32)
         blank_sh.set_value(x1)
+        print np.array(grad_fct()).flatten().shape
         return np.array(grad_fct()).flatten()
 
-    x0 = blank_sh.get_value()
+    x0 = blank_sh.get_value().astype(np.float32)
 
     for i in range(n_epochs):
         print(i)
-        new_im, losses, temp = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, np.zeros((1,3*224*224)), fprime=grad_fct_py, maxfun=40)
+        new_im, losses, temp = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, x0.flatten(), fprime=grad_fct_py, maxfun=40)
         #new_im, losses, temp = scipy.optimize.minimize(loss_fct_py, x0.flatten(), args=(), method='L-BFGS-B', jac=grad_fct_py, bounds=None, tol=None, callback=None,
         #                        options={'disp': None, 'maxls': 20, 'iprint': -1, 'gtol': 1e-05, 'eps': 1e-08,
         #                                 'maxiter': 15000, 'ftol': 2.220446049250313e-09, 'maxcor': 10,
