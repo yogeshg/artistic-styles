@@ -106,14 +106,14 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     loss_fct = theano.function([], loss,  givens=givens)
     grad_fct = theano.function([], grad,  givens=givens)
 
-    def loss_fct_py(x0):
-        x0 = (x0.reshape((1, 3* 224* 224))).astype(np.float32)
-        blank_sh.set_value(x0)
+    def loss_fct_py(x1):
+        x1 = (x1.reshape((1, 3, 224, 224))).astype(np.float32)
+        blank_sh.set_value(x1)
         return loss_fct()
 
-    def grad_fct_py(x0):
-        x0 = (x0.reshape((1, 3* 224* 224))).astype(np.float32)
-        blank_sh.set_value(x0)
+    def grad_fct_py(x1):
+        x1 = (x1.reshape((1, 3, 224, 224))).astype(np.float32)
+        blank_sh.set_value(x1)
         return grad_fct()
 
     x0 = blank_sh.get_value()
