@@ -135,6 +135,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         #                                 'maxiter': 15000, 'ftol': 2.220446049250313e-09, 'maxcor': 10,
         #                                 'maxfun': 15000})
         print new_im.shape
+        new_im = np.reshape(new_im, (1,3,224,224))
+        print new_im.shape
         blank_sh.set_value(new_im.astype(np.float32))
         x0 = blank_sh.get_value().astype(np.float32)
         print x0.flatten().shape
