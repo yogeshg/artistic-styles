@@ -29,7 +29,7 @@ import theano.tensor as T
 from theano.tensor.signal import downsample
 from theano.tensor.signal import pool
 
-from Utils import shared_dataset, load_data, RmsProp, train_nn
+from Utils import shared_dataset, load_data, RmsProp, train_nn, Adam
 from Utils import about
 from Layers import LogisticRegression, HiddenLayer, LeNetConvLayer, DropoutHiddenLayer, drop
 from ImportParameters import load_layer_params
@@ -444,10 +444,12 @@ class VGG_19():
         # manually create an update rule for each model parameter. We thus
         # create the updates list by automatically looping over all
         # (params[i], grads[i]) pairs.
-        updates = [
-            (param_i, param_i - learning_rate * grad_i)
-            for param_i, grad_i in zip(params, grads)
-            ]
+        # updates = [
+        #     (param_i, param_i - learning_rate * grad_i)
+        #     for param_i, grad_i in zip(params, grads)
+        #     ]
+        a = Adam(learning_rate)
+        updates = a.getUpdates(params, grads)
 
         self.train_model = theano.function(
             [x,y],

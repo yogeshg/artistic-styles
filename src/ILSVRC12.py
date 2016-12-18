@@ -20,6 +20,7 @@ class ILSVRC12():
         self.df = self.df.loc[idx,:]
         label2enum = dict(zip(list(self.df.label.unique()),range(100)))
         self.paths = list(self.df.path)
+        self.num_data = len(self.paths)
         # self.labels = list(self.df.label.map(label2enum).map(lambda x: onehot(x,10)))
         self.labels = list(self.df.label.map(label2enum))
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -30,7 +31,7 @@ class ILSVRC12():
         x,sh = ip.preprocess_image(paths)
         x = x.astype(np.float32)
         y = np.array(labels).astype(np.float32)
-        self.logger.info('x: '+about(x))
-        self.logger.info('y: '+about(y))
+        self.logger.debug('x: '+about(x))
+        self.logger.debug('y: '+about(y))
         return (x,y)
 
