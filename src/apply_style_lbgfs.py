@@ -124,7 +124,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         print new_im.shape
         blank_sh.set_value(new_im)
         x0 = blank_sh.get_value()
-        print losses
+        #print losses
         o = blank_sh.get_value()
         try:
             p = np2pil(deprocess_image(o.reshape((1, 3, 224, 224)))[0])
