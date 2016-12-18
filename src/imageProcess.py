@@ -44,7 +44,7 @@ def preprocess_image(paths,resize=True):
             images = imcopy
         else:
             images = numpy.append(images,imcopy,axis=0)
-    return images
+    return images,images.shape
 
 def deprocess_image(image_array):
     # put channels last
