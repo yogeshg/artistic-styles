@@ -121,7 +121,15 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         x0 = blank_sh.get_value().astype(np.float32)
         loss_fct = theano.function([], loss,  givens=givens)
         grad_fct = theano.function([], grad,  givens=givens)
+        loss_grad_fct = theano.function([],[loss,grad],givens=givens)
 
+    def loss_grad_fct_py(x1):
+        x1 = (x1.reshape(content_shape)).astype(np.float32)
+        blank_sh.set_value(x1)
+        out = loss_grad_fct()
+        loss_val = out[0]
+        grad_val = np.ones(np.prod(content_shape[1:]))-1+(np.array(out[1:]).flatten())
+        return loss_val,grad_val
     def loss_fct_py(x1):
         x1 = (x1.reshape(content_shape)).astype(np.float32)
         blank_sh.set_value(x1)
@@ -138,6 +146,22 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         #return np.ones(3*224*224)
         return temp2
 
+    class loss_grad_eval():
+        def __init__(self):
+            self.loss_val = None
+            self.grad_val = None
+        def loss(self,x1):
+            loss_val,grad_val = loss_grad_fct_py(x1)
+            self.loss_val = loss_val
+            self.grad_val = grad_val
+            return self.loss_val
+        def grad(self,x1):
+            assert self.loss_val is not None
+            grad_val = np.copy(self.grad_val)
+            self.loss_val = None
+            self.grad_val = None
+            return grad_val
+
     print('... training')
 
     archiver.cleanDir(archiver.CURRDIR)
@@ -148,7 +172,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         for i in range(n_epochs):
             # print sum(blank)
             if optimizer=='l-bfgs':
-                new_im, loss, temp = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, x0.flatten(), fprime=grad_fct_py, maxfun=40)
+                e = loss_grad_eval()
+                new_im, loss, temp = scipy.optimize.fmin_l_bfgs_b(e.loss, x0.flatten(), fprime=e.grad, maxfun=20)
                 new_im = np.reshape(new_im, content_shape)
                 blank_sh.set_value(new_im.astype(np.float32))
                 x0 = blank_sh.get_value().astype(np.float32)
@@ -183,4 +208,4 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
 train_style(0.02, 2e-4, 'test_images/tubingen.jpg', 'test_images/starry_night_google.jpg', blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=5,learning_rate=10,resize=False,optimizer='l-bfgs')
+                content_layers = ['conv4_2'], n_epochs=20,learning_rate=10,resize=True,optimizer='l-bfgs')
