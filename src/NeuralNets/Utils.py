@@ -59,15 +59,41 @@ class RmsProp():
     def getUpdates(self, params, grads):
         accumulators = [shared_zeros(p.get_value().shape) for p in params]
         updates = []
-    
+
         for p, gr, ac in zip(params, grads, accumulators):
             ac2 = self.rho * ac + (1 - self.rho) * gr ** 2
             p2 = p - self.lr * gr / T.sqrt(ac2 + self.epsilon)
             updates.extend([(ac, ac2), (p, p2)])
 
         return updates
+class Adam():
+    def __init__(self,learning_rate,b1=0.9, b2 = 0.999,gamma=1-1e-8):
+        self.b1 = b1
+        self.b2 = b2
+        self.gamma = gamma
+        self.alpha = learning_rate
+        self.epsilon = 1e-8
+        return
 
+    def getUpdates(self,p,gr):
+        t = theano.shared(numpy.float32(1))
+        b1_t = self.b1*self.gamma**(t-1)   #(Decay the first moment running average coefficient)
+        updates = []
+        # for p,gr in zip(params,grads):
+        x = numpy.zeros(p.get_value().shape,dtype=theano.config.floatX)
+        m_previous= theano.shared(x)
+        v_previous = theano.shared(x)
+        m = b1_t*m_previous + (1 - b1_t)*gr
+        v = self.b2*v_previous + (1 - self.b2)*gr**2
+        m_hat = m / (1-self.b1**t)
+        v_hat = v / (1-self.b2**t)
+        theta = p - (self.alpha * m_hat) / (T.sqrt(v_hat) + self.epsilon)
+        updates.append((m_previous, m))
+        updates.append((v_previous, v))
+        updates.append((p, theta) )
+        updates.append((t,t+1))
 
+        return updates
 def shared_dataset(data_xy, borrow=True):
     """ Function that loads the dataset into shared variables
 
@@ -115,7 +141,7 @@ def load_data(ds_rate=None, theano_shared=True):
             "data",
             dataset
         )
-        #f_name = new_path.replace("src/../data/%s"%dataset, "data/") 
+        #f_name = new_path.replace("src/../data/%s"%dataset, "data/")
         f_name = os.path.join(
             os.getcwd(),
             "..",
@@ -127,21 +153,21 @@ def load_data(ds_rate=None, theano_shared=True):
                 'https://www.cs.toronto.edu/~kriz/' + dataset
             )
             print('Downloading data from %s' % origin)
-            urllib.request.urlretrieve(origin, new_path) 
-             
+            urllib.request.urlretrieve(origin, new_path)
+
         tar = tarfile.open(new_path)
         file_names = tar.getnames()
         for file_name in file_names:
             tar.extract(file_name,f_name)
-        tar.close()              
-        
+        tar.close()
+
         return f_name
-    
+
     f_name=check_dataset('cifar-10-matlab-00100.tar.gz')
-    
+
     train_batches=os.path.join(f_name,'cifar-10-batches-mat/data_batch_1.mat')
     print train_batches
-    
+
     # Load data and convert data format
     train_batches=['data_batch_1.mat','data_batch_2.mat','data_batch_3.mat','data_batch_4.mat','data_batch_5.mat']
     train_batch=os.path.join(f_name,'cifar-10-batches-mat',train_batches[0])
@@ -154,16 +180,16 @@ def load_data(ds_rate=None, theano_shared=True):
         print 'loaded a matrix of shape', temp['data'].shape
         train_set['data']=numpy.concatenate((train_set['data'],temp['data']/255.),axis=0)
         train_set['labels']=numpy.concatenate((train_set['labels'].flatten(),temp['labels'].flatten()),axis=0)
-    
+
     test_batches=os.path.join(f_name,'cifar-10-batches-mat/test_batch.mat')
     test_set=scipy.io.loadmat(test_batches)
     print 'loaded a matrix of shape', test_set['data'].shape
     test_set['data']=test_set['data']/255.
     test_set['labels']=test_set['labels'].flatten()
-    
+
     train_set=(train_set['data'],train_set['labels'])
     test_set=(test_set['data'],test_set['labels'])
-    
+
 
     # Downsample the training dataset if specified
     train_set_len = len(train_set[1])
@@ -214,7 +240,7 @@ def rotateTranslate(image, angle, new_center = None, yMirror=1):
     x,y = image.getbbox()[2:4]
     x = x/2
     y = y/2
-    nx,ny = x,y 
+    nx,ny = x,y
     if new_center:
         (dx,dy) = new_center
         nx+=dx
@@ -397,4 +423,3 @@ def train_nn(train_model, validate_model, test_model,
     sys.stderr.write(('The training process for function ' +
            calframe[1][3] +
            ' ran for %.2fm' % ((end_time - start_time) / 60.)))
-

@@ -14,6 +14,7 @@ import theano.tensor as T
 import NeuralNets.Utils as u
 from PIL import Image
 
+
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10,learning_rate=0.000001):
@@ -78,12 +79,15 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     blank_values = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224)).astype(np.float32)  # (1,3,224,224)
     blank_sh = theano.shared(blank_values)
-    grad_sh = theano.shared(np.zeros_like(blank_values))
+    # grad_sh = theano.shared(np.zeros_like(blank_values))
 
-    updates = [
-        (blank_sh, blank_sh - learning_rate * grad),
-        (grad_sh, grad)
-    ]
+    # updates = [
+    #     (blank_sh, blank_sh - learning_rate * grad),
+    #     (grad_sh, grad)
+    # ]
+    a = u.Adam(learning_rate=learning_rate)
+    updates = a.getUpdates(blank_sh,grad)
+
     givens = { v.x : blank_sh }
 
     train_model = theano.function([], loss, updates=updates, givens=givens)
@@ -93,13 +97,13 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     for i in range(n_epochs):
         # print sum(blank)
         loss = train_model()
-        print (loss)
+        print loss
         o = blank_sh.get_value()
-        g = grad_sh.get_value()
-        print 'magnitude of gradient:', np.sum(g**2)
-        print 'min of gradient:', g.min()
-        print 'max of gradient:', g.max()
-        print 'mean of gradient:', g.mean()
+        # g = grad_sh.get_value()
+        #print 'magnitude of gradient:', np.sum(g**2)
+        #print 'min of gradient:', g.min()
+        #print 'max of gradient:', g.max()
+        #print 'mean of gradient:', g.mean()
         try:
             p = np2pil( deprocess_image(o.reshape((1,3,224,224)))[0])
             #p = np2pil( o.reshape((1,3,224,224))[0])
@@ -113,4 +117,4 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
 train_style(1, 0, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/starry_night_google.jpg',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate =1e-8)
+                content_layers = ['conv4_2'], n_epochs=100,learning_rate =10)
