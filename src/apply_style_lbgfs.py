@@ -99,7 +99,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     #        (blank_sh, blank_sh - learning_rate * grad)
     #    ]
 
-    givens = {v.x: blank_sh.flatten()}
+    givens = {v.x: blank_sh.flatten(2)}
 
     #train_model = theano.function([], loss, updates=updates, givens=givens)
 
