@@ -114,6 +114,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
             loss = train_model()
             print loss
             print type(loss)
+            print loss.shape
             o = blank_sh.get_value()
             # g = grad_sh.get_value()
             #print 'magnitude of gradient:', np.sum(g**2)
