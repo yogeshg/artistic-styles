@@ -8,6 +8,7 @@ from imageProcess import preprocess_image,deprocess_image,np2pil
 from ASLoss import total_loss
 
 import numpy as np
+import scipy
 import theano
 import theano.tensor as T
 
@@ -27,7 +28,7 @@ def white_noise(shape=(1,3,224,224)):
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
-                optimizer='Adam'):
+                optimizer='Adam',resize=True):
 
     vgg19_params = 'imagenet-vgg-verydeep-19.mat'
     #image_shape = (3,224,224)
@@ -43,9 +44,9 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     print 'creating vgg19...'
 
     #v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],)
-    style_image,style_shape = preprocess_image(style_image_path,resize=False)
+    style_image,style_shape = preprocess_image(style_image_path,resize=resize)
     style_values = np.reshape(style_image, (style_shape[0], np.prod(style_shape[1:])))
-    content_image,content_shape = preprocess_image(content_image_path,resize=False)
+    content_image,content_shape = preprocess_image(content_image_path,resize=resize)
     content_values = np.reshape(content_image,(content_shape[0], np.prod(content_shape[1:])))
     style_values = style_values.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
@@ -105,13 +106,37 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     if optimizer=='Adam':
         a = u.Adam(learning_rate=learning_rate)
         updates = a.getUpdates(blank_sh,grad)
-    else:
+        givens = { v.x : blank_sh }
+        train_model = theano.function([], loss, updates=updates, givens=givens)
+    elif optimizer =='GD':
         updates = [
             (blank_sh, blank_sh - learning_rate * grad)
         ]
-    givens = { v.x : blank_sh }
+        givens = { v.x : blank_sh }
+        train_model = theano.function([], loss, updates=updates, givens=givens)
+    elif optimizer =='l-bfgs':
+        blank_values=np.reshape(blank_values,(content_shape)).astype(np.float32)
+        blank_sh = theano.shared(blank_values)
+        givens = {v.x: blank_sh.flatten(2)}
+        x0 = blank_sh.get_value().astype(np.float32)
+        loss_fct = theano.function([], loss,  givens=givens)
+        grad_fct = theano.function([], grad,  givens=givens)
 
-    train_model = theano.function([], loss, updates=updates, givens=givens)
+    def loss_fct_py(x1):
+        x1 = (x1.reshape(content_shape)).astype(np.float32)
+        blank_sh.set_value(x1)
+        return loss_fct()
+    def grad_fct_py(x1):
+        x1 = (x1.reshape(content_shape)).astype(np.float32)
+        blank_sh.set_value(x1)
+        #print np.array(grad_fct()).flatten().shape
+        #print np.ones(3*224*224).shape
+        #print type(np.array(grad_fct()).flatten())
+        #print type(np.ones(3*224*224))
+        temp2 = np.ones(np.prod(content_shape[1:]))-1+(np.array(grad_fct()).flatten())
+        #return np.array(grad_fct()).flatten()
+        #return np.ones(3*224*224)
+        return temp2
 
     print('... training')
 
@@ -122,7 +147,14 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     try:
         for i in range(n_epochs):
             # print sum(blank)
-            loss = train_model()
+            if optimizer=='l-bfgs':
+                new_im, loss, temp = scipy.optimize.fmin_l_bfgs_b(loss_fct_py, x0.flatten(), fprime=grad_fct_py, maxfun=40)
+                new_im = np.reshape(new_im, content_shape)
+                blank_sh.set_value(new_im.astype(np.float32))
+                x0 = blank_sh.get_value().astype(np.float32)
+            else:
+                loss = train_model()
+
             print '%.3e' % loss
             o = blank_sh.get_value()
             # g = grad_sh.get_value()
@@ -149,6 +181,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     return loss
 
-train_style(0.02, 2e-4, 'test_images/tubingen.jpg', 'test_images/starry_night_google.jpg', blank_image_path='test_images/tubingen.jpg',
+train_style(0.02, 2e-4, 'test_images/tubingen.jpg', 'test_images/starry_night_google.jpg', blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=100,learning_rate=10)
+                content_layers = ['conv4_2'], n_epochs=5,learning_rate=10,resize=False,optimizer='l-bfgs')
