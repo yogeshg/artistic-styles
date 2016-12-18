@@ -14,25 +14,31 @@ import theano.tensor as T
 import NeuralNets.Utils as u
 from PIL import Image
 
+import archiver
+import json
 
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate=0.000001):
+                content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
+                optimizer='Adam'):
 
+    vgg19_params = 'imagenet-vgg-verydeep-19.mat'
+    image_shape = (3,224,224) 
 
+    hyperparameters = locals()
 
     rng = np.random.RandomState(23455)
 
     print 'loading parameters...'
 
-    p = load_layer_params('imagenet-vgg-verydeep-19.mat')
+    p = load_layer_params(vgg19_params)
 
     print 'creating vgg19...'
 
     v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'])
 
-    style_values = np.reshape(preprocess_image(style_image_path), (1, 3 * 224 * 224)) # (1,3,224,224)
-    content_values = np.reshape(preprocess_image(content_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
+    style_values = np.reshape(preprocess_image(style_image_path), (1, np.prod(image_shape))) # (1,3,224,224)
+    content_values = np.reshape(preprocess_image(content_image_path), (1, np.prod(image_shape)))  # (1,3,224,224)
     style_values = style_values.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
 
@@ -69,9 +75,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     # grad = T.nnet.relu(T.grad(loss, v.x))
     # grad = T.grad(T.nnet.relu(loss), v.x)
     # grad = T.grad((loss), T.nnet.relu(v.x))
-    grad = T.grad((loss), (v.x))
-
-    # blank = np.reshape(preprocess_image(blank_image_path), (1, 3 * 224 * 224))  # (1,3,224,224)
+    grad = T.grad(loss, v.x)
 
     # updates = [
     #     (v.x, v.x - learning_rate * grad)
@@ -85,8 +89,14 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     #     (blank_sh, blank_sh - learning_rate * grad),
     #     (grad_sh, grad)
     # ]
-    a = u.Adam(learning_rate=learning_rate)
-    updates = a.getUpdates(blank_sh,grad)
+
+    if optimizer=='Adam':
+        a = u.Adam(learning_rate=learning_rate)
+        updates = a.getUpdates(blank_sh,grad)
+    else:
+        updates = [
+            (blank_sh, blank_sh - learning_rate * grad)
+        ]
 
     givens = { v.x : blank_sh }
 
@@ -94,27 +104,40 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     print('... training')
 
-    for i in range(n_epochs):
-        # print sum(blank)
-        loss = train_model()
-        print loss
-        o = blank_sh.get_value()
-        # g = grad_sh.get_value()
-        #print 'magnitude of gradient:', np.sum(g**2)
-        #print 'min of gradient:', g.min()
-        #print 'max of gradient:', g.max()
-        #print 'mean of gradient:', g.mean()
-        try:
-            p = np2pil( deprocess_image(o.reshape((1,3,224,224)))[0])
-            #p = np2pil( o.reshape((1,3,224,224))[0])
-            #p = np2pil(deprocess_image(np.reshape(o,(1,3,224,224)))[0])
-            p.save('./data/gen_'+str(i)+'.jpg')
-            print('./data/gen_'+str(i)+'.jpg'+'   saved')
-        except Exception, e:
-            print o.shape
-            print e
+    archiver.cleanDir(archiver.CURRDIR)
+    with open(archiver.getFilePath('properties.json'), 'w') as f:
+        json.dump(hyperparameters, f)
+
+    try:
+        for i in range(n_epochs):
+            # print sum(blank)
+            loss = train_model()
+            print loss
+            o = blank_sh.get_value()
+            # g = grad_sh.get_value()
+            #print 'magnitude of gradient:', np.sum(g**2)
+            #print 'min of gradient:', g.min()
+            #print 'max of gradient:', g.max()
+            #print 'mean of gradient:', g.mean()
+            try:
+                p = np2pil( deprocess_image(o.reshape((1,3,224,224)))[0])
+                #p = np2pil( o.reshape((1,3,224,224))[0])
+                #p = np2pil(deprocess_image(np.reshape(o,(1,3,224,224)))[0])
+                filepath = archiver.getFilePath('gen_{:04d}.jpg'.format(i))
+                p.save( filepath )
+                print(filepath+'   saved')
+            except Exception, e:
+                print o.shape
+                print e
+
+    except Exception, e:
+        print e
+    finally:
+        archiver.archiveDir(archiver.CURRDIR)
+
+
     return loss
 
-train_style(1, 0, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/starry_night_google.jpg',
+train_style(0, 1, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=100,learning_rate =10)
+                content_layers = ['conv4_2'], n_epochs=100,learning_rate=10)

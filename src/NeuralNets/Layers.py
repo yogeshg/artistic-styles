@@ -240,8 +240,6 @@ class LeNetConvLayer(object):
 
         assert (image_shape[1] == filter_shape[1]), image_shape[1]
 
-        self.SCALE_WEIGHTS_TO_MEAN_1 = False
-
         self.input = input
 
         # there are "num input feature maps * filter height * filter width"
@@ -260,8 +258,6 @@ class LeNetConvLayer(object):
                     rng.uniform(low=-W_bound, high=W_bound, size=filter_shape),
                     dtype=theano.config.floatX
                     )
-        if( self.SCALE_WEIGHTS_TO_MEAN_1 ):
-            W_values = W_values / W_values.mean()
 
         W = theano.shared( W_values, borrow=True)
 
