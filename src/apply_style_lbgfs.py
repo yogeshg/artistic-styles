@@ -107,13 +107,11 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     grad_fct = theano.function([], grad,  givens=givens)
 
     def loss_fct_py(x1):
-        print ("hello1")
         x1 = (x1.reshape((1, 3, 224, 224))).astype(np.float32)
         blank_sh.set_value(x1)
         return loss_fct()
 
     def grad_fct_py(x1):
-        print ("hello")
         x1 = (x1.reshape((1, 3, 224, 224))).astype(np.float32)
         blank_sh.set_value(x1)
         #print np.array(grad_fct()).flatten().shape
@@ -134,13 +132,13 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         #                        options={'disp': None, 'maxls': 20, 'iprint': -1, 'gtol': 1e-05, 'eps': 1e-08,
         #                                 'maxiter': 15000, 'ftol': 2.220446049250313e-09, 'maxcor': 10,
         #                                 'maxfun': 15000})
-        print new_im.shape
+        #print new_im.shape
         new_im = np.reshape(new_im, (1,3,224,224))
-        print new_im.shape
+        #print new_im.shape
         blank_sh.set_value(new_im.astype(np.float32))
         x0 = blank_sh.get_value().astype(np.float32)
-        print x0.flatten().shape
-        #print losses
+        #print x0.flatten().shape
+        print losses
         o = blank_sh.get_value()
         '''
         try:
@@ -164,4 +162,4 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
 train_style(0, 1, 'test_images/thais.JPG', 'test_images/starry_night_google.jpg', 'test_images/thais.JPG',
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=100,learning_rate=10)
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10)
