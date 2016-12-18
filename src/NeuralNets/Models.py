@@ -414,14 +414,16 @@ class VGG_19():
         self.test_model = theano.function(
             [x,y],
             self.prob.errors(y),
-            allow_input_downcast=True
+            allow_input_downcast=True,
+            name = self.__class__.__name__+'.test_model'
         )
         print('Test model compiled...')
 
         self.validate_model = theano.function(
             [x,y],
             self.prob.errors(y),
-            allow_input_downcast=True
+            allow_input_downcast=True,
+            name = self.__class__.__name__+'.validate_model'
         )
         print('Validate model compiled...')
 
@@ -451,7 +453,8 @@ class VGG_19():
             [x,y],
             self.cost,
             updates=updates,
-            allow_input_downcast=True ## To allow float64 values to be changed to float32
+            allow_input_downcast=True, ## To allow float64 values to be changed to float32
+            name = self.__class__.__name__+'.train_model'
         )
 
         self.x = x
