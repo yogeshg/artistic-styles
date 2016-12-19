@@ -60,7 +60,7 @@ def total_loss (style_activations, content_activations, v,
         al = style_activations[layer][0]
         logger.debug('Fl: '+str(Fl))
         logger.debug('al: '+str(al.shape))
-        wl = 0.2
+        wl = 1./float(len(style_layers))
         N =filter_shape[layer][-3]
         M =filter_shape[layer][-1]*filter_shape[layer][-2]
         loss += beta*getStyleLoss(Fl,al,N,M,wl)
