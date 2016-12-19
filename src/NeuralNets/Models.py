@@ -355,7 +355,12 @@ class VGG_19():
             self.logger.debug('self.fc6_input_sample:'+about(self.fc6_input_sample))
 
         get_reshape = lambda sh: (sh[0],np.prod( sh[1:] ))
-        flatten_2 = lambda m: m.reshape(get_reshape(m.shape))
+        flatten_2_l = lambda m: m.reshape(get_reshape(m.shape))
+        def flatten_2(m):
+            if m is None:
+                return None
+            else:
+                return flatten_2_l(m)
 
         self.fc6     = HiddenLayer(
             rng,
@@ -363,8 +368,8 @@ class VGG_19():
             n_in=int(d * w * h),
             n_out=4096,
             activation=T.nnet.relu,
-            W_values=flatten_2(weights['fc6']).T,
-            b_values=flatten_2(bias['fc6'])[:,0]
+            W_values=flatten_2(weights['fc6']),
+            b_values=flatten_2(bias['fc6'])
         )
         if(self.DEBUG):
             self.fc6_sample = self.fc6.output.eval( self.eval_sample )
@@ -378,8 +383,8 @@ class VGG_19():
             n_in=4096,
             n_out=4096,
             activation=T.nnet.relu,
-            W_values=flatten_2(weights['fc7']).T,
-            b_values=flatten_2(bias['fc7'])[:,0]
+            W_values=flatten_2(weights['fc7']),
+            b_values=flatten_2(bias['fc7'])
         )
         if(self.DEBUG):
             self.fc7_sample = self.fc7.output.eval( self.eval_sample )
@@ -393,8 +398,8 @@ class VGG_19():
             n_in=4096,                                      ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             n_out=1000,                                     ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             activation=None,                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
-            W_values=flatten_2(weights['fc8']).T,
-            b_values=flatten_2(bias['fc8'])[:,0]
+            W_values=flatten_2(weights['fc8']),
+            b_values=flatten_2(bias['fc8'])
         )
         if(self.DEBUG):                                                ## CHECK if Prob LogisticRegression can be used instead of HiddenLayer
             self.fc8_sample = self.fc8.output.eval( self.eval_sample )
@@ -429,7 +434,7 @@ class VGG_19():
 
         # create a list of all model parameters to be fit by gradient descent
         # params = np.sum([ (getattr(self, l, None)).params for l in self.layer_names ]);
-        params = self.conv1_1.params+self.conv1_2.params+\
+        self.params = self.conv1_1.params+self.conv1_2.params+\
                 self.conv2_1.params+self.conv2_2.params+\
                 self.conv3_1.params+self.conv3_2.params+self.conv3_3.params+self.conv3_4.params+\
                 self.conv4_1.params+self.conv4_2.params+self.conv4_3.params+self.conv4_4.params+\
@@ -437,7 +442,7 @@ class VGG_19():
                 self.fc6.params+self.fc7.params+self.fc8.params
 
         # create a list of gradients for all model parameters
-        grads = T.grad(self.cost, params)
+        grads = T.grad(self.cost, self.params)
 
         # train_model is a function that updates the model parameters by
         # SGD Since this model has many parameters, it would be tedious to
@@ -449,7 +454,7 @@ class VGG_19():
         #     for param_i, grad_i in zip(params, grads)
         #     ]
         a = Adam(learning_rate)
-        updates = a.getUpdates(params, grads)
+        updates = a.getUpdates(self.params, grads)
 
         self.train_model = theano.function(
             [x,y],
