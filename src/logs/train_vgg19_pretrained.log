@@ -1,0 +1,60 @@
+/home/ubuntu/miniconda2/envs/theano/lib/python2.7/site-packages/matplotlib/__init__.py:1312: UserWarning:  This call to matplotlib.use() has no effect
+because the backend has already been chosen;
+matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
+or matplotlib.backends is imported for the first time.
+
+  warnings.warn(_use_error_msg)
+Using gpu device 0: GRID K520 (CNMeM is disabled, cuDNN Version is too old. Update to v5, was 3007.)
+/home/ubuntu/miniconda2/envs/theano/lib/python2.7/site-packages/theano/tensor/signal/downsample.py:6: UserWarning: downsample module has been moved to the theano.tensor.signal.pool module.
+  "downsample module has been moved to the theano.tensor.signal.pool module.")
+loading parameters...
+... loading params
+creating vgg19...
+/home/ubuntu/code/artistic-styles/src/NeuralNets/Models.py:358: VisibleDeprecationWarning: using a non-integer number instead of an integer will result in an error in the future
+  flatten_2 = lambda m: m.reshape(get_reshape(m.shape))
+Test model compiled...
+Validate model compiled...
+Train model compiled...
+('batch_size:', 16)
+('n_epochs:', 1000)
+('verbose:', True)
+('n_total_batches:', 52)
+('n_train_batches:', 31)
+('n_test_batches:', 10)
+('n_valid_batches:', 11)
+('training @ iter = ', 0)
+epoch 1, minibatch 31/31, validation error 88.636364 %
+     epoch 1, minibatch 31/31, test error of best model 86.875000 %
+epoch 2, minibatch 31/31, validation error 84.090909 %
+     epoch 2, minibatch 31/31, test error of best model 85.625000 %
+epoch 3, minibatch 31/31, validation error 83.522727 %
+     epoch 3, minibatch 31/31, test error of best model 88.750000 %
+('training @ iter = ', 100)
+epoch 4, minibatch 31/31, validation error 87.500000 %
+epoch 5, minibatch 31/31, validation error 84.090909 %
+epoch 6, minibatch 31/31, validation error 85.227273 %
+('training @ iter = ', 200)
+epoch 7, minibatch 31/31, validation error 87.500000 %
+epoch 8, minibatch 31/31, validation error 86.931818 %
+epoch 9, minibatch 31/31, validation error 85.795455 %
+('training @ iter = ', 300)
+epoch 10, minibatch 31/31, validation error 85.227273 %
+epoch 11, minibatch 31/31, validation error 86.931818 %
+epoch 12, minibatch 31/31, validation error 87.500000 %
+('training @ iter = ', 400)
+epoch 13, minibatch 31/31, validation error 86.931818 %
+Error allocating 25690112 bytes of device memory (out of memory). Driver report 21442560 bytes free and 4294770688 bytes total 
+ERROR:root:BaseGpuCorrMM: Failed to allocate output of 16 x 512 x 28 x 28
+Apply node that caused the error: GpuCorrMM{half, (1, 1), (1, 1)}(GpuContiguous.0, GpuContiguous.0)
+Toposort index: 161
+Inputs types: [CudaNdarrayType(float32, 4D), CudaNdarrayType(float32, 4D)]
+Inputs shapes: [(16, 512, 28, 28), (512, 512, 3, 3)]
+Inputs strides: [(401408, 784, 28, 1), (4608, 9, 3, 1)]
+Inputs values: ['not shown', 'not shown']
+Outputs clients: [[GpuElemwise{Add}[(0, 0)](GpuCorrMM{half, (1, 1), (1, 1)}.0, GpuDimShuffle{x,0,x,x}.0)]]
+
+HINT: Re-running with most Theano optimization disabled could give you a back-trace of when this node was created. This can be done with by setting the Theano flag 'optimizer=fast_compile'. If that does not work, Theano optimizations can be disabled with 'optimizer=None'.
+HINT: Use the Theano flag 'exception_verbosity=high' for a debugprint and storage map footprint of this apply node.
+Optimization complete.
+Best validation error of 83.522727 % obtained at iteration 93, with test performance 88.750000 %
+The training process ran for 25.38m
