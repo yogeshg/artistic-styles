@@ -76,7 +76,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         'conv4_2': content_conv_4_2
     }
 
-    loss = total_loss(style_activations, content_activations, v,
+    loss,loss_c = total_loss(style_activations, content_activations, v,
                       style_layers, content_layers,
                       alpha, beta, p['filter_shape'])
 
@@ -181,7 +181,12 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
             else:
                 loss = train_model()
 
-            print '%.3e' % loss
+            print 'loss =','%.3e' % loss
+            content_loss = loss_c.eval({v.x:blank_sh.get_value().reshape((1,np.prod(content_shape[1:])))})
+            content_loss_div_alpha = content_loss/alpha
+            style_loss_div_beta = (loss-content_loss)/beta
+            print 'content loss =','%.3e'%content_loss_div_alpha
+            print 'style loss =','%.3e'%style_loss_div_beta
             o = blank_sh.get_value()
             # g = grad_sh.get_value()
             #print 'magnitude of gradient:', np.sum(g**2)
@@ -207,6 +212,6 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     return loss
 
-train_style(0.2, 2e-4, 'test_images/tubingen_small.jpg', 'test_images/shipwreck.jpg', blank_image_path=None,
+train_style(0.2, 5e-6, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg', blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,optimizer='l-bfgs',lbfgs_maxfun=20)
