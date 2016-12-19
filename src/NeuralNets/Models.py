@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 import theano
 import theano.tensor as T
-from theano.tensor.signal import downsample
+#from theano.tensor.signal import downsample
 from theano.tensor.signal import pool
 
 from Utils import shared_dataset, load_data, RmsProp, train_nn, Adam
@@ -38,7 +38,7 @@ from ImportParameters import load_layer_params
 
 class VGG_19():
     def __init__(self, rng, datasets, filter_shape, batch_size=1, learning_rate=0.1,
-                    weights=None,bias=None,image_size=(1,3,224,224)):
+                    weights=None,bias=None,image_size=(1,3,224,224),pool2d_mode='max'):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
@@ -96,7 +96,8 @@ class VGG_19():
         pool1_output = pool.pool_2d(
                 input=self.conv1_2.output,
                 ds=(2,2),
-                ignore_border=True
+                ignore_border=True,
+                mode=pool2d_mode
             )
 
         #new image dimensions
@@ -134,7 +135,8 @@ class VGG_19():
         pool2_output   = pool.pool_2d(
                 input=self.conv2_2.output,
                 ds=(2,2),
-                ignore_border=True
+                ignore_border=True,
+                mode=pool2d_mode
             )
 
         w = w/2
@@ -200,7 +202,8 @@ class VGG_19():
         pool3_output   = pool.pool_2d(
                 input=self.conv3_4.output,
                 ds=(2,2),
-                ignore_border=True
+                ignore_border=True,
+                mode=pool2d_mode
             )
 
         #new image dimensions
@@ -270,7 +273,8 @@ class VGG_19():
         pool4_output   = pool.pool_2d(
                 input=self.conv4_4.output,
                 ds=(2,2),
-                ignore_border=True
+                ignore_border=True,
+                mode=pool2d_mode
             )
 
         #new image dimensions
@@ -341,7 +345,8 @@ class VGG_19():
         pool5_output   = pool.pool_2d(
                 input=self.conv5_4.output,
                 ds=(2,2),
-                ignore_border=True
+                ignore_border=True,
+                mode=pool2d_mode
             )
 
         #new image dimensions

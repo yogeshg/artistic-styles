@@ -28,7 +28,7 @@ def white_noise(shape=(1,3,224,224)):
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
-                optimizer='Adam',resize=True,lbfgs_maxfun=20):
+                optimizer='Adam',resize=True,lbfgs_maxfun=20,pool2d_mode='max'):
 
     vgg19_params = 'imagenet-vgg-verydeep-19.mat'
     #image_shape = (3,224,224)
@@ -50,8 +50,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     content_values = np.reshape(content_image,(content_shape[0], np.prod(content_shape[1:])))
     style_values = style_values.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
-    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape)
-    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape)
+    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode)
+    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode)
     content_conv_4_2 = v.conv4_2.output.eval({v.x : content_values})
     style_conv1_1 = v_style.conv1_1.output.eval({v_style.x: style_values})
     style_conv2_1 = v_style.conv2_1.output.eval({v_style.x: style_values})
@@ -182,11 +182,11 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
                 loss = train_model()
 
             print 'loss =','%.3e' % loss
-            content_loss = loss_c.eval({v.x:blank_sh.get_value().reshape((1,np.prod(content_shape[1:])))})
-            content_loss_div_alpha = content_loss/alpha
-            style_loss_div_beta = (loss-content_loss)/beta
-            print 'content loss =','%.3e'%content_loss_div_alpha
-            print 'style loss =','%.3e'%style_loss_div_beta
+            #content_loss = loss_c.eval({v.x:blank_sh.get_value().reshape((1,np.prod(content_shape[1:])))})
+            #content_loss_div_alpha = content_loss/alpha
+            #style_loss_div_beta = (loss-content_loss)/beta
+            #print 'content loss =','%.3e'%content_loss_div_alpha
+            #print 'style loss =','%.3e'%style_loss_div_beta
             o = blank_sh.get_value()
             # g = grad_sh.get_value()
             #print 'magnitude of gradient:', np.sum(g**2)
@@ -212,6 +212,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     return loss
 
-train_style(0.2, 5e-6, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg', blank_image_path=None,
+train_style(0.2, 5e-6, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
+                blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,optimizer='l-bfgs',lbfgs_maxfun=20)
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,
+                optimizer='l-bfgs',lbfgs_maxfun=20)
