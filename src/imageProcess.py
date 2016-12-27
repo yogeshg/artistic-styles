@@ -1,31 +1,31 @@
 from PIL import Image
 import numpy
 
-def preprocess_image(paths,resize=True):
+def preprocess_image(paths,resize=True,shape=(224,224)):
     # if single given not list of strings then convert to list of strings
     if isinstance(paths, basestring):
         paths = [paths]
     if resize == False:
         assert len(paths)==1
+    if resize == True:
+	assert len(shape)==2
     images = []
     for path in paths:
         image = Image.open(path,'r').convert('RGB')
         if resize:
-            w,h = image.size
-            # resize so smallest dimenison = 256 (preserve aspect ratio)
+            h,w = image.size
+	    h_new,w_new=shape
+	    w_ratio=w_new/float(w)
+	    h_ratio=h_new/float(h)
+            # resize the largest ratio
+	    ratio=max(w_ratio,h_ratio)
             if resize:
-                if h<w:
-                    image = image.resize((w*256/h,256),resample=Image.BILINEAR)
-                else:
-                    image = image.resize((256,h*256/w),resample=Image.BILINEAR)
-                # crop the images to 224x224
-                #get the new shape of the image
-                w1,h1 = image.size
-                #get the bounds of the box
-                right = w1//2 + 112
-                left =w1//2 - 112
-                top = h1//2 - 112
-                bottom = h1//2 + 112
+		image = image.resize((int(h*ratio),int(w*ratio)))
+		h1,w1 = image.size
+		right = (w1+w_new)//2
+		left = (w1-w_new)//2
+		top = (h1-h_new)//2
+		bottom = (h1+h_new)//2
                 image = image.crop((left,top,right,bottom))
 
         im = numpy.asarray(image)

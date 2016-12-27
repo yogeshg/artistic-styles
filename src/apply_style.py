@@ -28,7 +28,9 @@ def white_noise(shape=(1,3,224,224)):
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
-                optimizer='Adam',resize=True,lbfgs_maxfun=20,pool2d_mode='max'):
+                optimizer='Adam',resize=True,resize_shape=(224,224),lbfgs_maxfun=20,pool2d_mode='max'):
+    
+    theano.config.floatX='float32'
 
     vgg19_params = 'imagenet-vgg-verydeep-19.mat'
     #image_shape = (3,224,224)
@@ -219,10 +221,5 @@ if __name__ == '__main__':
     train_style(0, 1, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
                 blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,
-                optimizer='l-bfgs',lbfgs_maxfun=20)
-# train_style(0, 1, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
-#                 blank_image_path=None,
-#                 style_layers = ['conv1_1','conv2_1','conv3_1'],
-#                 content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,
-#                 optimizer='l-bfgs',lbfgs_maxfun=20)
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,resize_shape=(224,224),
+                optimizer='l-bfgs',lbfgs_maxfun=20,pool2d_mode='max')
