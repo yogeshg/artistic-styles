@@ -43,20 +43,35 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     p = load_layer_params(vgg19_params)
 
-    print 'creating vgg19...'
+    print 'loading images...'
 
-    #v = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],)
     style_image,style_shape = preprocess_image(style_image_path,resize=resize)
     style_values = np.reshape(style_image, (style_shape[0], np.prod(style_shape[1:])))
     content_image,content_shape = preprocess_image(content_image_path,resize=resize)
     content_values = np.reshape(content_image,(content_shape[0], np.prod(content_shape[1:])))
     style_values = style_values.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
-    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode)
-    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode)
-    # v_style = VGG_19(rng, None, p['filter_shape'], image_size=style_shape,pool2d_mode=pool2d_mode)
-    # v = VGG_19(rng,None, p['filter_shape'], image_size=content_shape,pool2d_mode=pool2d_mode)
 
+    print 'creating vgg19...'
+
+    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode)
+    
+    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode)
+    return
+
+    print 'calculating activations...'
+
+    content_activations={}
+    for c_layer in content_layers:
+	activation = getattr(v,c_layer).output.eval({v.x : content_values})
+	content_activation[c_layer] = activation
+
+    style_activations={}
+    for s_layer in style_layers:
+	activation = getattr(v_style,s_layer).output.eval({v_style.x:style_values})
+	style_activation[s_layer] = activation
+
+    '''
     content_conv_4_2 = v.conv4_2.output.eval({v.x : content_values})
     style_conv1_1 = v_style.conv1_1.output.eval({v_style.x: style_values})
     style_conv2_1 = v_style.conv2_1.output.eval({v_style.x: style_values})
@@ -80,7 +95,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     content_activations = {
         'conv4_2': content_conv_4_2
     }
-
+    '''
     loss,loss_c = total_loss(style_activations, content_activations, v,
                       style_layers, content_layers,
                       alpha, beta, p['filter_shape'])
@@ -168,7 +183,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
             self.grad_val = None
             return grad_val
 
-    print('... training')
+    print('generating image...')
 
     archiver.cleanDir(archiver.CURRDIR)
     with open(archiver.getFilePath('properties.json'), 'w') as f:
