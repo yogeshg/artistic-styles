@@ -13,19 +13,20 @@ def preprocess_image(paths,resize=True,shape=(224,224)):
     for path in paths:
         image = Image.open(path,'r').convert('RGB')
         if resize:
-            h,w = image.size
+            w,h = image.size
 	    h_new,w_new=shape
 	    w_ratio=w_new/float(w)
 	    h_ratio=h_new/float(h)
             # resize the largest ratio
 	    ratio=max(w_ratio,h_ratio)
             if resize:
-		image = image.resize((int(h*ratio),int(w*ratio)))
-		h1,w1 = image.size
+		image = image.resize((int(w*ratio),int(h*ratio)))
+		w1,h1 = image.size
 		right = (w1+w_new)//2
 		left = (w1-w_new)//2
 		top = (h1-h_new)//2
 		bottom = (h1+h_new)//2
+		assert min(right,left,top,bottom)>=0
                 image = image.crop((left,top,right,bottom))
 
         im = numpy.asarray(image)
