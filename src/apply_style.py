@@ -28,8 +28,8 @@ def white_noise(shape=(1,3,224,224)):
 def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
-                optimizer='Adam',resize=True,resize_shape=(224,224),lbfgs_maxfun=20,pool2d_mode='max'):
-    
+                optimizer='Adam',resize=True,resize_shape=(224,224),lbfgs_maxfun=20,pool2d_mode='max',vgg_train=True):
+
     theano.config.floatX='float32'
 
     vgg19_params = 'imagenet-vgg-verydeep-19.mat'
@@ -54,7 +54,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     print 'creating style Neural Netowrk...'
 
-    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode)
+    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode,train=vgg_train)
 
     print 'calculating style activations...'
 
@@ -66,8 +66,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     del v_style
 
     print 'creating content Neural Network...'
-    
-    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode)
+
+    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode,train=vgg_train)
 
     print 'calculating content activations...'
 
@@ -238,8 +238,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     return loss
 
 if __name__ == '__main__':
-    train_style(0.2, 0.2, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
+    train_style(0.2, 5e-6, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
                 blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=True,resize_shape=(50,50),
-                optimizer='l-bfgs',lbfgs_maxfun=20,pool2d_mode='max')
+                optimizer='l-bfgs',lbfgs_maxfun=20,pool2d_mode='max',vgg_train=False)

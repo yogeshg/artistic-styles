@@ -38,7 +38,7 @@ from ImportParameters import load_layer_params
 
 class VGG_19():
     def __init__(self, rng, datasets, filter_shape, batch_size=1, learning_rate=0.1,
-                    weights=None,bias=None,image_size=(1,3,224,224),pool2d_mode='max'):
+                    weights=None,bias=None,image_size=(1,3,224,224),pool2d_mode='max',train=True):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
@@ -359,7 +359,7 @@ class VGG_19():
             self.fc6_input_sample = fc6_input.eval( self.eval_sample )
             self.logger.debug('self.fc6_input_sample:'+about(self.fc6_input_sample))
 
-        get_reshape = lambda sh: (sh[0],np.prod( sh[1:] ))
+        get_reshape = lambda sh: (sh[0],int(np.prod( sh[1:] )))
         flatten_2 = lambda m: m.reshape(get_reshape(m.shape))
 
         self.fc6     = HiddenLayer(
@@ -414,58 +414,58 @@ class VGG_19():
         )
         # the cost we minimize during training is the NLL of the model
         self.cost = self.prob.negative_log_likelihood(y)
+        if train==True:
+            # create a function to compute the mistakes that are made by the model
+            self.test_model = theano.function(
+                [x,y],
+                self.prob.errors(y),
+                allow_input_downcast=True,
+                name = self.__class__.__name__+'.test_model'
+            )
+            print('Test model compiled...')
 
-        # create a function to compute the mistakes that are made by the model
-        self.test_model = theano.function(
-            [x,y],
-            self.prob.errors(y),
-            allow_input_downcast=True,
-            name = self.__class__.__name__+'.test_model'
-        )
-        print('Test model compiled...')
+            self.validate_model = theano.function(
+                [x,y],
+                self.prob.errors(y),
+                allow_input_downcast=True,
+                name = self.__class__.__name__+'.validate_model'
+            )
+            print('Validate model compiled...')
 
-        self.validate_model = theano.function(
-            [x,y],
-            self.prob.errors(y),
-            allow_input_downcast=True,
-            name = self.__class__.__name__+'.validate_model'
-        )
-        print('Validate model compiled...')
+            # create a list of all model parameters to be fit by gradient descent
+            # params = np.sum([ (getattr(self, l, None)).params for l in self.layer_names ]);
+            params = self.conv1_1.params+self.conv1_2.params+\
+                    self.conv2_1.params+self.conv2_2.params+\
+                    self.conv3_1.params+self.conv3_2.params+self.conv3_3.params+self.conv3_4.params+\
+                    self.conv4_1.params+self.conv4_2.params+self.conv4_3.params+self.conv4_4.params+\
+                    self.conv5_1.params+self.conv5_2.params+self.conv5_3.params+self.conv5_4.params+\
+                    self.fc6.params+self.fc7.params+self.fc8.params
 
-        # create a list of all model parameters to be fit by gradient descent
-        # params = np.sum([ (getattr(self, l, None)).params for l in self.layer_names ]);
-        params = self.conv1_1.params+self.conv1_2.params+\
-                self.conv2_1.params+self.conv2_2.params+\
-                self.conv3_1.params+self.conv3_2.params+self.conv3_3.params+self.conv3_4.params+\
-                self.conv4_1.params+self.conv4_2.params+self.conv4_3.params+self.conv4_4.params+\
-                self.conv5_1.params+self.conv5_2.params+self.conv5_3.params+self.conv5_4.params+\
-                self.fc6.params+self.fc7.params+self.fc8.params
+            # create a list of gradients for all model parameters
+            grads = T.grad(self.cost, params)
 
-        # create a list of gradients for all model parameters
-        grads = T.grad(self.cost, params)
+            # train_model is a function that updates the model parameters by
+            # SGD Since this model has many parameters, it would be tedious to
+            # manually create an update rule for each model parameter. We thus
+            # create the updates list by automatically looping over all
+            # (params[i], grads[i]) pairs.
+            # updates = [
+            #     (param_i, param_i - learning_rate * grad_i)
+            #     for param_i, grad_i in zip(params, grads)
+            #     ]
+            a = Adam(learning_rate)
+            updates = a.getUpdates(params, grads)
 
-        # train_model is a function that updates the model parameters by
-        # SGD Since this model has many parameters, it would be tedious to
-        # manually create an update rule for each model parameter. We thus
-        # create the updates list by automatically looping over all
-        # (params[i], grads[i]) pairs.
-        # updates = [
-        #     (param_i, param_i - learning_rate * grad_i)
-        #     for param_i, grad_i in zip(params, grads)
-        #     ]
-        a = Adam(learning_rate)
-        updates = a.getUpdates(params, grads)
-
-        self.train_model = theano.function(
-            [x,y],
-            self.cost,
-            updates=updates,
-            allow_input_downcast=True, ## To allow float64 values to be changed to float32
-            name = self.__class__.__name__+'.train_model'
-        )
+            self.train_model = theano.function(
+                [x,y],
+                self.cost,
+                updates=updates,
+                allow_input_downcast=True, ## To allow float64 values to be changed to float32
+                name = self.__class__.__name__+'.train_model'
+            )
+            print('Train model compiled...')
 
         self.x = x
-        print('Train model compiled...')
 
     def __str__(self):
         layers_strs = [ l+":\t"+str(getattr(self, l, 'LAYER_NOT_SET')) for l in self.layer_names ]
