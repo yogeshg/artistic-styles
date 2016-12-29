@@ -52,24 +52,29 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     style_values = style_values.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
 
-    print 'creating vgg19...'
+    print 'creating style Neural Netowrk...'
 
     v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode)
+
+    print 'calculating style activations...'
+
+    style_activations={}
+    for s_layer in style_layers:
+        activation = getattr(v_style,s_layer).output.eval({v_style.x:style_values})
+        style_activations[s_layer] = activation
+
+    del v_style
+
+    print 'creating content Neural Network...'
     
     v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode)
-    return
 
-    print 'calculating activations...'
+    print 'calculating content activations...'
 
     content_activations={}
     for c_layer in content_layers:
 	activation = getattr(v,c_layer).output.eval({v.x : content_values})
-	content_activation[c_layer] = activation
-
-    style_activations={}
-    for s_layer in style_layers:
-	activation = getattr(v_style,s_layer).output.eval({v_style.x:style_values})
-	style_activation[s_layer] = activation
+	content_activations[c_layer] = activation
 
     '''
     content_conv_4_2 = v.conv4_2.output.eval({v.x : content_values})
@@ -233,8 +238,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     return loss
 
 if __name__ == '__main__':
-    train_style(0, 1, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
+    train_style(0.2, 0.2, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
                 blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,resize_shape=(224,224),
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=True,resize_shape=(50,50),
                 optimizer='l-bfgs',lbfgs_maxfun=20,pool2d_mode='max')
