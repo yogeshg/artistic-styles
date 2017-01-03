@@ -1,8 +1,7 @@
-
-from __future__ import print_function
-
 __docformat__ = 'restructedtext en'
 
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 import sys
@@ -38,17 +37,17 @@ def load_layer_params(params_file):
             origin = (
                 'http://www.vlfeat.org/matconvnet/models/' + params_file
             )
-            print('Downloading data from %s' % origin)
+            logger.info('Downloading data from %s' % origin)
             urllib.request.urlretrieve(origin, new_path)
         return new_path
 
     params_file_path = check_dataset(params_file)
 
-    print('... loading params')
+    logger.info('... loading params')
 
     # Load the dataset
     params_dataset = scipy.io.loadmat(params_file_path, variable_names="layers")
-    #print (numpy.array(weight_set['layers'][0][0][0][0]).shape)
+    #logger.info (numpy.array(weight_set['layers'][0][0][0][0]).shape)
     names = []
     types = {}
     weights = {}

@@ -4,7 +4,7 @@ import pytz
 import datetime as dt
 
 import logging
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 def ensureDir(p):
     if(not os.path.isdir(p)):

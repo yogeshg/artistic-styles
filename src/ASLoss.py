@@ -41,18 +41,20 @@ def getStyleLoss(Fl,al,N,M,wl):
 
 def total_loss (style_activations, content_activations, v,
                       style_layers, content_layers,
-                      alpha, beta, filter_shape):
+                      alpha, beta, filter_shape, mask=None):
     # def total_loss(style_image,content_image,vgg,style_layers,content_layer,alpha,beta,filter_shape):
     # loss = T.scalar('loss')   # should be intialised(?) to 0
     loss = 0
+    styleLoss = 0
+    contentLoss = 0
     # add content loss
 
     assert 'conv4_2' == content_layers[0]
     Fl = v.conv4_2.output                 # depends on v.x
     Pl = content_activations['conv4_2']
 
-    loss += alpha * getContentLoss(Fl, Pl)   # (symbolic, np) -> symbolic
-    loss_c = loss
+    contentLoss = alpha * getContentLoss(Fl, Pl)
+    loss += contentLoss
     # Fl = v.conv1_1.output
     # al = style_activations['conv1_1']
     for layer in style_layers:
@@ -63,8 +65,9 @@ def total_loss (style_activations, content_activations, v,
         wl = 1./float(len(style_layers))
         N =filter_shape[layer][-3]
         M =filter_shape[layer][-1]*filter_shape[layer][-2]
-        loss += beta*getStyleLoss(Fl,al,N,M,wl)
-    return loss,loss_c
+        styleLoss += beta*getStyleLoss(Fl,al,N,M,wl)
+    loss += styleLoss
+    return loss, contentLoss
 
 # def gram_matrix_numpy(Input):
 #     assert Input.ndim==3

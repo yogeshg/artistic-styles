@@ -34,6 +34,12 @@ from Utils import about
 from Layers import LogisticRegression, HiddenLayer, LeNetConvLayer, DropoutHiddenLayer, drop
 from ImportParameters import load_layer_params
 
+def default_mask_val(batch_size, d, w, h):
+    mask_val = np.ones((batch_size, d*w*h)).astype(np.float32)
+    channel_size = w*h
+    for i in range(d):
+        mask_val[:,(2*i)*channel_size/2:(2*i+1)*channel_size/2] = 0
+    return mask_val
 
 
 class VGG_19():
@@ -56,11 +62,16 @@ class VGG_19():
 
         n,d,w,h=image_size
 
-        x = T.matrix('x')  # the data is presented as rasterized images
+        x_image = T.matrix('x_image')
+        mask_val = default_mask_val(batch_size, d, w, h)
+        mask = theano.shared(mask_val, name='mask')
+        x = mask*x_image
+        # x --> x_masked
+        # x = T.matrix('x')  # the data is presented as rasterized images
         y = T.ivector('y')  # the labels are presented as 1D vector of
 
         if(self.DEBUG):                # [int] labels
-            self.eval_sample = {x: np.random.random((batch_size, d*w*h)).astype(np.float32)}
+            self.eval_sample = {x_image: np.random.random((batch_size, d*w*h)).astype(np.float32)}
 
         layer0_input = x.reshape((batch_size, d, w, h))
 
@@ -465,6 +476,8 @@ class VGG_19():
             )
             print('Train model compiled...')
 
+        self.mask = mask
+        self.x_image = x_image
         self.x = x
 
     def __str__(self):
