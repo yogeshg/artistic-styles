@@ -44,7 +44,7 @@ def default_mask_val(batch_size, d, w, h):
 
 class VGG_19():
     def __init__(self, rng, datasets, filter_shape, batch_size=1, learning_rate=0.1,
-                    weights=None,bias=None,image_size=(1,3,224,224),pool2d_mode='max',train=True
+                    weights=None,bias=None,image_size=(1,3,224,224),pool2d_mode='max',train=True,
                     mask_val=None):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
