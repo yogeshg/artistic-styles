@@ -29,7 +29,7 @@ def white_noise(shape=(1,3,224,224)):
     image = image[:, ::-1,:, :]
     return image
 
-def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None,
+def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None, # TODO @RG content_image_path2 (add a paramemter, make it required)
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
                 optimizer='Adam',resize=True,resize_shape=(224,224),style_scale=1.0,lbfgs_maxfun=20,pool2d_mode='max',vgg_train=True):
@@ -53,9 +53,15 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     content_shape = tuple([int(x) for x in resize_shape])
     content_image,content_shape = preprocess_image(content_image_path,resize=resize,shape=content_shape)
+    # TODO @RG content_image2,content_shape2 = preprocess_image(content_image_path2,resize=resize,shape=content_shape)
+
     content_values = np.reshape(content_image,(content_shape[0], np.prod(content_shape[1:])))
+    # content_values2 = np.reshape(content_image2,(content_shape[0], np.prod(content_shape[1:])))
+    # TODO @RG
+    
     style_values = style_values.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
+    # TODO @RG content_values2 = content_values2.astype( np.float32 )
 
     logger.info('creating style Neural Network...')
 
@@ -70,6 +76,13 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     del v_style
 
+    # TODO @RG v_style2 = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode,train=vgg_train)
+    # style_activations2={}
+    # for s_layer in style_layers:
+    #     activation = getattr(v_style2,s_layer).output.eval({v_style2.x_image:style_values})
+    #     style_activations2[s_layer] = activation
+    # del v_style2
+
     logger.info('creating content Neural Network...')
 
     v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode,train=vgg_train)
@@ -78,42 +91,28 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     content_activations={}
     for c_layer in content_layers:
-	activation = getattr(v,c_layer).output.eval({v.x_image : content_values})
-	content_activations[c_layer] = activation
+        activation = getattr(v,c_layer).output.eval({v.x_image : content_values})
+        content_activations[c_layer] = activation
 
-    '''
-    content_conv_4_2 = v.conv4_2.output.eval({v.x : content_values})
-    style_conv1_1 = v_style.conv1_1.output.eval({v_style.x: style_values})
-    style_conv2_1 = v_style.conv2_1.output.eval({v_style.x: style_values})
-    style_conv3_1 = v_style.conv3_1.output.eval({v_style.x: style_values})
-    style_conv4_1 = v_style.conv4_1.output.eval({v_style.x: style_values})
-    style_conv5_1 = v_style.conv5_1.output.eval({v_style.x: style_values})
-    print('content_conv_4_2: ' + str(content_conv_4_2.shape))
-    print('style_conv1_1: ' + str(style_conv1_1.shape))
-    print('style_conv2_1: ' + str(style_conv2_1.shape))
-    print('style_conv3_1: ' + str(style_conv3_1.shape))
-    print('style_conv4_1: ' + str(style_conv4_1.shape))
-    print('style_conv5_1: ' + str(style_conv5_1.shape))
-    style_activations = {
-        'conv1_1': style_conv1_1,
-        'conv2_1': style_conv2_1,
-        'conv3_1': style_conv3_1,
-        'conv4_1': style_conv4_1,
-        'conv5_1': style_conv5_1
-    }
-    content_activations = {
-        'conv4_2': content_conv_4_2
-    }
-    '''
     loss,loss_c = total_loss(style_activations, content_activations, v,
                       style_layers, content_layers,
                       alpha, beta, p['filter_shape'])
+    # TODO @RG clalculate the loss wrt style_activations2 too, does the following make sense?
+    # get a dictionary with content loss and style loss and total loss
+    # r1 = total_loss(style_activations, content_activations, ...)
+    # r2 = total_loss(style_activations, content_activations2, ...)
+    # content_loss = r1['content_loss']
+    # style1_loss = r1['style_loss']
+    # style2_loss = r2['style_loss']
+    # total_loss = content_loss + style1_loss + style2_loss
 
     # loss : symbolic
     # grad = T.grad(loss, v.x)
     # grad = T.nnet.relu(T.grad(loss, v.x))
     # grad = T.grad(T.nnet.relu(loss), v.x)
     # grad = T.grad((loss), T.nnet.relu(v.x))
+
+    # TODO @RG calculate loss wrt total_loss
     grad = T.grad(loss, v.x)
 
     # updates = [

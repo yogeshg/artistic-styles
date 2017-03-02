@@ -39,6 +39,9 @@ def getStyleLoss(Fl,al,N,M,wl):
     El = ((1/(2.*N*M))**2)*(T.sum(T.pow(Gl-Al,2)))
     return wl*El
 
+# TODO @RG, return a dictionary with keys 'content_loss', 'style_loss', 'total_loss'
+# TODO @RG mask will be np matrix, with mask values (think of it right now as left half 0 and right half all 1
+# we may want to apply this before or after calculating the gradient -- need to discuss
 def total_loss (style_activations, content_activations, v,
                       style_layers, content_layers,
                       alpha, beta, filter_shape, mask=None):
@@ -68,6 +71,7 @@ def total_loss (style_activations, content_activations, v,
         styleLoss += beta*getStyleLoss(Fl,al,N,M,wl)
     loss += styleLoss
     return loss, contentLoss
+    
 
 # def gram_matrix_numpy(Input):
 #     assert Input.ndim==3
