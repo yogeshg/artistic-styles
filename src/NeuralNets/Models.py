@@ -37,8 +37,8 @@ from ImportParameters import load_layer_params
 def default_mask_val(batch_size, d, w, h):
     mask_val = np.ones((batch_size, d*w*h)).astype(np.float32)
     channel_size = w*h
-    for i in range(d):
-        mask_val[:,(2*i)*channel_size/2:(2*i+1)*channel_size/2] = 0
+    # for i in range(d):
+    #     mask_val[:,(2*i)*channel_size/2:(2*i+1)*channel_size/2] = 0
     return mask_val
 
 
@@ -67,7 +67,8 @@ class VGG_19():
         if(mask_val is None):
             mask_val = default_mask_val(batch_size, d, w, h)
         mask = theano.shared(mask_val, name='mask')
-        x = mask*x_image
+        # x = x_image*mask
+        x = x_image
         # TODO @YG change x --> x_masked
 
         # x = T.matrix('x')  # the data is presented as rasterized images
