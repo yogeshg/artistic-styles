@@ -1,10 +1,13 @@
 import logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s %(name)-8s %(levelname)-6s %(message)s')
 logger = logging.getLogger(__file__)
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 from NeuralNets.Models import VGG_19
 from NeuralNets.ImportParameters import load_layer_params
 from imageProcess import preprocess_image,deprocess_image,np2pil
@@ -21,6 +24,9 @@ from PIL import Image
 
 import archiver
 import json
+
+from util import about 
+
 def white_noise(shape=(1,3,224,224)):
     image = np.random.randint(0,255,size=shape)
     image[:,0,:,:] = image[:,0, :, :] - 103.939
@@ -116,14 +122,24 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
     # grad = T.grad(T.nnet.relu(loss), v.x)
     # grad = T.grad((loss), T.nnet.relu(v.x))
 
-    grad = T.grad(loss, v.x)
+    grad1 = T.grad(loss, v.x)
     grad2 = T.grad(loss2, v.x)
 
     mask_val= None
     if(mask_val is None):
         mask_val = default_mask_val(content_shape)
+    mask_val = np.reshape(mask_val,(content_shape[0], np.prod(content_shape[1:])))
 
-    # grad = grad1*mask_val+grad2*(1-mask_val)
+    logger.debug(about(content_image))
+    logger.debug(about(content_values))
+    logger.debug(about(v.x_image))
+    logger.debug(about(grad1))
+    logger.debug(about(mask_val))
+    logger.debug(about(grad2))
+    logger.debug(about(1-mask_val))
+    grad = grad1*mask_val+grad2*(1-mask_val)
+    logger.debug(about(grad))
+    raise ValueError("break")
 
     if blank_image_path==None:
         blank_values = np.reshape(white_noise(content_shape),(content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)
