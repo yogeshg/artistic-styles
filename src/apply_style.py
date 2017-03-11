@@ -29,14 +29,22 @@ def white_noise(shape=(1,3,224,224)):
     image = image[:, ::-1,:, :]
     return image
 
-def train_style(alpha, beta, content_image_path, style_image_path, blank_image_path=None, # TODO @RG content_image_path2 (add a paramemter, make it required)
+def default_mask_val(mask_shape):
+    mask_val = np.ones((mask_shape)).astype(np.float32)
+    num_chanels=mask_shape[1]
+    w=mask_shape[2]
+    h=mask_shape[3]
+    for i in range(num_chanels):
+        mask_val[:,i,0:w/2,:] = 0
+    return mask_val
+
+def train_style(alpha, beta, content_image_path, style_image_path, style_image_path2, blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10, learning_rate=0.000001,
                 optimizer='Adam',resize=True,resize_shape=(224,224),style_scale=1.0,lbfgs_maxfun=20,pool2d_mode='max',vgg_train=True):
 
 
     vgg19_params = 'imagenet-vgg-verydeep-19.mat'
-    #image_shape = (3,224,224)
 
     hyperparameters = locals()
 
@@ -53,15 +61,11 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     content_shape = tuple([int(x) for x in resize_shape])
     content_image,content_shape = preprocess_image(content_image_path,resize=resize,shape=content_shape)
-    # TODO @RG content_image2,content_shape2 = preprocess_image(content_image_path2,resize=resize,shape=content_shape)
 
     content_values = np.reshape(content_image,(content_shape[0], np.prod(content_shape[1:])))
-    # content_values2 = np.reshape(content_image2,(content_shape[0], np.prod(content_shape[1:])))
-    # TODO @RG
     
     style_values = style_values.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
-    # TODO @RG content_values2 = content_values2.astype( np.float32 )
 
     logger.info('creating style Neural Network...')
 
@@ -76,12 +80,12 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
 
     del v_style
 
-    # TODO @RG v_style2 = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode,train=vgg_train)
-    # style_activations2={}
-    # for s_layer in style_layers:
-    #     activation = getattr(v_style2,s_layer).output.eval({v_style2.x_image:style_values})
-    #     style_activations2[s_layer] = activation
-    # del v_style2
+    v_style2 = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode,train=vgg_train)
+    style_activations2={}
+    for s_layer in style_layers:
+        activation = getattr(v_style2,s_layer).output.eval({v_style2.x_image:style_values})
+        style_activations2[s_layer] = activation
+    del v_style2
 
     logger.info('creating content Neural Network...')
 
@@ -94,37 +98,39 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
         activation = getattr(v,c_layer).output.eval({v.x_image : content_values})
         content_activations[c_layer] = activation
 
-    loss,loss_c = total_loss(style_activations, content_activations, v,
+
+    style_loss1, content_loss1= total_loss(style_activations, content_activations, v,
                       style_layers, content_layers,
                       alpha, beta, p['filter_shape'])
-    # TODO @RG clalculate the loss wrt style_activations2 too, does the following make sense?
-    # get a dictionary with content loss and style loss and total loss
-    # r1 = total_loss(style_activations, content_activations, ...)
-    # r2 = total_loss(style_activations, content_activations2, ...)
-    # content_loss = r1['content_loss']
-    # style1_loss = r1['style_loss']
-    # style2_loss = r2['style_loss']
-    # total_loss = content_loss + style1_loss + style2_loss
 
+    style_loss2, content_loss2= total_loss(style_activations2, content_activations, v,
+                      style_layers, content_layers,
+                      alpha, beta, p['filter_shape'])
+    
+
+    loss = style_loss1 + content_loss1
+    loss2 = style_loss2 + content_loss2
     # loss : symbolic
     # grad = T.grad(loss, v.x)
     # grad = T.nnet.relu(T.grad(loss, v.x))
     # grad = T.grad(T.nnet.relu(loss), v.x)
     # grad = T.grad((loss), T.nnet.relu(v.x))
 
-    # TODO @RG calculate loss wrt total_loss
     grad = T.grad(loss, v.x)
+    grad2 = T.grad(loss2, v.x)
 
-    # updates = [
-    #     (v.x, v.x - learning_rate * grad)
-    # ]
+    mask_val= None
+    if(mask_val is None):
+        mask_val = default_mask_val(content_shape)
+
+    # grad = grad1*mask_val+grad2*(1-mask_val)
+
     if blank_image_path==None:
         blank_values = np.reshape(white_noise(content_shape),(content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)
     else:
-        blank_image,blank_image_shape = preprocess_image(blank_image_path,resize=resize)
-        blank_values = np.reshape(blank_image, (content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)  # (1,3,224,224)
+        blank_image,blank_image_shape = preprocess_image(blank_image_path,resize=resize,shape=content_shape[2:])
+        blank_values = np.reshape(blank_image, (content_shape[0], np.prod(content_shape[1:]))).astype(np.float32) 
     blank_sh = theano.shared(blank_values)
-    # grad_sh = theano.shared(np.zeros_like(blank_values))
 
     # updates = [
     #     (blank_sh, blank_sh - learning_rate * grad),
@@ -241,7 +247,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, blank_image_p
     return loss
 
 if __name__ == '__main__':
-    train_style(0.2, 5e-5, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg',
+    train_style(0.2, 5e-5, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg', 'test_images/starry_night_google.jpg',
                 blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=True,resize_shape=(250,250),style_scale=1.111111,
