@@ -281,5 +281,5 @@ if __name__ == '__main__':
     train_style(0.2, 5e-5, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg', 'test_images/kandinsky.jpg',
                 blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
-                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=True,resize_shape=(250,250),style_scale=1.111111,
+                content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=False,resize_shape=(250,250),style_scale=1.111111,
                 optimizer='l-bfgs', lbfgs_maxfun=40, pool2d_mode='max', vgg_train=False)

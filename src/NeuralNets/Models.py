@@ -67,8 +67,8 @@ class VGG_19():
         if(mask_val is None):
             mask_val = default_mask_val(batch_size, d, w, h)
         mask = theano.shared(mask_val, name='mask')
-        x = x_image*mask
-        # x = x_image
+        # x = x_image*mask
+        x = x_image
         # TODO @YG change x --> x_masked
 
         # x = T.matrix('x')  # the data is presented as rasterized images
