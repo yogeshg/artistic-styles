@@ -44,8 +44,8 @@ def default_mask_val(batch_size, d, w, h):
 
 class VGG_19():
     def __init__(self, rng, datasets, filter_shape, batch_size=1, learning_rate=0.1,
-                    weights=None,bias=None,image_size=(1,3,224,224),pool2d_mode='max',train=True,
-                    mask_val=None):
+                    weights=None, bias=None, image_size=(1,3,224,224), pool2d_mode='max',
+                    train=True, mask_val=None):
         self.model_name = "VGG_ILSVRC_19_layers"
         self.layer_names = ["conv1_1","conv1_2","pool1","conv2_1","conv2_2","pool2"
                                 ,"conv3_1","conv3_2","conv3_3","conv3_4","pool3","conv4_1","conv4_2","conv4_3","conv4_4","pool4"
@@ -67,8 +67,8 @@ class VGG_19():
         if(mask_val is None):
             mask_val = default_mask_val(batch_size, d, w, h)
         mask = theano.shared(mask_val, name='mask')
-        # x = x_image*mask
-        x = x_image
+        x = x_image*mask
+        # x = x_image
         # TODO @YG change x --> x_masked
 
         # x = T.matrix('x')  # the data is presented as rasterized images

@@ -1,6 +1,6 @@
 import logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO, 
     format='%(asctime)s %(name)-8s %(levelname)-6s %(message)s')
 logger = logging.getLogger(__file__)
 
@@ -42,7 +42,7 @@ def default_mask_val(mask_shape):
     h=mask_shape[3]
     for i in range(num_chanels):
         mask_val[:,i,0:w/2,:] = 0
-    return mask_val
+    return mask_val.astype('float32')
 
 def train_style(alpha, beta, content_image_path, style_image_path, style_image_path2, blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
@@ -61,9 +61,13 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
     p = load_layer_params(vgg19_params)
 
     logger.info('loading images...')
-    style_shape = tuple([int(style_scale*x) for x in resize_shape])
-    style_image,style_shape = preprocess_image(style_image_path,resize=resize,shape=style_shape)
+    temp = tuple([int(style_scale*x) for x in resize_shape])
+    style_image, style_shape = preprocess_image(style_image_path, resize=resize, shape=temp)
     style_values = np.reshape(style_image, (style_shape[0], np.prod(style_shape[1:])))
+
+    temp = tuple([int(style_scale*x) for x in resize_shape])
+    style_image2, style_shape2 = preprocess_image(style_image_path2, resize=resize, shape=temp)
+    style_values2 = np.reshape(style_image2, (style_shape2[0], np.prod(style_shape2[1:])))
 
     content_shape = tuple([int(x) for x in resize_shape])
     content_image,content_shape = preprocess_image(content_image_path,resize=resize,shape=content_shape)
@@ -71,11 +75,13 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
     content_values = np.reshape(content_image,(content_shape[0], np.prod(content_shape[1:])))
     
     style_values = style_values.astype( np.float32 )
+    style_values2 = style_values2.astype( np.float32 )
     content_values = content_values.astype( np.float32 )
 
     logger.info('creating style Neural Network...')
 
-    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode,train=vgg_train)
+    v_style = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],
+                    image_size=style_shape, pool2d_mode=pool2d_mode, train=vgg_train)
 
     logger.info('calculating style activations...')
 
@@ -86,30 +92,38 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
 
     del v_style
 
-    v_style2 = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=style_shape,pool2d_mode=pool2d_mode,train=vgg_train)
+    v_style2 = VGG_19(rng, None, p['filter_shape'], weights=p['weights'], bias=p['bias'],
+                    image_size=style_shape2, pool2d_mode=pool2d_mode, train=vgg_train)
+
     style_activations2={}
     for s_layer in style_layers:
-        activation = getattr(v_style2,s_layer).output.eval({v_style2.x_image:style_values})
+        activation = getattr(v_style2,s_layer).output.eval({v_style2.x_image:style_values2})
         style_activations2[s_layer] = activation
     del v_style2
 
     logger.info('creating content Neural Network...')
 
-    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],image_size=content_shape,pool2d_mode=pool2d_mode,train=vgg_train)
+    v = VGG_19(rng,None,p['filter_shape'], weights=p['weights'], bias=p['bias'],
+            image_size=content_shape, pool2d_mode=pool2d_mode, train=vgg_train)
 
     logger.info('calculating content activations...')
 
-    content_activations={}
+    content_activations = {}
     for c_layer in content_layers:
         activation = getattr(v,c_layer).output.eval({v.x_image : content_values})
         content_activations[c_layer] = activation
+
+    content_activations2 = {}
+    for c_layer in content_layers:
+        activation = getattr(v,c_layer).output.eval({v.x_image : content_values})
+        content_activations2[c_layer] = activation
 
 
     style_loss1, content_loss1= total_loss(style_activations, content_activations, v,
                       style_layers, content_layers,
                       alpha, beta, p['filter_shape'])
 
-    style_loss2, content_loss2= total_loss(style_activations2, content_activations, v,
+    style_loss2, content_loss2= total_loss(style_activations2, content_activations2, v,
                       style_layers, content_layers,
                       alpha, beta, p['filter_shape'])
     
@@ -130,6 +144,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
         mask_val = default_mask_val(content_shape)
     mask_val = np.reshape(mask_val,(content_shape[0], np.prod(content_shape[1:])))
 
+    grad = grad1*mask_val+grad2*(1-mask_val)
+
     logger.debug(about(content_image))
     logger.debug(about(content_values))
     logger.debug(about(v.x_image))
@@ -137,9 +153,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
     logger.debug(about(mask_val))
     logger.debug(about(grad2))
     logger.debug(about(1-mask_val))
-    grad = grad1*mask_val+grad2*(1-mask_val)
     logger.debug(about(grad))
-    raise ValueError("break")
 
     if blank_image_path==None:
         blank_values = np.reshape(white_noise(content_shape),(content_shape[0], np.prod(content_shape[1:]))).astype(np.float32)
@@ -251,6 +265,7 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
                 p.save( filepath )
                 print(filepath+'   saved')
             except Exception, e:
+                logger.exception(e)
                 print o.shape
                 print e
 
@@ -263,8 +278,8 @@ def train_style(alpha, beta, content_image_path, style_image_path, style_image_p
     return loss
 
 if __name__ == '__main__':
-    train_style(0.2, 5e-5, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg', 'test_images/starry_night_google.jpg',
+    train_style(0.2, 5e-5, 'test_images/tubingen_small.jpg', 'test_images/starry_night_google.jpg', 'test_images/kandinsky.jpg',
                 blank_image_path=None,
                 style_layers = ['conv1_1','conv2_1','conv3_1','conv4_1','conv5_1'],
                 content_layers = ['conv4_2'], n_epochs=10,learning_rate=10,resize=True,resize_shape=(250,250),style_scale=1.111111,
-                optimizer='l-bfgs',lbfgs_maxfun=40,pool2d_mode='max',vgg_train=False)
+                optimizer='l-bfgs', lbfgs_maxfun=40, pool2d_mode='max', vgg_train=False)
